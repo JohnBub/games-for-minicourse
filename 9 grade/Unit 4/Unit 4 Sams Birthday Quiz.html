@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit 4 - Sam's Birthday - Quiz</title>
+    <link rel="stylesheet" href="Unit 4 Sams Birthday Quiz.css">
+</head>
+
+<body>
+
+    <div id="u4bd-quiz-container">
+        <!-- Header -->
+        <div class="u4bd-header">
+            <h1 class="u4bd-title">Sam's Birthday - Quiz</h1>
+            <p class="u4bd-subtitle">Unit 4: Dialogue Comprehension</p>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="u4bd-progress-section">
+            <span class="u4bd-counter" id="u4bd-counter">Question 1 / 15</span>
+            <div class="u4bd-progress-bar">
+                <div class="u4bd-progress-fill" id="u4bd-progress-fill"></div>
+            </div>
+        </div>
+
+        <!-- Question Slides -->
+        <div id="u4bd-questions">
+
+            <!-- Question 1 -->
+            <div class="u4bd-question u4bd-active" data-id="1" data-answer="B"
+                data-feedback="Sam's party was at his house. 'At his house' = 'Chez lui' in French.">
+                <div class="u4bd-question-header">
+                    <span class="u4bd-num">1</span>
+                    <span class="u4bd-text">Where was Sam's party?</span>
+                </div>
+                <div class="u4bd-choices">
+                    <button type="button" class="u4bd-choice" data-option="A">A) At a restaurant</button>
+                    <button type="button" class="u4bd-choice" data-option="B">B) At his house</button>
+                    <button type="button" class="u4bd-choice" data-option="C">C) At school</button>
+                    <button type="button" class="u4bd-choice" data-option="D">D) In the park</button>
+                </div>
+                <div class="u4bd-feedback" id="u4bd-feedback-1"></div>
+                <div class="u4bd-nav">
+                    <div class="u4bd-spacer"></div>
+                    <button type="button" class="u4bd-btn u4bd-btn-check" id="u4bd-check-1">Check Answer</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-next" id="u4bd-next-1" disabled>Next →</button>
+                </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="u4bd-question" data-id="2" data-answer="C"
+                data-feedback="About fifteen people were at the party. 'About' = 'Environ' in French.">
+                <div class="u4bd-question-header">
+                    <span class="u4bd-num">2</span>
+                    <span class="u4bd-text">How many people were at the party?</span>
+                </div>
+                <div class="u4bd-choices">
+                    <button type="button" class="u4bd-choice" data-option="A">A) About five</button>
+                    <button type="button" class="u4bd-choice" data-option="B">B) About ten</button>
+                    <button type="button" class="u4bd-choice" data-option="C">C) About fifteen</button>
+                    <button type="button" class="u4bd-choice" data-option="D">D) About twenty</button>
+                </div>
+                <div class="u4bd-feedback" id="u4bd-feedback-2"></div>
+                <div class="u4bd-nav">
+                    <button type="button" class="u4bd-btn u4bd-btn-prev" id="u4bd-prev-2">← Back</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-check" id="u4bd-check-2">Check Answer</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-next" id="u4bd-next-2" disabled>Next →</button>
+                </div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="u4bd-question" data-id="3" data-answer="C"
+                data-feedback="Both his family and friends were at the party. 'Family and friends' = 'Famille et amis'.">
+                <div class="u4bd-question-header">
+                    <span class="u4bd-num">3</span>
+                    <span class="u4bd-text">Who was at the party?</span>
+                </div>
+                <div class="u4bd-choices">
+                    <button type="button" class="u4bd-choice" data-option="A">A) Only his family</button>
+                    <button type="button" class="u4bd-choice" data-option="B">B) Only his friends</button>
+                    <button type="button" class="u4bd-choice" data-option="C">C) His family and friends</button>
+                    <button type="button" class="u4bd-choice" data-option="D">D) His teachers</button>
+                </div>
+                <div class="u4bd-feedback" id="u4bd-feedback-3"></div>
+                <div class="u4bd-nav">
+                    <button type="button" class="u4bd-btn u4bd-btn-prev" id="u4bd-prev-3">← Back</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-check" id="u4bd-check-3">Check Answer</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-next" id="u4bd-next-3" disabled>Next →</button>
+                </div>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="u4bd-question" data-id="4" data-answer="B"
+                data-feedback="Yes, there was a chocolate cake. 'Chocolate cake' = 'Gâteau au chocolat'.">
+                <div class="u4bd-question-header">
+                    <span class="u4bd-num">4</span>
+                    <span class="u4bd-text">Was there a cake?</span>
+                </div>
+                <div class="u4bd-choices">
+                    <button type="button" class="u4bd-choice" data-option="A">A) Yes, a vanilla cake</button>
+                    <button type="button" class="u4bd-choice" data-option="B">B) Yes, a chocolate cake</button>
+                    <button type="button" class="u4bd-choice" data-option="C">C) No, there wasn't</button>
+                    <button type="button" class="u4bd-choice" data-option="D">D) Yes, a strawberry cake</button>
+                </div>
+                <div class="u4bd-feedback" id="u4bd-feedback-4"></div>
+                <div class="u4bd-nav">
+                    <button type="button" class="u4bd-btn u4bd-btn-prev" id="u4bd-prev-4">← Back</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-check" id="u4bd-check-4">Check Answer</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-next" id="u4bd-next-4" disabled>Next →</button>
+                </div>
+            </div>
+
+            <!-- Question 5 -->
+            <div class="u4bd-question" data-id="5" data-answer="C"
+                data-feedback="Sam's best present was a new phone. 'Present' = 'Cadeau' in French.">
+                <div class="u4bd-question-header">
+                    <span class="u4bd-num">5</span>
+                    <span class="u4bd-text">What was Sam's best present?</span>
+                </div>
+                <div class="u4bd-choices">
+                    <button type="button" class="u4bd-choice" data-option="A">A) A guitar</button>
+                    <button type="button" class="u4bd-choice" data-option="B">B) A book</button>
+                    <button type="button" class="u4bd-choice" data-option="C">C) A new phone</button>
+                    <button type="button" class="u4bd-choice" data-option="D">D) Money</button>
+                </div>
+                <div class="u4bd-feedback" id="u4bd-feedback-5"></div>
+                <div class="u4bd-nav">
+                    <button type="button" class="u4bd-btn u4bd-btn-prev" id="u4bd-prev-5">← Back</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-check" id="u4bd-check-5">Check Answer</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-next" id="u4bd-next-5" disabled>Next →</button>
+                </div>
+            </div>
+
+            <!-- Question 6 -->
+            <div class="u4bd-question" data-id="6" data-answer="D"
+                data-feedback="Sam's parents gave him the phone. 'Parents' = 'Parents' in French (same word!).">
+                <div class="u4bd-question-header">
+                    <span class="u4bd-num">6</span>
+                    <span class="u4bd-text">Who gave Sam the phone?</span>
+                </div>
+                <div class="u4bd-choices">
+                    <button type="button" class="u4bd-choice" data-option="A">A) His friends</button>
+                    <button type="button" class="u4bd-choice" data-option="B">B) His grandmother</button>
+                    <button type="button" class="u4bd-choice" data-option="C">C) His sister</button>
+                    <button type="button" class="u4bd-choice" data-option="D">D) His parents</button>
+                </div>
+                <div class="u4bd-feedback" id="u4bd-feedback-6"></div>
+                <div class="u4bd-nav">
+                    <button type="button" class="u4bd-btn u4bd-btn-prev" id="u4bd-prev-6">← Back</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-check" id="u4bd-check-6">Check Answer</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-next" id="u4bd-next-6" disabled>Next →</button>
+                </div>
+            </div>
+
+            <!-- Question 7 -->
+            <div class="u4bd-question" data-id="7" data-answer="C"
+                data-feedback="Yes, there was pop music at the party. 'Pop music' = 'Musique pop'.">
+                <div class="u4bd-question-header">
+                    <span class="u4bd-num">7</span>
+                    <span class="u4bd-text">Was there music at the party?</span>
+                </div>
+                <div class="u4bd-choices">
+                    <button type="button" class="u4bd-choice" data-option="A">A) No, there wasn't</button>
+                    <button type="button" class="u4bd-choice" data-option="B">B) Yes, rock music</button>
+                    <button type="button" class="u4bd-choice" data-option="C">C) Yes, pop music</button>
+                    <button type="button" class="u4bd-choice" data-option="D">D) Yes, classical music</button>
+                </div>
+                <div class="u4bd-feedback" id="u4bd-feedback-7"></div>
+                <div class="u4bd-nav">
+                    <button type="button" class="u4bd-btn u4bd-btn-prev" id="u4bd-prev-7">← Back</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-check" id="u4bd-check-7">Check Answer</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-next" id="u4bd-next-7" disabled>Next →</button>
+                </div>
+            </div>
+
+            <!-- Question 8 -->
+            <div class="u4bd-question" data-id="8" data-answer="A"
+                data-feedback="Sam's birthday was on the tenth of March. Date format: 'the + ordinal + of + month'.">
+                <div class="u4bd-question-header">
+                    <span class="u4bd-num">8</span>
+                    <span class="u4bd-text">When was Sam's birthday?</span>
+                </div>
+                <div class="u4bd-choices">
+                    <button type="button" class="u4bd-choice" data-option="A">A) On the tenth of March</button>
+                    <button type="button" class="u4bd-choice" data-option="B">B) On the third of October</button>
+                    <button type="button" class="u4bd-choice" data-option="C">C) On the first of May</button>
+                    <button type="button" class="u4bd-choice" data-option="D">D) On the thirtieth of March</button>
+                </div>
+                <div class="u4bd-feedback" id="u4bd-feedback-8"></div>
+                <div class="u4bd-nav">
+                    <button type="button" class="u4bd-btn u4bd-btn-prev" id="u4bd-prev-8">← Back</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-check" id="u4bd-check-8">Check Answer</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-next" id="u4bd-next-8" disabled>Next →</button>
+                </div>
+            </div>
+
+            <!-- Question 9 -->
+            <div class="u4bd-question" data-id="9" data-answer="B"
+                data-feedback="The weather was rainy. 'Rainy' = 'Pluvieux' in French.">
+                <div class="u4bd-question-header">
+                    <span class="u4bd-num">9</span>
+                    <span class="u4bd-text">How was the weather?</span>
+                </div>
+                <div class="u4bd-choices">
+                    <button type="button" class="u4bd-choice" data-option="A">A) It was sunny</button>
+                    <button type="button" class="u4bd-choice" data-option="B">B) It was rainy</button>
+                    <button type="button" class="u4bd-choice" data-option="C">C) It was snowy</button>
+                    <button type="button" class="u4bd-choice" data-option="D">D) It was hot</button>
+                </div>
+                <div class="u4bd-feedback" id="u4bd-feedback-9"></div>
+                <div class="u4bd-nav">
+                    <button type="button" class="u4bd-btn u4bd-btn-prev" id="u4bd-prev-9">← Back</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-check" id="u4bd-check-9">Check Answer</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-next" id="u4bd-next-9" disabled>Next →</button>
+                </div>
+            </div>
+
+            <!-- Question 10 -->
+            <div class="u4bd-question" data-id="10" data-answer="C"
+                data-feedback="The people were inside the house during the party. 'Inside' = 'À l'intérieur'.">
+                <div class="u4bd-question-header">
+                    <span class="u4bd-num">10</span>
+                    <span class="u4bd-text">Where were the people during the party?</span>
+                </div>
+                <div class="u4bd-choices">
+                    <button type="button" class="u4bd-choice" data-option="A">A) In the garden</button>
+                    <button type="button" class="u4bd-choice" data-option="B">B) At the park</button>
+                    <button type="button" class="u4bd-choice" data-option="C">C) Inside the house</button>
+                    <button type="button" class="u4bd-choice" data-option="D">D) At a café</button>
+                </div>
+                <div class="u4bd-feedback" id="u4bd-feedback-10"></div>
+                <div class="u4bd-nav">
+                    <button type="button" class="u4bd-btn u4bd-btn-prev" id="u4bd-prev-10">← Back</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-check" id="u4bd-check-10">Check Answer</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-next" id="u4bd-next-10" disabled>Next →</button>
+                </div>
+            </div>
+
+            <!-- Question 11 -->
+            <div class="u4bd-question" data-id="11" data-answer="B"
+                data-feedback="Yes, the cake was delicious! 'Delicious' = 'Délicieux' in French.">
+                <div class="u4bd-question-header">
+                    <span class="u4bd-num">11</span>
+                    <span class="u4bd-text">Was the cake delicious?</span>
+                </div>
+                <div class="u4bd-choices">
+                    <button type="button" class="u4bd-choice" data-option="A">A) No, it wasn't</button>
+                    <button type="button" class="u4bd-choice" data-option="B">B) Yes, it was</button>
+                    <button type="button" class="u4bd-choice" data-option="C">C) Sam doesn't say</button>
+                    <button type="button" class="u4bd-choice" data-option="D">D) It was okay</button>
+                </div>
+                <div class="u4bd-feedback" id="u4bd-feedback-11"></div>
+                <div class="u4bd-nav">
+                    <button type="button" class="u4bd-btn u4bd-btn-prev" id="u4bd-prev-11">← Back</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-check" id="u4bd-check-11">Check Answer</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-next" id="u4bd-next-11" disabled>Next →</button>
+                </div>
+            </div>
+
+            <!-- Question 12 -->
+            <div class="u4bd-question" data-id="12" data-answer="B"
+                data-feedback="Yes, there were lots of presents. 'Lots of' = 'Beaucoup de' in French.">
+                <div class="u4bd-question-header">
+                    <span class="u4bd-num">12</span>
+                    <span class="u4bd-text">Were there many presents?</span>
+                </div>
+                <div class="u4bd-choices">
+                    <button type="button" class="u4bd-choice" data-option="A">A) No, there weren't</button>
+                    <button type="button" class="u4bd-choice" data-option="B">B) Yes, there were lots</button>
+                    <button type="button" class="u4bd-choice" data-option="C">C) There was only one</button>
+                    <button type="button" class="u4bd-choice" data-option="D">D) Sam doesn't say</button>
+                </div>
+                <div class="u4bd-feedback" id="u4bd-feedback-12"></div>
+                <div class="u4bd-nav">
+                    <button type="button" class="u4bd-btn u4bd-btn-prev" id="u4bd-prev-12">← Back</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-check" id="u4bd-check-12">Check Answer</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-next" id="u4bd-next-12" disabled>Next →</button>
+                </div>
+            </div>
+
+            <!-- Question 13 -->
+            <div class="u4bd-question" data-id="13" data-answer="C"
+                data-feedback="Yes, the party was fun! 'Fun' = 'Amusant' in French.">
+                <div class="u4bd-question-header">
+                    <span class="u4bd-num">13</span>
+                    <span class="u4bd-text">Was the party fun?</span>
+                </div>
+                <div class="u4bd-choices">
+                    <button type="button" class="u4bd-choice" data-option="A">A) No, it was boring</button>
+                    <button type="button" class="u4bd-choice" data-option="B">B) It was okay</button>
+                    <button type="button" class="u4bd-choice" data-option="C">C) Yes, it was fun</button>
+                    <button type="button" class="u4bd-choice" data-option="D">D) Sam doesn't say</button>
+                </div>
+                <div class="u4bd-feedback" id="u4bd-feedback-13"></div>
+                <div class="u4bd-nav">
+                    <button type="button" class="u4bd-btn u4bd-btn-prev" id="u4bd-prev-13">← Back</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-check" id="u4bd-check-13">Check Answer</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-next" id="u4bd-next-13" disabled>Next →</button>
+                </div>
+            </div>
+
+            <!-- Question 14 -->
+            <div class="u4bd-question" data-id="14" data-answer="C"
+                data-feedback="Sam says it was the best party ever! 'The best...ever' = 'Le/La meilleur(e)...jamais'.">
+                <div class="u4bd-question-header">
+                    <span class="u4bd-num">14</span>
+                    <span class="u4bd-text">How does Sam describe his party?</span>
+                </div>
+                <div class="u4bd-choices">
+                    <button type="button" class="u4bd-choice" data-option="A">A) It was okay</button>
+                    <button type="button" class="u4bd-choice" data-option="B">B) It was terrible</button>
+                    <button type="button" class="u4bd-choice" data-option="C">C) It was the best party ever</button>
+                    <button type="button" class="u4bd-choice" data-option="D">D) It was boring</button>
+                </div>
+                <div class="u4bd-feedback" id="u4bd-feedback-14"></div>
+                <div class="u4bd-nav">
+                    <button type="button" class="u4bd-btn u4bd-btn-prev" id="u4bd-prev-14">← Back</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-check" id="u4bd-check-14">Check Answer</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-next" id="u4bd-next-14" disabled>Next →</button>
+                </div>
+            </div>
+
+            <!-- Question 15 -->
+            <div class="u4bd-question" data-id="15" data-answer="C"
+                data-feedback="Sam is talking to Mia. This is a dialogue between Sam and Mia about the party.">
+                <div class="u4bd-question-header">
+                    <span class="u4bd-num">15</span>
+                    <span class="u4bd-text">Who is Sam talking to?</span>
+                </div>
+                <div class="u4bd-choices">
+                    <button type="button" class="u4bd-choice" data-option="A">A) His mother</button>
+                    <button type="button" class="u4bd-choice" data-option="B">B) His teacher</button>
+                    <button type="button" class="u4bd-choice" data-option="C">C) Mia</button>
+                    <button type="button" class="u4bd-choice" data-option="D">D) His brother</button>
+                </div>
+                <div class="u4bd-feedback" id="u4bd-feedback-15"></div>
+                <div class="u4bd-nav">
+                    <button type="button" class="u4bd-btn u4bd-btn-prev" id="u4bd-prev-15">← Back</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-check" id="u4bd-check-15">Check Answer</button>
+                    <button type="button" class="u4bd-btn u4bd-btn-next" id="u4bd-next-15" disabled>See Results →</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Results Slide -->
+        <div class="u4bd-results" id="u4bd-results">
+            <span class="u4bd-results-emoji" id="u4bd-results-emoji"></span>
+            <div class="u4bd-results-title">Quiz Complete!</div>
+            <div class="u4bd-results-score" id="u4bd-results-score">0 / 15</div>
+            <div class="u4bd-results-message" id="u4bd-results-message">
+                Great job! You've completed the quiz.
+            </div>
+            <div class="u4bd-results-buttons">
+                <button type="button" class="u4bd-btn u4bd-btn-review" id="u4bd-review-btn">Review Answers</button>
+                <button type="button" class="u4bd-btn u4bd-btn-restart" id="u4bd-restart-btn">Try Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="Unit 4 Sams Birthday Quiz.js" defer></script>
+
+</body>
+
+</html>

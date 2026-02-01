@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit 4 - Emma's Surprise Party - Quiz</title>
+    <style>
+        #u4esp-quiz-container {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 10px;
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border-radius: 0;
+            box-sizing: border-box;
+            min-height: 100vh;
+        }
+
+        #u4esp-quiz-container * {
+            box-sizing: border-box;
+        }
+
+        #u4esp-quiz-container .u4esp-header {
+            display: none;
+        }
+
+        #u4esp-quiz-container .u4esp-progress-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 12px;
+        }
+
+        #u4esp-quiz-container .u4esp-counter {
+            font-weight: 600;
+            color: #e65100;
+            font-size: 0.95em;
+            white-space: nowrap;
+        }
+
+        #u4esp-quiz-container .u4esp-progress-bar {
+            flex: 1;
+            background: #ddd;
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+        }
+
+        #u4esp-quiz-container .u4esp-progress-fill {
+            background: linear-gradient(90deg, #ff9800, #ffb74d);
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease;
+            border-radius: 10px;
+        }
+
+        #u4esp-quiz-container .u4esp-question {
+            display: none;
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            animation: u4esp-fadeIn 0.4s ease;
+        }
+
+        #u4esp-quiz-container .u4esp-question.u4esp-active {
+            display: block;
+        }
+
+        @keyframes u4esp-fadeIn {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        #u4esp-quiz-container .u4esp-question-header {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        #u4esp-quiz-container .u4esp-num {
+            background: linear-gradient(135deg, #ff9800, #e65100);
+            color: #fff;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1em;
+            flex-shrink: 0;
+        }
+
+        #u4esp-quiz-container .u4esp-text {
+            font-size: 1.1em;
+            color: #333;
+            line-height: 1.5;
+            padding-top: 6px;
+        }
+
+        #u4esp-quiz-container .u4esp-choices {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        #u4esp-quiz-container .u4esp-choice {
+            padding: 14px 18px;
+            background: #fafafa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            text-align: left;
+            transition: all 0.2s ease;
+            color: #333;
+        }
+
+        #u4esp-quiz-container .u4esp-choice:hover:not(:disabled) {
+            border-color: #e65100;
+            background: #fff3e0;
+            transform: translateX(4px);
+        }
+
+        #u4esp-quiz-container .u4esp-choice.u4esp-selected {
+            border-color: #1976d2;
+            background: #e3f2fd;
+        }
+
+        #u4esp-quiz-container .u4esp-choice.u4esp-correct-choice {
+            border-color: #43a047;
+            background: #c8e6c9;
+            color: #1b5e20;
+        }
+
+        #u4esp-quiz-container .u4esp-choice.u4esp-wrong-choice {
+            border-color: #e53935;
+            background: #ffcdd2;
+            color: #b71c1c;
+            text-decoration: line-through;
+        }
+
+        #u4esp-quiz-container .u4esp-choice:disabled {
+            cursor: not-allowed;
+        }
+
+        #u4esp-quiz-container .u4esp-feedback {
+            padding: 14px 16px;
+            border-radius: 10px;
+            font-size: 0.95em;
+            line-height: 1.5;
+            display: none;
+            margin-bottom: 16px;
+        }
+
+        #u4esp-quiz-container .u4esp-feedback.u4esp-show {
+            display: block;
+        }
+
+        #u4esp-quiz-container .u4esp-feedback.u4esp-success {
+            background: #c8e6c9;
+            color: #1b5e20;
+            border-left: 4px solid #43a047;
+        }
+
+        #u4esp-quiz-container .u4esp-feedback.u4esp-error {
+            background: #ffcdd2;
+            color: #b71c1c;
+            border-left: 4px solid #e53935;
+        }
+
+        #u4esp-quiz-container .u4esp-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #u4esp-quiz-container .u4esp-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        #u4esp-quiz-container .u4esp-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        #u4esp-quiz-container .u4esp-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #u4esp-quiz-container .u4esp-btn-prev {
+            background: linear-gradient(135deg, #757575, #616161);
+            color: #fff;
+        }
+
+        #u4esp-quiz-container .u4esp-btn-check {
+            background: linear-gradient(135deg, #1976d2, #1565c0);
+            color: #fff;
+        }
+
+        #u4esp-quiz-container .u4esp-btn-next {
+            background: linear-gradient(135deg, #ff9800, #e65100);
+            color: #fff;
+        }
+
+        #u4esp-quiz-container .u4esp-spacer {
+            flex: 1;
+        }
+
+        #u4esp-quiz-container .u4esp-results {
+            display: none;
+            background: #fff;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            animation: u4esp-fadeIn 0.4s ease;
+        }
+
+        #u4esp-quiz-container .u4esp-results.u4esp-active {
+            display: block;
+        }
+
+        #u4esp-quiz-container .u4esp-results-emoji {
+            font-size: 4em;
+            display: block;
+            margin-bottom: 16px;
+        }
+
+        #u4esp-quiz-container .u4esp-results-title {
+            font-size: 1.5em;
+            color: #e65100;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        #u4esp-quiz-container .u4esp-results-score {
+            font-size: 2em;
+            font-weight: 700;
+            color: #ff9800;
+            margin-bottom: 12px;
+        }
+
+        #u4esp-quiz-container .u4esp-results-message {
+            font-size: 1em;
+            color: #555;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        #u4esp-quiz-container .u4esp-results-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        #u4esp-quiz-container .u4esp-btn-restart {
+            background: linear-gradient(135deg, #ff9800, #e65100);
+            color: #fff;
+        }
+
+        #u4esp-quiz-container .u4esp-btn-review {
+            background: linear-gradient(135deg, #1976d2, #1565c0);
+            color: #fff;
+        }
+
+        #u4esp-quiz-container.u4esp-review-mode .u4esp-question {
+            display: none;
+        }
+
+        #u4esp-quiz-container.u4esp-review-mode .u4esp-question.u4esp-active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="u4esp-quiz-container">
+        <div class="u4esp-progress-section">
+            <span class="u4esp-counter" id="u4esp-counter">Question 1 / 15</span>
+            <div class="u4esp-progress-bar">
+                <div class="u4esp-progress-fill" id="u4esp-progress-fill"></div>
+            </div>
+        </div>
+        <p style="text-align: center; color: #555; font-size: 0.9em; margin: 0 0 12px 0;">Select an answer, then click "Check Answer" / Choisis une reponse, puis clique sur "Check Answer"</p>
+
+        <div id="u4esp-questions">
+
+            <!-- Question 1 -->
+            <div class="u4esp-question u4esp-active" data-id="1" data-answer="B"
+                data-feedback="It was a surprise party for Emma. 'Surprise party' = 'Fete surprise'.">
+                <div class="u4esp-question-header">
+                    <span class="u4esp-num">1</span>
+                    <span class="u4esp-text">What kind of party was it?</span>
+                </div>
+                <div class="u4esp-choices">
+                    <button type="button" class="u4esp-choice" data-option="A">A) A costume party</button>
+                    <button type="button" class="u4esp-choice" data-option="B">B) A surprise party</button>
+                    <button type="button" class="u4esp-choice" data-option="C">C) A garden party</button>
+                    <button type="button" class="u4esp-choice" data-option="D">D) A pool party</button>
+                </div>
+                <div class="u4esp-feedback" id="u4esp-feedback-1"></div>
+                <div class="u4esp-nav">
+                    <div class="u4esp-spacer"></div>
+                    <button type="button" class="u4esp-btn u4esp-btn-check" id="u4esp-check-1">Check Answer</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-next" id="u4esp-next-1" disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="u4esp-question" data-id="2" data-answer="C"
+                data-feedback="Sophie organised the party. 'To organise' = 'Organiser'.">
+                <div class="u4esp-question-header">
+                    <span class="u4esp-num">2</span>
+                    <span class="u4esp-text">Who organised the party?</span>
+                </div>
+                <div class="u4esp-choices">
+                    <button type="button" class="u4esp-choice" data-option="A">A) Emma's parents</button>
+                    <button type="button" class="u4esp-choice" data-option="B">B) Emma's brother</button>
+                    <button type="button" class="u4esp-choice" data-option="C">C) Sophie</button>
+                    <button type="button" class="u4esp-choice" data-option="D">D) Lucas</button>
+                </div>
+                <div class="u4esp-feedback" id="u4esp-feedback-2"></div>
+                <div class="u4esp-nav">
+                    <button type="button" class="u4esp-btn u4esp-btn-prev" id="u4esp-prev-2">Back</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-check" id="u4esp-check-2">Check Answer</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-next" id="u4esp-next-2" disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="u4esp-question" data-id="3" data-answer="C"
+                data-feedback="Sophie planned the party for two months. 'Two months' = 'Deux mois'.">
+                <div class="u4esp-question-header">
+                    <span class="u4esp-num">3</span>
+                    <span class="u4esp-text">How long did Sophie plan the party?</span>
+                </div>
+                <div class="u4esp-choices">
+                    <button type="button" class="u4esp-choice" data-option="A">A) Two weeks</button>
+                    <button type="button" class="u4esp-choice" data-option="B">B) One month</button>
+                    <button type="button" class="u4esp-choice" data-option="C">C) Two months</button>
+                    <button type="button" class="u4esp-choice" data-option="D">D) Six months</button>
+                </div>
+                <div class="u4esp-feedback" id="u4esp-feedback-3"></div>
+                <div class="u4esp-nav">
+                    <button type="button" class="u4esp-btn u4esp-btn-prev" id="u4esp-prev-3">Back</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-check" id="u4esp-check-3">Check Answer</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-next" id="u4esp-next-3" disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="u4esp-question" data-id="4" data-answer="C"
+                data-feedback="The party was at the community centre. 'Community centre' = 'Centre communautaire'.">
+                <div class="u4esp-question-header">
+                    <span class="u4esp-num">4</span>
+                    <span class="u4esp-text">Where was the party?</span>
+                </div>
+                <div class="u4esp-choices">
+                    <button type="button" class="u4esp-choice" data-option="A">A) At Emma's house</button>
+                    <button type="button" class="u4esp-choice" data-option="B">B) At a restaurant</button>
+                    <button type="button" class="u4esp-choice" data-option="C">C) At the community centre</button>
+                    <button type="button" class="u4esp-choice" data-option="D">D) At the cinema</button>
+                </div>
+                <div class="u4esp-feedback" id="u4esp-feedback-4"></div>
+                <div class="u4esp-nav">
+                    <button type="button" class="u4esp-btn u4esp-btn-prev" id="u4esp-prev-4">Back</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-check" id="u4esp-check-4">Check Answer</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-next" id="u4esp-next-4" disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- Question 5 -->
+            <div class="u4esp-question" data-id="5" data-answer="A"
+                data-feedback="The party was on the twenty-fifth of January. Date format: 'the + ordinal + of + month'.">
+                <div class="u4esp-question-header">
+                    <span class="u4esp-num">5</span>
+                    <span class="u4esp-text">When was the party?</span>
+                </div>
+                <div class="u4esp-choices">
+                    <button type="button" class="u4esp-choice" data-option="A">A) On the twenty-fifth of January</button>
+                    <button type="button" class="u4esp-choice" data-option="B">B) On the fifteenth of January</button>
+                    <button type="button" class="u4esp-choice" data-option="C">C) On the fifth of February</button>
+                    <button type="button" class="u4esp-choice" data-option="D">D) On the twenty-second of January</button>
+                </div>
+                <div class="u4esp-feedback" id="u4esp-feedback-5"></div>
+                <div class="u4esp-nav">
+                    <button type="button" class="u4esp-btn u4esp-btn-prev" id="u4esp-prev-5">Back</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-check" id="u4esp-check-5">Check Answer</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-next" id="u4esp-next-5" disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- Question 6 -->
+            <div class="u4esp-question" data-id="6" data-answer="B"
+                data-feedback="The party started at six o'clock. 'At six o'clock' = 'A six heures'.">
+                <div class="u4esp-question-header">
+                    <span class="u4esp-num">6</span>
+                    <span class="u4esp-text">What time did the party start?</span>
+                </div>
+                <div class="u4esp-choices">
+                    <button type="button" class="u4esp-choice" data-option="A">A) At five o'clock</button>
+                    <button type="button" class="u4esp-choice" data-option="B">B) At six o'clock</button>
+                    <button type="button" class="u4esp-choice" data-option="C">C) At seven o'clock</button>
+                    <button type="button" class="u4esp-choice" data-option="D">D) At eight o'clock</button>
+                </div>
+                <div class="u4esp-feedback" id="u4esp-feedback-6"></div>
+                <div class="u4esp-nav">
+                    <button type="button" class="u4esp-btn u4esp-btn-prev" id="u4esp-prev-6">Back</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-check" id="u4esp-check-6">Check Answer</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-next" id="u4esp-next-6" disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- Question 7 -->
+            <div class="u4esp-question" data-id="7" data-answer="C"
+                data-feedback="About forty people were at the party. 'About' = 'Environ'.">
+                <div class="u4esp-question-header">
+                    <span class="u4esp-num">7</span>
+                    <span class="u4esp-text">How many people were at the party?</span>
+                </div>
+                <div class="u4esp-choices">
+                    <button type="button" class="u4esp-choice" data-option="A">A) About twenty</button>
+                    <button type="button" class="u4esp-choice" data-option="B">B) About thirty</button>
+                    <button type="button" class="u4esp-choice" data-option="C">C) About forty</button>
+                    <button type="button" class="u4esp-choice" data-option="D">D) About fifty</button>
+                </div>
+                <div class="u4esp-feedback" id="u4esp-feedback-7"></div>
+                <div class="u4esp-nav">
+                    <button type="button" class="u4esp-btn u4esp-btn-prev" id="u4esp-prev-7">Back</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-check" id="u4esp-check-7">Check Answer</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-next" id="u4esp-next-7" disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- Question 8 -->
+            <div class="u4esp-question" data-id="8" data-answer="B"
+                data-feedback="Emma's grandmother was ill, so she couldn't come. 'Ill' = 'Malade'.">
+                <div class="u4esp-question-header">
+                    <span class="u4esp-num">8</span>
+                    <span class="u4esp-text">Why wasn't Emma's grandmother there?</span>
+                </div>
+                <div class="u4esp-choices">
+                    <button type="button" class="u4esp-choice" data-option="A">A) She was on holiday</button>
+                    <button type="button" class="u4esp-choice" data-option="B">B) She was ill</button>
+                    <button type="button" class="u4esp-choice" data-option="C">C) She was working</button>
+                    <button type="button" class="u4esp-choice" data-option="D">D) She forgot</button>
+                </div>
+                <div class="u4esp-feedback" id="u4esp-feedback-8"></div>
+                <div class="u4esp-nav">
+                    <button type="button" class="u4esp-btn u4esp-btn-prev" id="u4esp-prev-8">Back</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-check" id="u4esp-check-8">Check Answer</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-next" id="u4esp-next-8" disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- Question 9 -->
+            <div class="u4esp-question" data-id="9" data-answer="C"
+                data-feedback="Sophie told Emma they were going to the cinema. It was a trick! 'Cinema' = 'Cinema'.">
+                <div class="u4esp-question-header">
+                    <span class="u4esp-num">9</span>
+                    <span class="u4esp-text">Where did Sophie tell Emma they were going?</span>
+                </div>
+                <div class="u4esp-choices">
+                    <button type="button" class="u4esp-choice" data-option="A">A) To a restaurant</button>
+                    <button type="button" class="u4esp-choice" data-option="B">B) To the park</button>
+                    <button type="button" class="u4esp-choice" data-option="C">C) To the cinema</button>
+                    <button type="button" class="u4esp-choice" data-option="D">D) To a concert</button>
+                </div>
+                <div class="u4esp-feedback" id="u4esp-feedback-9"></div>
+                <div class="u4esp-nav">
+                    <button type="button" class="u4esp-btn u4esp-btn-prev" id="u4esp-prev-9">Back</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-check" id="u4esp-check-9">Check Answer</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-next" id="u4esp-next-9" disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- Question 10 -->
+            <div class="u4esp-question" data-id="10" data-answer="B"
+                data-feedback="There was a vanilla cake with strawberries. 'Strawberries' = 'Fraises'.">
+                <div class="u4esp-question-header">
+                    <span class="u4esp-num">10</span>
+                    <span class="u4esp-text">What kind of cake was there?</span>
+                </div>
+                <div class="u4esp-choices">
+                    <button type="button" class="u4esp-choice" data-option="A">A) Chocolate cake</button>
+                    <button type="button" class="u4esp-choice" data-option="B">B) Vanilla cake with strawberries</button>
+                    <button type="button" class="u4esp-choice" data-option="C">C) Carrot cake</button>
+                    <button type="button" class="u4esp-choice" data-option="D">D) Lemon cake</button>
+                </div>
+                <div class="u4esp-feedback" id="u4esp-feedback-10"></div>
+                <div class="u4esp-nav">
+                    <button type="button" class="u4esp-btn u4esp-btn-prev" id="u4esp-prev-10">Back</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-check" id="u4esp-check-10">Check Answer</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-next" id="u4esp-next-10" disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- Question 11 -->
+            <div class="u4esp-question" data-id="11" data-answer="C"
+                data-feedback="Marcus, Emma's brother's friend, was the DJ. 'DJ' = 'Disc-jockey'.">
+                <div class="u4esp-question-header">
+                    <span class="u4esp-num">11</span>
+                    <span class="u4esp-text">Who was the DJ?</span>
+                </div>
+                <div class="u4esp-choices">
+                    <button type="button" class="u4esp-choice" data-option="A">A) Emma's brother</button>
+                    <button type="button" class="u4esp-choice" data-option="B">B) Sophie's friend</button>
+                    <button type="button" class="u4esp-choice" data-option="C">C) Emma's brother's friend Marcus</button>
+                    <button type="button" class="u4esp-choice" data-option="D">D) A professional DJ</button>
+                </div>
+                <div class="u4esp-feedback" id="u4esp-feedback-11"></div>
+                <div class="u4esp-nav">
+                    <button type="button" class="u4esp-btn u4esp-btn-prev" id="u4esp-prev-11">Back</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-check" id="u4esp-check-11">Check Answer</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-next" id="u4esp-next-11" disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- Question 12 -->
+            <div class="u4esp-question" data-id="12" data-answer="B"
+                data-feedback="Emma's parents gave her concert tickets. 'Concert tickets' = 'Billets de concert'.">
+                <div class="u4esp-question-header">
+                    <span class="u4esp-num">12</span>
+                    <span class="u4esp-text">What did Emma's parents give her?</span>
+                </div>
+                <div class="u4esp-choices">
+                    <button type="button" class="u4esp-choice" data-option="A">A) A guitar</button>
+                    <button type="button" class="u4esp-choice" data-option="B">B) Concert tickets</button>
+                    <button type="button" class="u4esp-choice" data-option="C">C) A phone</button>
+                    <button type="button" class="u4esp-choice" data-option="D">D) Money</button>
+                </div>
+                <div class="u4esp-feedback" id="u4esp-feedback-12"></div>
+                <div class="u4esp-nav">
+                    <button type="button" class="u4esp-btn u4esp-btn-prev" id="u4esp-prev-12">Back</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-check" id="u4esp-check-12">Check Answer</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-next" id="u4esp-next-12" disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- Question 13 -->
+            <div class="u4esp-question" data-id="13" data-answer="A"
+                data-feedback="The concert is on the fourteenth of March. 'Fourteenth' = 'Quatorzieme'.">
+                <div class="u4esp-question-header">
+                    <span class="u4esp-num">13</span>
+                    <span class="u4esp-text">When is the concert?</span>
+                </div>
+                <div class="u4esp-choices">
+                    <button type="button" class="u4esp-choice" data-option="A">A) On the fourteenth of March</button>
+                    <button type="button" class="u4esp-choice" data-option="B">B) On the fourth of March</button>
+                    <button type="button" class="u4esp-choice" data-option="C">C) On the thirtieth of March</button>
+                    <button type="button" class="u4esp-choice" data-option="D">D) On the twenty-fourth of April</button>
+                </div>
+                <div class="u4esp-feedback" id="u4esp-feedback-13"></div>
+                <div class="u4esp-nav">
+                    <button type="button" class="u4esp-btn u4esp-btn-prev" id="u4esp-prev-13">Back</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-check" id="u4esp-check-13">Check Answer</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-next" id="u4esp-next-13" disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- Question 14 -->
+            <div class="u4esp-question" data-id="14" data-answer="C"
+                data-feedback="Jake was on holiday in Spain. 'On holiday' = 'En vacances'.">
+                <div class="u4esp-question-header">
+                    <span class="u4esp-num">14</span>
+                    <span class="u4esp-text">Why wasn't Jake at the party?</span>
+                </div>
+                <div class="u4esp-choices">
+                    <button type="button" class="u4esp-choice" data-option="A">A) He was ill</button>
+                    <button type="button" class="u4esp-choice" data-option="B">B) He was working</button>
+                    <button type="button" class="u4esp-choice" data-option="C">C) He was on holiday in Spain</button>
+                    <button type="button" class="u4esp-choice" data-option="D">D) He forgot about the party</button>
+                </div>
+                <div class="u4esp-feedback" id="u4esp-feedback-14"></div>
+                <div class="u4esp-nav">
+                    <button type="button" class="u4esp-btn u4esp-btn-prev" id="u4esp-prev-14">Back</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-check" id="u4esp-check-14">Check Answer</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-next" id="u4esp-next-14" disabled>Next</button>
+                </div>
+            </div>
+
+            <!-- Question 15 -->
+            <div class="u4esp-question" data-id="15" data-answer="C"
+                data-feedback="Sophie gave Emma a silver necklace. 'Silver necklace' = 'Collier en argent'.">
+                <div class="u4esp-question-header">
+                    <span class="u4esp-num">15</span>
+                    <span class="u4esp-text">What did Sophie give Emma?</span>
+                </div>
+                <div class="u4esp-choices">
+                    <button type="button" class="u4esp-choice" data-option="A">A) A book</button>
+                    <button type="button" class="u4esp-choice" data-option="B">B) Money</button>
+                    <button type="button" class="u4esp-choice" data-option="C">C) A silver necklace</button>
+                    <button type="button" class="u4esp-choice" data-option="D">D) Concert tickets</button>
+                </div>
+                <div class="u4esp-feedback" id="u4esp-feedback-15"></div>
+                <div class="u4esp-nav">
+                    <button type="button" class="u4esp-btn u4esp-btn-prev" id="u4esp-prev-15">Back</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-check" id="u4esp-check-15">Check Answer</button>
+                    <button type="button" class="u4esp-btn u4esp-btn-next" id="u4esp-next-15" disabled>See Results</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Results Slide -->
+        <div class="u4esp-results" id="u4esp-results">
+            <span class="u4esp-results-emoji" id="u4esp-results-emoji"></span>
+            <div class="u4esp-results-title">Quiz Complete!</div>
+            <div class="u4esp-results-score" id="u4esp-results-score">0 / 15</div>
+            <div class="u4esp-results-message" id="u4esp-results-message">
+                Great job! You've completed the quiz.
+            </div>
+            <div class="u4esp-results-buttons">
+                <button type="button" class="u4esp-btn u4esp-btn-review" id="u4esp-review-btn">Review Answers</button>
+                <button type="button" class="u4esp-btn u4esp-btn-restart" id="u4esp-restart-btn">Try Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            'use strict';
+
+            var state = {
+                currentQuestion: 1,
+                totalQuestions: 15,
+                answers: {},
+                checked: {}
+            };
+
+            var dom = {};
+
+            function init() {
+                dom.container = document.getElementById('u4esp-quiz-container');
+                if (!dom.container) {
+                    console.warn('U4ESPQuiz: Container not found.');
+                    return;
+                }
+                dom.resultsSlide = document.getElementById('u4esp-results');
+                dom.counterEl = document.getElementById('u4esp-counter');
+                dom.progressFill = document.getElementById('u4esp-progress-fill');
+
+                updateCounter();
+                updateProgress();
+                attachEvents();
+                console.log('U4ESPQuiz: Ready');
+            }
+
+            function updateCounter() {
+                if (!dom.counterEl) return;
+                var text = 'Question ' + state.currentQuestion + ' / ' + state.totalQuestions;
+                if (dom.container.classList.contains('u4esp-review-mode')) {
+                    text = 'Review: ' + state.currentQuestion + ' / ' + state.totalQuestions;
+                }
+                dom.counterEl.textContent = text;
+            }
+
+            function updateProgress() {
+                if (!dom.progressFill) return;
+                var percent = (state.currentQuestion / state.totalQuestions) * 100;
+                dom.progressFill.style.width = percent + '%';
+            }
+
+            function showSlide(num) {
+                if (!dom.container) return;
+
+                var slides = dom.container.querySelectorAll('.u4esp-question');
+                for (var i = 0; i < slides.length; i++) {
+                    slides[i].classList.remove('u4esp-active');
+                }
+                if (dom.resultsSlide) dom.resultsSlide.classList.remove('u4esp-active');
+
+                if (num > state.totalQuestions) {
+                    showResults();
+                } else {
+                    var targetSlide = dom.container.querySelector('.u4esp-question[data-id="' + num + '"]');
+                    if (targetSlide) {
+                        targetSlide.classList.add('u4esp-active');
+                    }
+                    state.currentQuestion = num;
+                    updateCounter();
+                    updateProgress();
+                }
+            }
+
+            function showResults() {
+                if (dom.resultsSlide) dom.resultsSlide.classList.add('u4esp-active');
+
+                var correctCount = 0;
+                for (var i = 1; i <= state.totalQuestions; i++) {
+                    var slide = dom.container.querySelector('.u4esp-question[data-id="' + i + '"]');
+                    if (!slide) continue;
+                    var correctAnswer = slide.getAttribute('data-answer');
+                    if (state.answers[i] === correctAnswer) {
+                        correctCount++;
+                    }
+                }
+
+                var percent = Math.round((correctCount / state.totalQuestions) * 100);
+                var emoji = '';
+                var message = '';
+
+                if (percent >= 90) {
+                    emoji = 'Trophy';
+                    message = "Excellent! You understood the dialogue perfectly!";
+                } else if (percent >= 70) {
+                    emoji = 'Star';
+                    message = 'Great work! You understood most of the dialogue!';
+                } else if (percent >= 50) {
+                    emoji = 'Good';
+                    message = 'Good effort! Review the dialogue and try again.';
+                } else if (percent >= 30) {
+                    emoji = 'Book';
+                    message = "Keep studying! Read the dialogue again.";
+                } else {
+                    emoji = 'Muscle';
+                    message = "Don't give up! Read the dialogue carefully and try again.";
+                }
+
+                document.getElementById('u4esp-results-emoji').textContent = emoji;
+                document.getElementById('u4esp-results-score').textContent = correctCount + ' / ' + state.totalQuestions + ' (' + percent + '%)';
+                document.getElementById('u4esp-results-message').textContent = message;
+
+                if (dom.counterEl) dom.counterEl.textContent = 'Results';
+                if (dom.progressFill) dom.progressFill.style.width = '100%';
+            }
+
+            function handleChoiceClick(e) {
+                var btn = e.target;
+                if (!btn.classList.contains('u4esp-choice')) return;
+
+                var slide = btn.closest('.u4esp-question');
+                if (!slide) return;
+
+                var questionId = slide.getAttribute('data-id');
+                if (state.checked[questionId]) return;
+
+                var siblings = slide.querySelectorAll('.u4esp-choice');
+                for (var i = 0; i < siblings.length; i++) {
+                    siblings[i].classList.remove('u4esp-selected');
+                }
+
+                btn.classList.add('u4esp-selected');
+                state.answers[questionId] = btn.getAttribute('data-option');
+            }
+
+            function handleCheckAnswer(questionId) {
+                var slide = dom.container.querySelector('.u4esp-question[data-id="' + questionId + '"]');
+                if (!slide) return;
+
+                var correctAnswer = slide.getAttribute('data-answer');
+                var feedbackText = slide.getAttribute('data-feedback');
+                var feedback = document.getElementById('u4esp-feedback-' + questionId);
+                var buttons = slide.querySelectorAll('.u4esp-choice');
+                var userAnswer = state.answers[questionId];
+                var checkBtn = document.getElementById('u4esp-check-' + questionId);
+                var nextBtn = document.getElementById('u4esp-next-' + questionId);
+
+                if (!userAnswer) {
+                    if (feedback) {
+                        feedback.textContent = "Please select an answer first! / Choisis une reponse d'abord !";
+                        feedback.classList.remove('u4esp-success');
+                        feedback.classList.add('u4esp-show', 'u4esp-error');
+                    }
+                    return;
+                }
+
+                state.checked[questionId] = true;
+                if (checkBtn) checkBtn.disabled = true;
+                if (nextBtn) nextBtn.disabled = false;
+
+                for (var i = 0; i < buttons.length; i++) {
+                    var btn = buttons[i];
+                    var opt = btn.getAttribute('data-option');
+                    btn.disabled = true;
+
+                    if (opt === correctAnswer) {
+                        btn.classList.add('u4esp-correct-choice');
+                    } else if (opt === userAnswer && userAnswer !== correctAnswer) {
+                        btn.classList.add('u4esp-wrong-choice');
+                    }
+                }
+
+                if (feedback) {
+                    if (userAnswer === correctAnswer) {
+                        feedback.textContent = 'Correct! ' + feedbackText;
+                        feedback.classList.remove('u4esp-error');
+                        feedback.classList.add('u4esp-show', 'u4esp-success');
+                    } else {
+                        feedback.textContent = 'Incorrect. The answer is ' + correctAnswer + '. ' + feedbackText;
+                        feedback.classList.remove('u4esp-success');
+                        feedback.classList.add('u4esp-show', 'u4esp-error');
+                    }
+                }
+            }
+
+            function resetQuiz() {
+                state.currentQuestion = 1;
+                state.answers = {};
+                state.checked = {};
+                if (dom.container) dom.container.classList.remove('u4esp-review-mode');
+
+                var slides = dom.container.querySelectorAll('.u4esp-question');
+                for (var s = 0; s < slides.length; s++) {
+                    var slide = slides[s];
+                    var questionId = slide.getAttribute('data-id');
+                    var feedback = document.getElementById('u4esp-feedback-' + questionId);
+                    var buttons = slide.querySelectorAll('.u4esp-choice');
+                    var checkBtn = document.getElementById('u4esp-check-' + questionId);
+                    var nextBtn = document.getElementById('u4esp-next-' + questionId);
+
+                    if (feedback) {
+                        feedback.classList.remove('u4esp-show', 'u4esp-success', 'u4esp-error');
+                        feedback.textContent = '';
+                    }
+
+                    for (var b = 0; b < buttons.length; b++) {
+                        buttons[b].classList.remove('u4esp-selected', 'u4esp-correct-choice', 'u4esp-wrong-choice');
+                        buttons[b].disabled = false;
+                    }
+
+                    if (checkBtn) checkBtn.disabled = false;
+                    if (nextBtn) nextBtn.disabled = true;
+                }
+
+                showSlide(1);
+            }
+
+            function attachEvents() {
+                if (!dom.container) return;
+
+                dom.container.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('u4esp-choice')) {
+                        handleChoiceClick(e);
+                    }
+                });
+
+                for (var i = 1; i <= state.totalQuestions; i++) {
+                    (function(num) {
+                        var checkBtn = document.getElementById('u4esp-check-' + num);
+                        if (checkBtn) {
+                            checkBtn.onclick = function() {
+                                handleCheckAnswer(num);
+                            };
+                        }
+
+                        var nextBtn = document.getElementById('u4esp-next-' + num);
+                        if (nextBtn) {
+                            nextBtn.onclick = function() {
+                                showSlide(num + 1);
+                            };
+                        }
+
+                        var prevBtn = document.getElementById('u4esp-prev-' + num);
+                        if (prevBtn) {
+                            prevBtn.onclick = function() {
+                                showSlide(num - 1);
+                            };
+                        }
+                    })(i);
+                }
+
+                var reviewBtn = document.getElementById('u4esp-review-btn');
+                if (reviewBtn) {
+                    reviewBtn.onclick = function() {
+                        if (dom.container) dom.container.classList.add('u4esp-review-mode');
+                        showSlide(1);
+                    };
+                }
+
+                var restartBtn = document.getElementById('u4esp-restart-btn');
+                if (restartBtn) {
+                    restartBtn.onclick = resetQuiz;
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
+    </script>
+
+</body>
+
+</html>

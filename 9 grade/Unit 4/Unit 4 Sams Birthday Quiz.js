@@ -86,19 +86,19 @@ const U4BdQuiz = (function () {
         let message = '';
 
         if (percent >= 90) {
-            emoji = '';
+            emoji = '🏆';
             message = 'Excellent! You understood the dialogue perfectly! / Excellent ! Tu as parfaitement compris le dialogue !';
         } else if (percent >= 70) {
-            emoji = '';
+            emoji = '⭐';
             message = 'Great work! You understood most of the dialogue! / Bravo ! Tu as compris la plupart du dialogue !';
         } else if (percent >= 50) {
-            emoji = '';
+            emoji = '👍';
             message = 'Good effort! Review the dialogue and try again. / Bon effort ! Relis le dialogue et réessaie.';
         } else if (percent >= 30) {
-            emoji = '';
+            emoji = '📚';
             message = 'Keep studying! Read the dialogue again. / Continue à étudier ! Relis le dialogue.';
         } else {
-            emoji = '';
+            emoji = '💪';
             message = "Don't give up! Read the dialogue carefully and try again. / N'abandonne pas ! Lis le dialogue attentivement et réessaie.";
         }
 

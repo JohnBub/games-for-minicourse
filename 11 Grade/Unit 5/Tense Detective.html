@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Tense Detective - Past Simple vs Past Continuous</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#F4F6F8; --primary:#002E47; --primary-light:#004d78; --primary-lighter:#0069a5;
+  --white:#fff; --card-bg:#fff;
+  --text-dark:#0d1b2a; --text-mid:#3a5068; --text-light:#7a95a8;
+  --green:#1a9e5f; --green-bg:#e6f7ef;
+  --red:#d63b3b; --red-bg:#fceaea;
+  --amber:#f59e0b; --amber-bg:#fffbeb;
+  --border:#dce4ea;
+  --shadow:0 4px 20px rgba(0,46,71,.10);
+  --shadow-md:0 8px 32px rgba(0,46,71,.14);
+  --radius:16px; --radius-sm:10px;
+}
+html, body { height:100%; font-family:'Inter',sans-serif; background:var(--bg); color:var(--text-dark); overflow-x:hidden; }
+body { min-height:100vh; display:flex; flex-direction:column; }
+.app-header { background:var(--primary); padding:14px 16px 12px; display:flex; align-items:center; gap:10px; flex-shrink:0; position:relative; }
+.app-header-icon { width:38px; height:38px; background:rgba(255,255,255,.15); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.app-header-text { flex:1; min-width:0; }
+.app-header-title { font-size:14px; font-weight:800; color:#fff; line-height:1.2; }
+.app-header-sub { font-size:11px; color:rgba(255,255,255,.6); margin-top:2px; }
+.streak-badge { display:none; align-items:center; gap:4px; background:rgba(255,255,255,.18); color:#fff; padding:4px 9px; border-radius:99px; font-size:11.5px; font-weight:700; }
+.streak-badge.hot { background:linear-gradient(135deg,#f59e0b,#ef4444); animation:pulseStreak 1.2s infinite; }
+@keyframes pulseStreak { 0%,100%{transform:scale(1);} 50%{transform:scale(1.06);} }
+.settings-btn { background:rgba(255,255,255,.15); border:none; color:#fff; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:15px; display:flex; align-items:center; justify-content:center; }
+.settings-btn:hover { background:rgba(255,255,255,.25); }
+.settings-panel { position:absolute; top:100%; right:10px; margin-top:4px; background:#fff; border-radius:var(--radius-sm); padding:10px 12px; min-width:200px; box-shadow:var(--shadow-md); display:none; z-index:200; }
+.settings-panel.visible { display:block; }
+.settings-row { display:flex; align-items:center; justify-content:space-between; padding:5px 0; font-size:12px; color:var(--text-dark); }
+.toggle { position:relative; width:34px; height:20px; background:var(--border); border-radius:99px; cursor:pointer; transition:background .2s; }
+.toggle.on { background:var(--primary-lighter); }
+.toggle::after { content:''; position:absolute; top:2px; left:2px; width:16px; height:16px; background:#fff; border-radius:50%; transition:left .2s; }
+.toggle.on::after { left:16px; }
+.tab-bar { background:var(--primary); display:flex; position:sticky; top:0; z-index:100; box-shadow:0 2px 12px rgba(0,46,71,.18); }
+.tab-btn { flex:1; background:none; border:none; color:rgba(255,255,255,.55); font-family:'Inter',sans-serif; font-size:12px; font-weight:600; padding:14px 6px 12px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px; position:relative; text-transform:uppercase; }
+.tab-btn .tab-icon { font-size:18px; line-height:1; }
+.tab-btn.active { color:#fff; background:rgba(255,255,255,.10); }
+.tab-btn.active::after { content:''; position:absolute; bottom:0; left:15%; right:15%; height:3px; background:#4fc3f7; border-radius:3px 3px 0 0; }
+.panels-container { flex:1; display:flex; flex-direction:column; overflow:hidden; position:relative; }
+.panel { display:none; flex-direction:column; position:absolute; top:0; left:0; right:0; bottom:0; overflow-y:auto; }
+.panel.active { display:flex; position:relative; }
+.learn-scroll { padding:20px 16px 40px; display:flex; flex-direction:column; gap:16px; }
+.hero-image { border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); }
+.hero-image img { width:100%; height:200px; object-fit:cover; display:block; }
+.learn-card { background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+.learn-card-header { background:var(--primary); padding:14px 18px; }
+.learn-card-header h2 { color:#fff; font-size:16px; font-weight:700; line-height:1.3; }
+.learn-card-header h3 { color:#fff; font-size:14px; font-weight:700; }
+.learn-card-body { padding:16px 18px; display:flex; flex-direction:column; gap:12px; }
+.learn-card-body p { font-size:14px; line-height:1.65; color:var(--text-dark); }
+.learn-card-body strong { color:var(--primary); }
+.learn-card-body em { color:var(--text-mid); font-style:italic; }
+.tense-cards { display:flex; flex-direction:column; gap:12px; }
+.tense-card { border-radius:var(--radius-sm); overflow:hidden; border:1.5px solid var(--border); }
+.tense-card-head { padding:10px 14px; font-size:13px; font-weight:700; color:#fff; }
+.tense-card-head.cont { background:#0069a5; }
+.tense-card-head.simple { background:#005a7a; }
+.tense-card-content { padding:12px 14px; font-size:13px; line-height:1.6; color:var(--text-dark); background:#f8fafc; display:flex; flex-direction:column; gap:6px; }
+.info-row { display:flex; align-items:flex-start; gap:8px; background:#eef4f8; border-radius:8px; padding:10px 12px; }
+.info-icon { font-size:16px; flex-shrink:0; margin-top:1px; }
+.info-text { font-size:13px; line-height:1.55; color:var(--text-dark); }
+.table-wrapper { overflow-x:auto; border-radius:8px; border:1px solid var(--border); }
+table { width:100%; border-collapse:collapse; font-size:12.5px; }
+thead tr { background:var(--primary); color:#fff; }
+thead th { padding:9px 10px; text-align:left; font-weight:600; }
+tbody tr:nth-child(odd) { background:#f4f8fb; }
+tbody td { padding:9px 10px; color:var(--text-dark); vertical-align:top; }
+.highlight-box { background:linear-gradient(135deg,#e8f4fd,#dceef9); border-left:4px solid var(--primary-lighter); border-radius:8px; padding:12px 14px; font-size:13px; line-height:1.6; }
+.practice-wrap { flex:1; display:flex; flex-direction:column; padding:16px 16px 32px; gap:16px; }
+.progress-bar-section { background:var(--card-bg); border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:8px; }
+.progress-top { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+.progress-label { font-size:12px; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:.05em; }
+.progress-right { display:flex; align-items:center; gap:8px; }
+.progress-counter { font-size:15px; font-weight:800; color:var(--primary); }
+.timer-chip { display:flex; align-items:center; gap:4px; background:var(--primary); color:#fff; font-size:12px; font-weight:700; padding:4px 10px; border-radius:99px; font-variant-numeric:tabular-nums; }
+.timer-chip.warning { background:linear-gradient(135deg,#f59e0b,#ef4444); animation:pulseTimer .8s infinite; }
+@keyframes pulseTimer { 0%,100%{transform:scale(1);} 50%{transform:scale(1.04);} }
+.progress-track { height:7px; background:#e0eaf0; border-radius:10px; overflow:hidden; }
+.progress-fill { height:100%; background:linear-gradient(90deg,#0069a5,#4fc3f7); border-radius:10px; transition:width .5s cubic-bezier(.4,0,.2,1); }
+.score-row { display:flex; gap:8px; flex-wrap:wrap; }
+.score-chip { display:flex; align-items:center; gap:5px; background:#eef4f8; border-radius:20px; padding:4px 10px; font-size:12px; font-weight:600; color:var(--text-mid); }
+.score-chip.correct { background:var(--green-bg); color:var(--green); }
+.score-chip.wrong { background:var(--red-bg); color:var(--red); }
+.score-chip.points { background:var(--amber-bg); color:#92400e; }
+.sentence-card { background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px 18px; display:flex; flex-direction:column; gap:12px; position:relative; }
+.story-badge { display:inline-flex; align-items:center; gap:6px; background:linear-gradient(90deg,#002e47,#0069a5); color:#fff; font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:4px 10px; border-radius:20px; width:fit-content; }
+.sentence-text { font-size:17px; font-weight:600; line-height:1.55; color:var(--text-dark); }
+.blank-word { display:inline-block; background:#e8f4fd; border:2px dashed #a0c8e0; border-radius:8px; padding:2px 12px; color:var(--primary-lighter); font-weight:800; font-size:16px; transition:all .3s; min-width:80px; text-align:center; }
+.blank-word.answered-correct { background:var(--green-bg); border-color:var(--green); color:var(--green); border-style:solid; }
+.blank-word.answered-wrong { background:var(--red-bg); border-color:var(--red); color:var(--red); border-style:solid; }
+.verdict-pill { display:inline-flex; align-items:center; gap:6px; font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.7px; padding:4px 10px; border-radius:99px; width:fit-content; margin-bottom:2px; }
+.verdict-pill.cont  { background:#e8f4fd; color:#0069a5; }
+.verdict-pill.simple { background:#e0e9ef; color:#004d78; }
+.verdict-pill::before { content:''; width:6px; height:6px; border-radius:50%; display:inline-block; }
+.verdict-pill.cont::before  { background:#0069a5; }
+.verdict-pill.simple::before { background:#004d78; }
+.feedback-box { border-radius:var(--radius-sm); padding:12px 14px; font-size:13px; line-height:1.55; font-weight:500; display:flex; align-items:flex-start; gap:10px; animation:fadeSlideIn .3s ease; }
+.feedback-box.correct { background:var(--green-bg); border:1.5px solid rgba(26,158,95,.3); color:#145c3e; }
+.feedback-box.wrong { background:var(--red-bg); border:1.5px solid rgba(214,59,59,.3); color:#7a1a1a; }
+.feedback-box.info { background:var(--amber-bg); border:1.5px solid rgba(245,158,11,.3); color:#78350f; }
+.feedback-icon { font-size:18px; flex-shrink:0; margin-top:1px; }
+.feedback-text strong { display:block; font-size:13px; font-weight:700; margin-bottom:3px; }
+.feedback-points { font-size:11px; font-weight:800; color:var(--green); margin-top:4px; text-transform:uppercase; letter-spacing:.5px; }
+@keyframes fadeSlideIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+.choice-buttons { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.choice-btn { background:#fff; border:2px solid var(--border); border-radius:var(--radius); padding:16px 10px; font-family:'Inter',sans-serif; cursor:pointer; transition:all .2s; display:flex; flex-direction:column; align-items:center; gap:6px; position:relative; }
+.choice-btn:not(:disabled):hover { border-color:var(--primary-lighter); box-shadow:0 4px 14px rgba(0,105,165,.12); transform:translateY(-1px); }
+.choice-btn:not(:disabled):active { transform:translateY(0) scale(.97); }
+.choice-btn:disabled { cursor:not-allowed; opacity:.6; }
+.choice-btn .kbd-hint { position:absolute; top:6px; right:8px; font-size:9px; font-weight:800; color:var(--text-light); background:#eef4f8; border-radius:4px; padding:1px 5px; }
+.choice-btn.selected-correct { background:var(--green-bg); border-color:var(--green); opacity:1 !important; }
+.choice-btn.selected-wrong { background:var(--red-bg); border-color:var(--red); opacity:1 !important; }
+.choice-btn.show-correct { background:var(--green-bg); border-color:var(--green); opacity:.8 !important; }
+.btn-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text-light); }
+.btn-tense { font-size:13px; font-weight:700; color:var(--primary); text-align:center; line-height:1.25; }
+.btn-form { font-size:11.5px; color:var(--text-mid); font-weight:500; text-align:center; line-height:1.3; }
+.choice-btn.selected-correct .btn-label, .choice-btn.selected-correct .btn-tense, .choice-btn.selected-correct .btn-form, .choice-btn.show-correct .btn-label, .choice-btn.show-correct .btn-tense, .choice-btn.show-correct .btn-form { color:var(--green); }
+.choice-btn.selected-wrong .btn-label, .choice-btn.selected-wrong .btn-tense, .choice-btn.selected-wrong .btn-form { color:var(--red); }
+.next-btn, .restart-btn, .retry-wrong-btn { width:100%; color:#fff; border:none; border-radius:var(--radius); padding:16px; font-family:'Inter',sans-serif; font-size:15px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 16px rgba(0,46,71,.22); transition:transform .2s; animation:fadeSlideIn .3s ease; }
+.next-btn, .restart-btn { background:linear-gradient(135deg,var(--primary),var(--primary-lighter)); }
+.retry-wrong-btn { background:linear-gradient(135deg,var(--amber),#d97706); }
+.next-btn:active, .restart-btn:active, .retry-wrong-btn:active { transform:scale(.97); }
+.results-card { background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow-md); padding:28px 20px; display:flex; flex-direction:column; align-items:center; gap:14px; animation:fadeSlideIn .4s ease; }
+.results-emoji { font-size:56px; line-height:1; }
+.results-title { font-size:22px; font-weight:800; color:var(--primary); text-align:center; }
+.results-score { font-size:44px; font-weight:800; color:var(--primary); line-height:1; }
+.results-sub { font-size:14px; color:var(--text-mid); text-align:center; line-height:1.6; }
+.results-bar-wrap { width:100%; background:#e0eaf0; border-radius:12px; height:12px; overflow:hidden; }
+.results-bar-fill { height:100%; background:linear-gradient(90deg,#1a9e5f,#4fc3f7); border-radius:12px; transition:width 1s cubic-bezier(.4,0,.2,1); }
+.results-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; width:100%; }
+.results-stat { background:#eef4f8; border-radius:10px; padding:10px 8px; text-align:center; }
+.results-stat-value { font-size:18px; font-weight:800; color:var(--primary); }
+.results-stat-label { font-size:10px; color:var(--text-light); margin-top:2px; text-transform:uppercase; letter-spacing:.4px; }
+.review-list { width:100%; display:flex; flex-direction:column; gap:8px; max-height:250px; overflow-y:auto; }
+.review-item { background:#f4f8fb; border-radius:10px; padding:10px 12px; font-size:12.5px; color:var(--text-dark); line-height:1.5; border-left:4px solid transparent; }
+.review-item.r-correct { border-color:var(--green); }
+.review-item.r-wrong { border-color:var(--red); }
+.review-item-top { display:flex; justify-content:space-between; margin-bottom:3px; }
+.review-verdict { font-size:11px; font-weight:700; text-transform:uppercase; }
+.r-correct .review-verdict { color:var(--green); }
+.r-wrong .review-verdict { color:var(--red); }
+.hidden { display:none !important; }
+.confetti { position:fixed; width:10px; height:14px; top:-20px; z-index:300; pointer-events:none; border-radius:2px; }
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-thumb { background:#c0d4e0; border-radius:4px; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="app-header-icon">&#128269;</div>
+  <div class="app-header-text">
+    <div class="app-header-title">Tense Detective</div>
+    <div class="app-header-sub">Past Simple vs. Past Continuous</div>
+  </div>
+  <div class="streak-badge" id="streakBadge"><span>&#128293;</span><span id="streakCount">0</span></div>
+  <button class="settings-btn" id="settingsBtn" type="button" aria-label="Settings">&#9881;</button>
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-row"><span>Timer (30s)</span><div class="toggle on" id="toggleTimer" data-setting="timer"></div></div>
+    <div class="settings-row"><span>Sounds</span><div class="toggle on" id="toggleSound" data-setting="sound"></div></div>
+    <div class="settings-row"><span>Keyboard hints</span><div class="toggle on" id="toggleHints" data-setting="hints"></div></div>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" data-tab="learn" id="tab-learn"><span class="tab-icon">&#128214;</span>Learn</button>
+  <button class="tab-btn" data-tab="practice" id="tab-practice"><span class="tab-icon">&#127919;</span>Practice</button>
+  <button class="tab-btn" data-tab="tips" id="tab-tips"><span class="tab-icon">&#128161;</span>Tips</button>
+</div>
+
+<div class="panels-container">
+
+  <!-- LEARN PANEL -->
+  <div class="panel active" id="panel-learn">
+    <div class="learn-scroll">
+      <div class="hero-image">
+        <img src="https://cdn.minicoursegenerator.com/production/images/ackley639028105188459076/ai_7eb57ff3-bfaf-460f-8ef2-e052005e80cc.jpeg" alt="Discovery story illustration">
+      </div>
+      <div class="learn-card">
+        <div class="learn-card-header"><h2>Telling Stories: Past Simple vs. Past Continuous</h2></div>
+        <div class="learn-card-body">
+          <p>When we tell stories about discoveries, we usually need two tenses. They work together like a movie camera: one <strong>sets the scene</strong>, and the other <strong>captures the sudden action</strong>.</p>
+          <div class="tense-cards">
+            <div class="tense-card">
+              <div class="tense-card-head cont">&#127909; Past Continuous - The Background</div>
+              <div class="tense-card-content">
+                <p><strong>Form:</strong> was / were + verb + -ing</p>
+                <p><strong>Use:</strong> For an action already in progress. It sets the scene or describes a longer background action.</p>
+                <div class="info-row"><span class="info-icon">&#9999;&#65039;</span><span class="info-text">In 1935, a reporter <strong>was writing</strong> a story. It <strong>was raining</strong> outside.</span></div>
+              </div>
+            </div>
+            <div class="tense-card">
+              <div class="tense-card-head simple">&#9889; Past Simple - The Interruption</div>
+              <div class="tense-card-content">
+                <p><strong>Form:</strong> regular verbs end in -ed (invented), irregular verbs change form (got, saw, wrote).</p>
+                <p><strong>Use:</strong> For a finished action, or a shorter, sudden action that interrupts the background scene.</p>
+                <div class="info-row"><span class="info-icon">&#127839;</span><span class="info-text">George Crum <strong>invented</strong> crisps in 1853. Suddenly, the pen <strong>ran</strong> out of ink.</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="learn-card">
+        <div class="learn-card-header"><h3>While &amp; When - Connecting Tenses</h3></div>
+        <div class="learn-card-body">
+          <p>Use <strong>while</strong> and <strong>when</strong> to connect the two tenses in one sentence.</p>
+          <div class="info-row"><span class="info-icon">&#8987;</span><span class="info-text"><strong>While</strong> I <strong>was reading</strong> (long action), the phone <strong>rang</strong> (short action).</span></div>
+          <div class="info-row"><span class="info-icon">&#128222;</span><span class="info-text">I <strong>was reading</strong> (long action) <strong>when</strong> the phone <strong>rang</strong> (short action).</span></div>
+          <div class="highlight-box">&#128394; Real Story: <strong>While</strong> Bíró <strong>was writing</strong> his article, he <strong>got</strong> annoyed with his pen. This led him to invent the ballpoint pen!</div>
+        </div>
+      </div>
+      <div class="learn-card">
+        <div class="learn-card-header"><h3>Asking Questions in the Past</h3></div>
+        <div class="learn-card-body">
+          <p>Be careful! The grammar changes depending on <strong>what</strong> you want to know.</p>
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Type</th><th>Rule</th><th>Example</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Object Q</strong></td><td>did + infinitive</td><td>What <strong>did</strong> George Crum <strong>invent</strong>?</td></tr>
+                <tr><td><strong>Subject Q</strong></td><td>past form, NO did</td><td>Who <strong>invented</strong> crisps?</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="highlight-box"><strong>Summary:</strong> Use Past Continuous to paint what was happening, and Past Simple for main events and sudden ideas!</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRACTICE PANEL -->
+  <div class="panel" id="panel-practice">
+    <div class="practice-wrap">
+
+      <div class="progress-bar-section">
+        <div class="progress-top">
+          <span class="progress-label">Progress</span>
+          <div class="progress-right">
+            <span class="timer-chip" id="timerChip">&#9201; <span id="timerValue">30</span>s</span>
+            <span class="progress-counter" id="progressCounter">1 / 8</span>
+          </div>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="score-row">
+          <div class="score-chip correct" id="correctChip">&#9989; 0 Correct</div>
+          <div class="score-chip wrong" id="wrongChip">&#10060; 0 Wrong</div>
+          <div class="score-chip points" id="pointsChip">&#11088; 0 pts</div>
+        </div>
+      </div>
+
+      <div class="sentence-card" id="sentenceCard">
+        <div class="story-badge" id="storyBadge">&#128214; Story</div>
+        <div class="sentence-text" id="sentenceText"></div>
+        <div id="feedbackArea"></div>
+      </div>
+
+      <div class="choice-buttons" id="choiceButtons">
+        <button class="choice-btn" id="btnOptionA" type="button" data-choice="a">
+          <span class="kbd-hint" id="kbdHintA">A</span>
+          <span class="btn-label" id="btnALabel">Past Continuous</span>
+          <span class="btn-tense" id="btnATense">was doing</span>
+          <span class="btn-form" id="btnAForm">was / were + -ing</span>
+        </button>
+        <button class="choice-btn" id="btnOptionB" type="button" data-choice="b">
+          <span class="kbd-hint" id="kbdHintB">B</span>
+          <span class="btn-label" id="btnBLabel">Past Simple</span>
+          <span class="btn-tense" id="btnBTense">did</span>
+          <span class="btn-form" id="btnBForm">-ed / irregular</span>
+        </button>
+      </div>
+
+      <div id="nextBtnWrap" class="hidden">
+        <button class="next-btn" id="nextBtn" type="button"><span id="nextBtnText">Next Question &rarr;</span></button>
+      </div>
+
+      <div id="resultsSection" class="hidden results-card">
+        <div class="results-emoji" id="resultsEmoji">&#127942;</div>
+        <div class="results-title" id="resultsTitle">Well done, Detective!</div>
+        <div class="results-score" id="resultsScore">7/8</div>
+        <div class="results-bar-wrap"><div class="results-bar-fill" id="resultsBarFill" style="width:0%"></div></div>
+        <div class="results-sub" id="resultsSub">You scored 7 out of 8 correctly.</div>
+        <div class="results-stats" id="resultsStats"></div>
+        <div class="review-list" id="reviewList"></div>
+        <button class="retry-wrong-btn hidden" id="retryWrongBtn" type="button">&#128257; Retry missed questions</button>
+        <button class="restart-btn" id="restartBtn" type="button">&#128260; Try Again</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TIPS PANEL -->
+  <div class="panel" id="panel-tips">
+    <div class="learn-scroll">
+      <div class="learn-card">
+        <div class="learn-card-header"><h2>&#128161; Quick Reference Guide</h2></div>
+        <div class="learn-card-body">
+          <p>Use these clues to identify which tense to use!</p>
+          <div class="tense-card">
+            <div class="tense-card-head cont">&#8987; Past Continuous Clues</div>
+            <div class="tense-card-content">
+              <div class="info-row"><span class="info-icon">&#128273;</span><div class="info-text"><strong>Key words:</strong> while, when (before a long action), at that moment, all day, all night</div></div>
+              <div class="info-row"><span class="info-icon">&#127916;</span><div class="info-text"><strong>Think:</strong> the "background movie" - the action was already playing when something else happened.</div></div>
+              <div class="info-row"><span class="info-icon">&#9989;</span><div class="info-text"><em>Bíró <strong>was working</strong> as a journalist when he noticed the ink dried quickly.</em></div></div>
+            </div>
+          </div>
+          <div class="tense-card">
+            <div class="tense-card-head simple">&#9889; Past Simple Clues</div>
+            <div class="tense-card-content">
+              <div class="info-row"><span class="info-icon">&#128273;</span><div class="info-text"><strong>Key words:</strong> when (before a short action), suddenly, then, after that, in [year], one day, finally</div></div>
+              <div class="info-row"><span class="info-icon">&#128248;</span><div class="info-text"><strong>Think:</strong> the "snapshot" - a completed action with a clear beginning and end.</div></div>
+              <div class="info-row"><span class="info-icon">&#9989;</span><div class="info-text"><em>George Crum <strong>invented</strong> the potato crisp in 1853.</em></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="learn-card">
+        <div class="learn-card-header"><h3>&#129504; Memory Tricks</h3></div>
+        <div class="learn-card-body">
+          <div class="info-row"><span class="info-icon">&#127909;</span><div class="info-text"><strong>The Movie Trick:</strong> Past Continuous = film playing in the background. Past Simple = someone walks in and interrupts the film.</div></div>
+          <div class="info-row"><span class="info-icon">&#127754;</span><div class="info-text"><strong>The River Trick:</strong> Past Continuous = flowing river (ongoing). Past Simple = stone dropped in (sudden event).</div></div>
+          <div class="info-row"><span class="info-icon">&#128292;</span><div class="info-text"><strong>WHILE = -ing:</strong> If you see "while", the verb after it is almost always Past Continuous (was/were + -ing).</div></div>
+          <div class="info-row"><span class="info-icon">&#9889;</span><div class="info-text"><strong>SUDDENLY = Past Simple:</strong> If you see "suddenly", the verb is almost always Past Simple.</div></div>
+        </div>
+      </div>
+      <div class="learn-card">
+        <div class="learn-card-header"><h3>&#128221; Common Mistakes to Avoid</h3></div>
+        <div class="learn-card-body">
+          <div class="info-row"><span class="info-icon">&#10060;</span><div class="info-text"><strong>Wrong:</strong> <em>While he was working, he was inventing the pen.</em><br><strong>Why:</strong> Two ongoing actions with "while" - the invention was a sudden, complete event.</div></div>
+          <div class="info-row"><span class="info-icon">&#9989;</span><div class="info-text"><strong>Right:</strong> <em>While he was working, he <strong>invented</strong> the pen.</em></div></div>
+          <div class="highlight-box">&#128172; <strong>Tip:</strong> Ready to test yourself? Switch to the <strong>Practice</strong> tab and try the Tense Detective challenge!</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script type="application/json" id="appData">
+{
+  "questions": [
+    {"story":"\u{1F58A} Bíró's Story","before":"Bíró ","blank":"was writing","after":" a newspaper article when he noticed the ink dried faster than his pen could use.","correct":"cont","explanation":"'was writing' describes the ongoing background action. Bíró was in the middle of writing when something else happened.","options":{"cont":{"tense":"Past Continuous","form":"was writing","sub":"was / were + -ing"},"simple":{"tense":"Past Simple","form":"wrote","sub":"-ed / irregular"}}},
+    {"story":"\u{1F58A} Bíró's Story","before":"While Bíró was working as a journalist, he ","blank":"got","after":" frustrated with his fountain pen leaking ink everywhere.","correct":"simple","explanation":"'got' is the sudden, completed action that interrupted the ongoing background of working. 'Got frustrated' was the key moment.","options":{"cont":{"tense":"Past Continuous","form":"was getting","sub":"was / were + -ing"},"simple":{"tense":"Past Simple","form":"got","sub":"-ed / irregular"}}},
+    {"story":"\u{1F35F} George Crum's Story","before":"George Crum ","blank":"invented","after":" the potato crisp in 1853 at a restaurant in Saratoga Springs.","correct":"simple","explanation":"'invented' is a completed historical fact with a specific year. It happened and was finished, so we use Past Simple.","options":{"cont":{"tense":"Past Continuous","form":"was inventing","sub":"was / were + -ing"},"simple":{"tense":"Past Simple","form":"invented","sub":"-ed / irregular"}}},
+    {"story":"\u{1F35F} George Crum's Story","before":"A customer complained while Crum ","blank":"was cooking","after":" in the kitchen - he said the French fries were too thick.","correct":"cont","explanation":"'while' tells us this was the ongoing background activity. Crum was already in the middle of cooking when the complaint arrived.","options":{"cont":{"tense":"Past Continuous","form":"was cooking","sub":"was / were + -ing"},"simple":{"tense":"Past Simple","form":"cooked","sub":"-ed / irregular"}}},
+    {"story":"\u{1F58A} Bíró's Story","before":"Bíró ","blank":"designed","after":" a new type of pen with a tiny rolling ball at the tip to solve the ink problem.","correct":"simple","explanation":"'designed' describes a completed action, the final result of his invention process. It was a finished achievement.","options":{"cont":{"tense":"Past Continuous","form":"was designing","sub":"was / were + -ing"},"simple":{"tense":"Past Simple","form":"designed","sub":"-ed / irregular"}}},
+    {"story":"\u{1F35F} George Crum's Story","before":"Crum ","blank":"was slicing","after":" the potatoes very thin when he decided to fry them until they were crispy.","correct":"cont","explanation":"'was slicing' is the background action already in progress. While Crum was doing this ongoing activity, he had the creative idea.","options":{"cont":{"tense":"Past Continuous","form":"was slicing","sub":"was / were + -ing"},"simple":{"tense":"Past Simple","form":"sliced","sub":"-ed / irregular"}}},
+    {"story":"\u{1F30D} Discovery Stories","before":"Scientists ","blank":"were studying","after":" the properties of rubber when Charles Goodyear accidentally discovered vulcanisation.","correct":"cont","explanation":"'when' here introduces a sudden event. The scientists' ongoing research is the long background described by Past Continuous.","options":{"cont":{"tense":"Past Continuous","form":"were studying","sub":"was / were + -ing"},"simple":{"tense":"Past Simple","form":"studied","sub":"-ed / irregular"}}},
+    {"story":"\u{1F30D} Discovery Stories","before":"Alexander Fleming ","blank":"noticed","after":" that mould was killing bacteria while he was examining his petri dishes in 1928.","correct":"simple","explanation":"'noticed' is the key discovery moment - a sudden completed observation. The noticing was the short event during his ongoing examination.","options":{"cont":{"tense":"Past Continuous","form":"was noticing","sub":"was / were + -ing"},"simple":{"tense":"Past Simple","form":"noticed","sub":"-ed / irregular"}}}
+  ]
+}
+</script>
+
+<script>
+(function(){
+  var DATA = JSON.parse(document.getElementById("appData").textContent);
+  var questions = DATA.questions;
+
+  var state = {
+    currentQ: 0,
+    correctCount: 0,
+    wrongCount: 0,
+    points: 0,
+    streak: 0,
+    maxStreak: 0,
+    userAnswers: [],
+    answered: false,
+    timeLeft: 30,
+    timerId: null,
+    startTime: 0,
+    settings: loadSettings(),
+    wrongPool: null
+  };
+
+  var LS_BEST = "mcg_tnsdt_best_v1";
+  var LS_SETTINGS = "mcg_tnsdt_settings_v1";
+
+  function loadSettings(){
+    try { var raw = localStorage.getItem(LS_SETTINGS); if (raw) return Object.assign({timer:true,sound:true,hints:true}, JSON.parse(raw)); } catch(e){}
+    return { timer:true, sound:true, hints:true };
+  }
+  function saveSettings(){ try { localStorage.setItem(LS_SETTINGS, JSON.stringify(state.settings)); } catch(e){} }
+  function $(id){ return document.getElementById(id); }
+
+  // ===== AUDIO =====
+  var audioCtx = null;
+  function beep(freq, dur, type){
+    if (!state.settings.sound) return;
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      var osc = audioCtx.createOscillator(); var gain = audioCtx.createGain();
+      osc.type = type || "sine"; osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.12, audioCtx.currentTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + dur);
+    } catch(e){}
+  }
+  function playCorrect(){ beep(660, .15, "triangle"); setTimeout(function(){ beep(880, .2, "triangle"); }, 120); }
+  function playWrong(){ beep(220, .25, "sawtooth"); }
+  function playTick(){ beep(1000, .04, "square"); }
+
+  // ===== CURRENT QUESTION HELPERS =====
+  function currentList(){ return state.wrongPool || questions.map(function(_, i){ return i; }); }
+  function currentQIndex(){ return currentList()[state.currentQ]; }
+  function currentQData(){ return questions[currentQIndex()]; }
+  function totalInRun(){ return currentList().length; }
+
+  // ===== TABS =====
+  function switchTab(tab){
+    ["learn","practice","tips"].forEach(function(t){
+      $("panel-" + t).classList.remove("active");
+      $("tab-" + t).classList.remove("active");
+    });
+    $("panel-" + tab).classList.add("active");
+    $("tab-" + tab).classList.add("active");
+    if (tab === "practice" && state.currentQ === 0 && state.userAnswers.length === 0) {
+      loadQuestion();
+    }
+  }
+
+  // ===== LOAD QUESTION =====
+  function loadQuestion(){
+    state.answered = false;
+    if (state.currentQ >= totalInRun()) { showResults(); return; }
+
+    var q = currentQData();
+
+    $("sentenceCard").classList.remove("hidden");
+    $("choiceButtons").classList.remove("hidden");
+    $("nextBtnWrap").classList.add("hidden");
+    $("resultsSection").classList.add("hidden");
+    $("feedbackArea").innerHTML = "";
+
+    $("storyBadge").textContent = q.story;
+    $("sentenceText").innerHTML = q.before + '<span class="blank-word" id="blankSpan">___</span>' + q.after;
+
+    var optA = q.options.cont;
+    var optB = q.options.simple;
+    $("btnALabel").textContent = optA.tense;
+    $("btnATense").textContent = optA.form;
+    $("btnAForm").textContent = optA.sub;
+    $("btnBLabel").textContent = optB.tense;
+    $("btnBTense").textContent = optB.form;
+    $("btnBForm").textContent = optB.sub;
+
+    var btnA = $("btnOptionA"); var btnB = $("btnOptionB");
+    btnA.className = "choice-btn"; btnB.className = "choice-btn";
+    btnA.disabled = false; btnB.disabled = false;
+
+    $("kbdHintA").style.display = state.settings.hints ? "block" : "none";
+    $("kbdHintB").style.display = state.settings.hints ? "block" : "none";
+
+    updateProgress();
+    startTimer();
+  }
+
+  // ===== TIMER =====
+  function startTimer(){
+    stopTimer();
+    state.startTime = Date.now();
+    var chip = $("timerChip");
+    if (!state.settings.timer) { chip.style.display = "none"; return; }
+    chip.style.display = "flex";
+    state.timeLeft = 30;
+    $("timerValue").textContent = state.timeLeft;
+    chip.classList.remove("warning");
+    state.timerId = setInterval(function(){
+      state.timeLeft--;
+      $("timerValue").textContent = state.timeLeft;
+      if (state.timeLeft <= 5) {
+        chip.classList.add("warning");
+        if (state.timeLeft > 0) playTick();
+      }
+      if (state.timeLeft <= 0) {
+        stopTimer();
+        if (!state.answered) {
+          state.answered = true;
+          handleTimeout();
+        }
+      }
+    }, 1000);
+  }
+  function stopTimer(){ if (state.timerId) { clearInterval(state.timerId); state.timerId = null; } }
+  function timeBonus(){ var el = (Date.now() - state.startTime) / 1000; return Math.max(0, Math.round(5 - (el / 6))); }
+
+  function handleTimeout(){
+    var q = currentQData();
+    $("btnOptionA").disabled = true;
+    $("btnOptionB").disabled = true;
+    var correctBtn = q.correct === "cont" ? $("btnOptionA") : $("btnOptionB");
+    correctBtn.className = "choice-btn show-correct";
+    var blank = $("blankSpan");
+    blank.className = "blank-word answered-wrong";
+    blank.textContent = q.blank;
+    state.streak = 0;
+    state.wrongCount++;
+    state.userAnswers.push({ qIndex: currentQIndex(), correct: false, chosen: null, timedOut: true });
+    showFeedback(false, true, q);
+    showNext();
+    updateProgress();
+  }
+
+  // ===== SELECT ANSWER =====
+  function selectAnswer(choice){
+    if (state.answered) return;
+    state.answered = true;
+    stopTimer();
+
+    var q = currentQData();
+    var isCorrect = (choice === "a" && q.correct === "cont") || (choice === "b" && q.correct === "simple");
+    var btnA = $("btnOptionA"); var btnB = $("btnOptionB");
+    btnA.disabled = true; btnB.disabled = true;
+    var blank = $("blankSpan");
+    var selectedBtn = choice === "a" ? btnA : btnB;
+    var correctBtn = q.correct === "cont" ? btnA : btnB;
+
+    var earned = 0;
+    if (isCorrect) {
+      selectedBtn.className = "choice-btn selected-correct";
+      blank.className = "blank-word answered-correct";
+      blank.textContent = q.blank;
+      state.correctCount++;
+      state.streak++;
+      if (state.streak > state.maxStreak) state.maxStreak = state.streak;
+      earned = 10 + timeBonus() + Math.min(state.streak - 1, 5) * 2;
+      state.points += earned;
+      playCorrect();
+    } else {
+      selectedBtn.className = "choice-btn selected-wrong";
+      correctBtn.className = "choice-btn show-correct";
+      blank.className = "blank-word answered-wrong";
+      blank.textContent = q.blank;
+      state.wrongCount++;
+      state.streak = 0;
+      playWrong();
+    }
+
+    state.userAnswers.push({ qIndex: currentQIndex(), correct: isCorrect, chosen: choice });
+    showFeedback(isCorrect, false, q, earned);
+    showNext();
+    updateProgress();
+  }
+
+  function showFeedback(isCorrect, isTimeout, q, earned){
+    var area = $("feedbackArea");
+    var verdictClass = q.correct === "cont" ? "cont" : "simple";
+    var verdictText = q.correct === "cont" ? "Past Continuous" : "Past Simple";
+    var icon, cls, title;
+    if (isCorrect) { icon = "&#9989;"; cls = "correct"; title = "Correct!"; }
+    else if (isTimeout) { icon = "&#9201;"; cls = "info"; title = "Time is up!"; }
+    else { icon = "&#10060;"; cls = "wrong"; title = "Not quite!"; }
+    var pointsHtml = (isCorrect && earned)
+      ? '<div class="feedback-points">&#11088; +' + earned + ' points' + (state.streak > 1 ? ' (streak ' + state.streak + ')' : '') + '</div>'
+      : '';
+    area.innerHTML =
+      '<div class="verdict-pill ' + verdictClass + '">The answer is ' + verdictText + '</div>' +
+      '<div class="feedback-box ' + cls + '">' +
+        '<span class="feedback-icon">' + icon + '</span>' +
+        '<div class="feedback-text"><strong>' + title + ' - "' + q.blank + '"</strong>' + q.explanation + pointsHtml + '</div>' +
+      '</div>';
+  }
+
+  function showNext(){
+    var wrap = $("nextBtnWrap");
+    wrap.classList.remove("hidden");
+    var isLast = state.currentQ === totalInRun() - 1;
+    $("nextBtnText").innerHTML = isLast ? "See Results &#127942;" : "Next Question &rarr;";
+  }
+
+  // ===== NEXT QUESTION =====
+  function nextQuestion(){
+    if (state.currentQ < totalInRun() - 1) {
+      state.currentQ++;
+      loadQuestion();
+      var p = $("panel-practice"); if (p) p.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      showResults();
+    }
+  }
+
+  // ===== RESULTS =====
+  function showResults(){
+    stopTimer();
+    $("sentenceCard").classList.add("hidden");
+    $("choiceButtons").classList.add("hidden");
+    $("nextBtnWrap").classList.add("hidden");
+    $("resultsSection").classList.remove("hidden");
+
+    var total = questions.length;
+    var pct = Math.round((state.correctCount / total) * 100);
+    var emoji, title, sub;
+    if (pct === 100)      { emoji = "\u{1F3C6}"; title = "Perfect Score!"; sub = "Outstanding! You're a true Tense Detective!"; }
+    else if (pct >= 75)   { emoji = "\u{1F31F}"; title = "Great Work!"; sub = "You've mastered most of the tenses. Keep it up!"; }
+    else if (pct >= 50)   { emoji = "\u{1F44D}"; title = "Good Effort!"; sub = "You're getting there. Review the Learn tab and try again."; }
+    else                  { emoji = "\u{1F4DA}"; title = "Keep Practising!"; sub = "Review Learn and Tips, then try again."; }
+
+    $("resultsEmoji").textContent = emoji;
+    $("resultsTitle").textContent = title;
+    $("resultsScore").textContent = state.correctCount + "/" + total;
+    $("resultsSub").textContent = sub;
+    setTimeout(function(){ $("resultsBarFill").style.width = pct + "%"; }, 100);
+
+    var best = 0;
+    try { best = parseInt(localStorage.getItem(LS_BEST) || "0", 10) || 0; } catch(e){}
+    if (state.points > best) { try { localStorage.setItem(LS_BEST, state.points); } catch(e){} best = state.points; }
+
+    $("resultsStats").innerHTML =
+      '<div class="results-stat"><div class="results-stat-value">&#11088; ' + state.points + '</div><div class="results-stat-label">Points</div></div>' +
+      '<div class="results-stat"><div class="results-stat-value">\u{1F525} ' + state.maxStreak + '</div><div class="results-stat-label">Best Streak</div></div>' +
+      '<div class="results-stat"><div class="results-stat-value">\u{1F947} ' + best + '</div><div class="results-stat-label">All-Time</div></div>';
+
+    var reviewList = $("reviewList");
+    reviewList.innerHTML = "";
+    state.userAnswers.forEach(function(a){
+      var q = questions[a.qIndex];
+      var div = document.createElement("div");
+      div.className = "review-item " + (a.correct ? "r-correct" : "r-wrong");
+      var verdict = a.correct ? "✅ Correct" : (a.timedOut ? "⏰ Timed out" : "❌ Wrong");
+      div.innerHTML = '<div class="review-item-top"><span>' + q.story + '</span><span class="review-verdict">' + verdict + '</span></div><span>Answer: <strong>' + q.blank + '</strong></span>';
+      reviewList.appendChild(div);
+    });
+
+    var wrongIndices = [];
+    state.userAnswers.forEach(function(a){ if (!a.correct) wrongIndices.push(a.qIndex); });
+    var retry = $("retryWrongBtn");
+    if (wrongIndices.length > 0) {
+      retry.classList.remove("hidden");
+      retry.innerHTML = "\u{1F501} Retry " + wrongIndices.length + " missed question" + (wrongIndices.length > 1 ? "s" : "");
+      retry.onclick = function(){ restartPractice(wrongIndices); };
+    } else {
+      retry.classList.add("hidden");
+    }
+
+    if (pct === 100) fireConfetti();
+  }
+
+  // ===== RESTART =====
+  function restartPractice(onlyIndices){
+    state.currentQ = 0;
+    state.correctCount = 0;
+    state.wrongCount = 0;
+    state.points = 0;
+    state.streak = 0;
+    state.maxStreak = 0;
+    state.userAnswers = [];
+    state.answered = false;
+    state.wrongPool = (onlyIndices && onlyIndices.length > 0) ? onlyIndices.slice() : null;
+    loadQuestion();
+    var p = $("panel-practice"); if (p) p.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // ===== UI =====
+  function updateProgress(){
+    var total = totalInRun();
+    var display = Math.min(state.currentQ + 1, total);
+    $("progressCounter").textContent = display + " / " + total;
+    var pct = (state.currentQ / total) * 100;
+    if (state.answered) pct = ((state.currentQ + 1) / total) * 100;
+    $("progressFill").style.width = pct + "%";
+    $("correctChip").innerHTML = "&#9989; " + state.correctCount + " Correct";
+    $("wrongChip").innerHTML = "&#10060; " + state.wrongCount + " Wrong";
+    $("pointsChip").innerHTML = "&#11088; " + state.points + " pts";
+    var sb = $("streakBadge");
+    if (state.streak >= 2) {
+      sb.style.display = "flex";
+      $("streakCount").textContent = state.streak;
+      if (state.streak >= 3) sb.classList.add("hot"); else sb.classList.remove("hot");
+    } else {
+      sb.style.display = "none"; sb.classList.remove("hot");
+    }
+  }
+
+  // ===== CONFETTI =====
+  function fireConfetti(){
+    var colors = ["#0069a5","#1a9e5f","#f59e0b","#d63b3b","#4fc3f7","#002e47"];
+    for (var i = 0; i < 60; i++) {
+      (function(){
+        var c = document.createElement("div");
+        c.className = "confetti";
+        c.style.left = Math.random() * 100 + "vw";
+        c.style.background = colors[Math.floor(Math.random() * colors.length)];
+        var startRot = Math.random() * 360;
+        c.style.transform = "rotate(" + startRot + "deg)";
+        document.body.appendChild(c);
+        var dur = 2500 + Math.random() * 2000;
+        var drift = (Math.random() - .5) * 200;
+        c.animate(
+          [{ transform: "rotate(" + startRot + "deg) translate(0,0)", opacity: 1 },
+           { transform: "rotate(" + (Math.random() * 720) + "deg) translate(" + drift + "px, 100vh)", opacity: .8 }],
+          { duration: dur, easing: "cubic-bezier(.2,.8,.3,1)" }
+        );
+        setTimeout(function(){ c.remove(); }, dur);
+      })();
+    }
+  }
+
+  // ===== SETTINGS =====
+  function applyToggleUI(){
+    $("toggleTimer").classList.toggle("on", !!state.settings.timer);
+    $("toggleSound").classList.toggle("on", !!state.settings.sound);
+    $("toggleHints").classList.toggle("on", !!state.settings.hints);
+  }
+
+  // ===== INIT =====
+  document.addEventListener("DOMContentLoaded", function(){
+    applyToggleUI();
+
+    // Tabs
+    document.querySelectorAll(".tab-btn").forEach(function(b){
+      b.addEventListener("click", function(e){ switchTab(e.currentTarget.getAttribute("data-tab")); });
+    });
+    // Choice buttons
+    $("btnOptionA").addEventListener("click", function(){ selectAnswer("a"); });
+    $("btnOptionB").addEventListener("click", function(){ selectAnswer("b"); });
+    // Next + restart
+    $("nextBtn").addEventListener("click", nextQuestion);
+    $("restartBtn").addEventListener("click", function(){ restartPractice(null); });
+    // Settings
+    $("settingsBtn").addEventListener("click", function(e){ e.stopPropagation(); $("settingsPanel").classList.toggle("visible"); });
+    document.addEventListener("click", function(e){
+      if (!$("settingsPanel").contains(e.target) && e.target !== $("settingsBtn")) $("settingsPanel").classList.remove("visible");
+    });
+    document.querySelectorAll(".toggle").forEach(function(t){
+      t.addEventListener("click", function(e){
+        var key = e.currentTarget.getAttribute("data-setting");
+        state.settings[key] = !state.settings[key];
+        applyToggleUI(); saveSettings();
+        if (key === "timer" || key === "hints") {
+          if (!state.answered) loadQuestion();
+        }
+      });
+    });
+    // Keyboard shortcuts
+    document.addEventListener("keydown", function(e){
+      if (!$("panel-practice").classList.contains("active")) return;
+      if ($("nextBtnWrap").classList.contains("hidden") === false) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); nextQuestion(); return; }
+      }
+      if (state.answered) return;
+      if (e.key === "a" || e.key === "A" || e.key === "1" || e.key === "ArrowLeft") selectAnswer("a");
+      else if (e.key === "b" || e.key === "B" || e.key === "2" || e.key === "ArrowRight") selectAnswer("b");
+    });
+
+    // Initial render: don't start timer until user opens Practice tab
+    updateProgress();
+  });
+})();
+</script>
+</body>
+</html>

@@ -33,7 +33,8 @@ body { min-height:100vh; display:flex; flex-direction:column; }
 .settings-btn:hover { background:rgba(255,255,255,.25); }
 .settings-panel { position:absolute; top:100%; right:10px; margin-top:4px; background:#fff; border-radius:var(--radius-sm); padding:10px 12px; min-width:200px; box-shadow:var(--shadow-md); display:none; z-index:200; }
 .settings-panel.visible { display:block; }
-.settings-row { display:flex; align-items:center; justify-content:space-between; padding:5px 0; font-size:12px; color:var(--text-dark); }
+.settings-row { display:flex; align-items:center; justify-content:space-between; padding:8px 4px; font-size:12px; color:var(--text-dark); cursor:pointer; user-select:none; border-radius:6px; }
+.settings-row:hover { background:#f4f8fb; }
 .toggle { position:relative; width:34px; height:20px; background:var(--border); border-radius:99px; cursor:pointer; transition:background .2s; }
 .toggle.on { background:var(--primary-lighter); }
 .toggle::after { content:''; position:absolute; top:2px; left:2px; width:16px; height:16px; background:#fff; border-radius:50%; transition:left .2s; }
@@ -163,9 +164,9 @@ tbody td { padding:9px 10px; color:var(--text-dark); vertical-align:top; }
   <div class="streak-badge" id="streakBadge"><span>&#128293;</span><span id="streakCount">0</span></div>
   <button class="settings-btn" id="settingsBtn" type="button" aria-label="Settings">&#9881;</button>
   <div class="settings-panel" id="settingsPanel">
-    <div class="settings-row"><span>Timer (30s)</span><div class="toggle on" id="toggleTimer" data-setting="timer"></div></div>
-    <div class="settings-row"><span>Sounds</span><div class="toggle on" id="toggleSound" data-setting="sound"></div></div>
-    <div class="settings-row"><span>Keyboard hints</span><div class="toggle on" id="toggleHints" data-setting="hints"></div></div>
+    <div class="settings-row" data-setting="timer"><span>Timer (30s)</span><div class="toggle on" id="toggleTimer"></div></div>
+    <div class="settings-row" data-setting="sound"><span>Sounds</span><div class="toggle on" id="toggleSound"></div></div>
+    <div class="settings-row" data-setting="hints"><span>Keyboard hints</span><div class="toggle on" id="toggleHints"></div></div>
   </div>
 </div>
 
@@ -728,13 +729,15 @@ tbody td { padding:9px 10px; color:var(--text-dark); vertical-align:top; }
     document.addEventListener("click", function(e){
       if (!$("settingsPanel").contains(e.target) && e.target !== $("settingsBtn")) $("settingsPanel").classList.remove("visible");
     });
-    document.querySelectorAll(".toggle").forEach(function(t){
-      t.addEventListener("click", function(e){
+    document.querySelectorAll(".settings-row").forEach(function(r){
+      r.addEventListener("click", function(e){
+        e.stopPropagation();
         var key = e.currentTarget.getAttribute("data-setting");
+        if (!key) return;
         state.settings[key] = !state.settings[key];
         applyToggleUI(); saveSettings();
         if (key === "timer" || key === "hints") {
-          if (!state.answered) loadQuestion();
+          if (!state.answered && $("panel-practice").classList.contains("active")) loadQuestion();
         }
       });
     });

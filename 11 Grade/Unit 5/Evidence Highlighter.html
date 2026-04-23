@@ -136,7 +136,8 @@ body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); 
 .settings-btn:hover { background:rgba(255,255,255,.25); }
 .settings-panel { position:absolute; top:100%; right:12px; margin-top:6px; background:var(--card); border-radius:var(--radius-sm); padding:12px; min-width:200px; box-shadow:var(--shadow-md); display:none; z-index:150; }
 .settings-panel.visible { display:block; }
-.settings-row { display:flex; align-items:center; justify-content:space-between; padding:6px 0; font-size:12px; color:var(--text); }
+.settings-row { display:flex; align-items:center; justify-content:space-between; padding:8px 4px; font-size:12px; color:var(--text); cursor:pointer; user-select:none; border-radius:6px; }
+.settings-row:hover { background:#f4f8fb; }
 .toggle { position:relative; width:36px; height:20px; background:var(--border); border-radius:99px; cursor:pointer; transition:background .2s; }
 .toggle.on { background:var(--accent); }
 .toggle::after { content:''; position:absolute; top:2px; left:2px; width:16px; height:16px; background:#fff; border-radius:50%; transition:left .2s; }
@@ -160,9 +161,9 @@ body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); 
   </div>
   <button class="settings-btn" id="settingsBtn" type="button" aria-label="Settings">&#9881;</button>
   <div class="settings-panel" id="settingsPanel">
-    <div class="settings-row"><span>Timer</span><div class="toggle on" id="toggleTimer" data-setting="timer"></div></div>
-    <div class="settings-row"><span>Sounds</span><div class="toggle on" id="toggleSound" data-setting="sound"></div></div>
-    <div class="settings-row"><span>Keyboard hints</span><div class="toggle on" id="toggleHints" data-setting="hints"></div></div>
+    <div class="settings-row" data-setting="timer"><span>Timer</span><div class="toggle on" id="toggleTimer"></div></div>
+    <div class="settings-row" data-setting="sound"><span>Sounds</span><div class="toggle on" id="toggleSound"></div></div>
+    <div class="settings-row" data-setting="hints"><span>Keyboard hints</span><div class="toggle on" id="toggleHints"></div></div>
   </div>
 </div>
 
@@ -576,13 +577,15 @@ body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); 
     document.addEventListener("click", function(e){
       if (!$("settingsPanel").contains(e.target) && e.target !== $("settingsBtn")) $("settingsPanel").classList.remove("visible");
     });
-    var toggles = document.querySelectorAll(".toggle");
-    for (var k = 0; k < toggles.length; k++) {
-      toggles[k].addEventListener("click", function(e){
+    var rows = document.querySelectorAll(".settings-row");
+    for (var k = 0; k < rows.length; k++) {
+      rows[k].addEventListener("click", function(e){
+        e.stopPropagation();
         var key = e.currentTarget.getAttribute("data-setting");
+        if (!key) return;
         state.settings[key] = !state.settings[key];
         applyToggleUI(); saveSettings();
-        if (key === "timer" || key === "hints") renderChallenge();
+        if ((key === "timer" || key === "hints") && $("panel-challenge").classList.contains("active")) renderChallenge();
       });
     }
     document.addEventListener("keydown", function(e){

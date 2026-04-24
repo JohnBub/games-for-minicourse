@@ -9,15 +9,25 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  /* Renardo palette — forest / navy / paper / ink */
-  --forest:#1E4B3A;
+  /* Renardo palette — exact brand tokens */
+  --rust:#BF5A24;          /* accent — now primary */
+  --rust-deep:#994418;
+  --rust-soft:#F3DDCB;
+  --rust-line:#E6B694;
+
+  --forest:#1F4D3C;        /* brand — secondary */
   --forest-deep:#163528;
   --forest-soft:#D7E2D6;
-  --forest-line:#B6C8B4;
-  --sage:#8DA890;
 
-  --navy:#1E3A5F;
-  --navy-deep:#152945;
+  --navy:#1E2A4D;          /* Americana */
+  --gold:#B8893A;          /* flourish */
+
+  /* Watercolor accents */
+  --sage:#A7B8A4;
+  --ochre:#D4A85E;
+  --terracotta:#C97B54;
+  --clay:#A66049;
+  --dust-rose:#C89188;
 
   --paper:#F5EFDE;
   --paper-warm:#FBF6E8;
@@ -30,17 +40,17 @@
   --border-strong:#D4C5A0;
 
   --text-dark:var(--ink);
-  --text-mid:#5A5448;
-  --text-light:#8A8473;
+  --text-mid:#5A4E3E;
+  --text-light:#8A7E68;
 
-  /* Feedback — muted, brand-compatible */
-  --ok:#2D6B52;
+  /* Feedback — brand-compatible */
+  --ok:var(--forest);
   --ok-bg:#E1EEDC;
-  --err:#A84530;
-  --err-bg:#F2E0D8;
+  --err:var(--clay);
+  --err-bg:#F2E0D4;
 
-  --shadow:0 2px 12px rgba(30,75,58,.08), 0 1px 3px rgba(30,75,58,.06);
-  --shadow-md:0 6px 24px rgba(30,75,58,.12);
+  --shadow:0 2px 12px rgba(191,90,36,.10), 0 1px 3px rgba(191,90,36,.06);
+  --shadow-md:0 6px 24px rgba(191,90,36,.14);
 
   --radius:16px;
   --radius-sm:10px;
@@ -57,14 +67,14 @@ body{
 
 /* Header */
 .app-header{
-  background:var(--forest);
+  background:var(--rust);
   padding:16px 18px;display:flex;align-items:center;gap:14px;flex-shrink:0;
-  border-bottom:3px solid var(--forest-deep);
+  border-bottom:3px solid var(--rust-deep);
 }
 .app-header-icon{
   width:48px;height:48px;border-radius:12px;flex-shrink:0;
   overflow:hidden;
-  border:1.5px solid var(--forest-line);
+  border:1.5px solid var(--rust-line);
   box-shadow:0 2px 6px rgba(0,0,0,.15);
 }
 .app-header-icon img{width:100%;height:100%;object-fit:cover;display:block}
@@ -74,7 +84,7 @@ body{
   color:var(--paper-warm);line-height:1.2;letter-spacing:.005em;
 }
 .app-header-sub{
-  font-size:11.5px;color:var(--forest-line);margin-top:3px;
+  font-size:11.5px;color:var(--rust-line);margin-top:3px;
   font-weight:500;font-family:var(--sans);letter-spacing:.02em;
 }
 .header-brand{
@@ -95,11 +105,11 @@ body{
   color:var(--text-light);text-transform:uppercase;letter-spacing:.1em;
   font-size:10.5px;font-weight:700;
 }
-.progress-counter{color:var(--forest);font-size:14px;font-weight:700;font-family:var(--serif)}
+.progress-counter{color:var(--rust);font-size:14px;font-weight:700;font-family:var(--serif)}
 .progress-counter .current{color:var(--ink)}
 .progress-track{height:4px;background:var(--border);border-radius:10px;overflow:hidden}
 .progress-fill{
-  height:100%;background:var(--forest);
+  height:100%;background:var(--rust);
   border-radius:10px;transition:width .5s cubic-bezier(.4,0,.2,1);
 }
 
@@ -121,7 +131,7 @@ body{
 }
 .intro-hero img{width:100%;height:100%;object-fit:cover;display:block}
 .intro-eyebrow{
-  font-size:10.5px;font-weight:700;color:var(--forest);
+  font-size:10.5px;font-weight:700;color:var(--rust);
   text-transform:uppercase;letter-spacing:.14em;
 }
 .intro-title{
@@ -137,21 +147,21 @@ body{
 }
 .meta-chip{
   display:inline-flex;align-items:center;gap:6px;
-  background:var(--forest-soft);color:var(--forest-deep);
+  background:var(--rust-soft);color:var(--rust-deep);
   font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:4px;
-  border:1px solid var(--forest-line);
+  border:1px solid var(--rust-line);
   letter-spacing:.02em;
 }
 .start-btn{
   margin-top:12px;align-self:center;
-  background:var(--forest);color:var(--paper-warm);
+  background:var(--rust);color:var(--paper-warm);
   border:none;padding:13px 28px;border-radius:6px;
   font-family:var(--sans);font-size:14.5px;font-weight:700;cursor:pointer;
   transition:background .2s, transform .1s;
   letter-spacing:.02em;
   box-shadow:var(--shadow);
 }
-.start-btn:hover{background:var(--forest-deep)}
+.start-btn:hover{background:var(--rust-deep)}
 .start-btn:active{transform:scale(.98)}
 
 /* Question card */
@@ -162,11 +172,11 @@ body{
 }
 .q-type-pill{
   display:inline-flex;align-items:center;gap:6px;
-  background:transparent;color:var(--forest);
+  background:transparent;color:var(--rust);
   font-family:var(--sans);
   font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
   padding:0;width:fit-content;
-  border-bottom:1.5px solid var(--forest);
+  border-bottom:1.5px solid var(--rust);
   padding-bottom:3px;
 }
 .q-text{
@@ -180,7 +190,7 @@ body{
   color:var(--ink);cursor:pointer;text-align:left;
   transition:all .15s;display:flex;align-items:center;gap:12px;line-height:1.45;
 }
-.opt:hover:not(:disabled){border-color:var(--forest);background:var(--forest-soft)}
+.opt:hover:not(:disabled){border-color:var(--rust);background:var(--rust-soft)}
 .opt:disabled{cursor:default}
 .opt-marker{
   width:24px;height:24px;border-radius:50%;
@@ -253,8 +263,8 @@ body{
   font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer;
   transition:all .15s;letter-spacing:.02em;
 }
-.results-btn.primary{background:var(--forest);color:var(--paper-warm)}
-.results-btn.primary:hover{background:var(--forest-deep)}
+.results-btn.primary{background:var(--rust);color:var(--paper-warm)}
+.results-btn.primary:hover{background:var(--rust-deep)}
 .results-btn.secondary{
   background:transparent;color:var(--ink);
   border:1.5px solid var(--border-strong);
@@ -571,11 +581,11 @@ function showResults() {
   } else if (pct >= 65) {
     title = 'Well done';
     msg = 'You grasped the main ideas. Review the questions you missed, then continue.';
-    colorVar = 'var(--forest)';
+    colorVar = 'var(--rust)';
   } else if (pct >= 45) {
     title = 'Keep going';
     msg = 'Listen to the audio once more and read through the missed questions below.';
-    colorVar = 'var(--sage)';
+    colorVar = 'var(--ochre)';
   } else {
     title = 'Try again';
     msg = 'Re-read the text carefully, then redo the quiz. You have this.';

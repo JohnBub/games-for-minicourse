@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Fenet's Story — Reading Quiz · Renardo Academy</title>
+<link rel="icon" type="image/png" href="renardo-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* Renardo palette */
+  --cream:#FBF5E9;
+  --cream-warm:#FDF6E8;
+  --rust:#D96028;
+  --rust-dark:#B84A1E;
+  --rust-soft:#F5D9C4;
+  --navy:#1E3A5F;
+  --navy-soft:#2E4F7A;
+  --forest:#2C5F4E;
+  --forest-soft:#D7E6DF;
+  --ink:#1A1A1A;
+
+  --bg:var(--cream);
+  --card-bg:#FFFFFF;
+  --text-dark:#1A1A1A;
+  --text-mid:#4A5568;
+  --text-light:#8A95A5;
+  --border:#EBDFC4;
+  --border-strong:#D9C9A4;
+
+  --green:#3D8B5C;
+  --green-bg:#E4F3EA;
+  --red:#C8432E;
+  --red-bg:#FBE4DE;
+
+  --shadow:0 4px 20px rgba(30,58,95,.08);
+  --shadow-md:0 8px 32px rgba(30,58,95,.14);
+  --shadow-warm:0 4px 16px rgba(217,96,40,.15);
+
+  --radius:18px;
+  --radius-sm:12px;
+}
+html,body{height:100%;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text-dark);overflow-x:hidden}
+body{min-height:100vh;display:flex;flex-direction:column;background:
+  radial-gradient(ellipse at top, #FEF9EC 0%, var(--cream) 55%)
+}
+
+/* Header */
+.app-header{
+  background:linear-gradient(135deg, var(--navy) 0%, var(--navy-soft) 100%);
+  padding:16px 18px;display:flex;align-items:center;gap:12px;flex-shrink:0;
+  box-shadow:0 2px 12px rgba(30,58,95,.2);
+  position:relative;overflow:hidden;
+}
+.app-header::after{
+  content:'';position:absolute;right:-40px;top:-40px;width:160px;height:160px;
+  background:radial-gradient(circle, rgba(217,96,40,.25) 0%, transparent 70%);
+  pointer-events:none;
+}
+.app-header-icon{
+  width:46px;height:46px;border-radius:12px;flex-shrink:0;
+  background:var(--cream-warm);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.2);
+  overflow:hidden;
+  border:2px solid rgba(255,255,255,.3);
+}
+.app-header-icon img{width:100%;height:100%;object-fit:cover;display:block}
+.app-header-text{flex:1;min-width:0;position:relative;z-index:1}
+.app-header-title{font-size:15px;font-weight:800;color:#fff;line-height:1.2;letter-spacing:-.01em}
+.app-header-sub{font-size:11.5px;color:rgba(255,255,255,.7);margin-top:2px;font-weight:600}
+.header-brand{
+  font-size:10px;font-weight:900;color:var(--rust);
+  background:var(--cream-warm);padding:4px 10px;border-radius:99px;
+  text-transform:uppercase;letter-spacing:.1em;
+  position:relative;z-index:1;
+}
+
+/* Progress */
+.progress-section{
+  background:var(--card-bg);padding:14px 18px;
+  border-bottom:1px solid var(--border);
+  flex-direction:column;gap:8px;flex-shrink:0;display:none;
+}
+.progress-section.visible{display:flex}
+.progress-top{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700}
+.progress-label{color:var(--text-light);text-transform:uppercase;letter-spacing:.08em}
+.progress-counter{color:var(--navy);font-size:15px;font-weight:900}
+.progress-counter .current{color:var(--rust)}
+.progress-track{height:8px;background:var(--rust-soft);border-radius:10px;overflow:hidden}
+.progress-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--rust) 0%,#E87B3D 100%);
+  border-radius:10px;transition:width .5s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 8px rgba(217,96,40,.4);
+}
+
+/* Main */
+.main{flex:1;overflow-y:auto;padding:20px 16px 32px;display:flex;flex-direction:column;gap:16px}
+
+/* Intro */
+.intro-card{
+  background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:24px 22px;display:flex;flex-direction:column;gap:14px;
+  border:1px solid var(--border);
+  position:relative;overflow:hidden;
+}
+.intro-card::before{
+  content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;
+  background:radial-gradient(circle, var(--rust-soft) 0%, transparent 70%);
+  pointer-events:none;
+}
+.intro-hero{
+  width:100px;height:100px;border-radius:50%;margin:0 auto 4px;
+  overflow:hidden;border:4px solid var(--cream-warm);
+  box-shadow:var(--shadow-warm);
+  position:relative;z-index:1;
+}
+.intro-hero img{width:100%;height:100%;object-fit:cover;display:block}
+.intro-title{
+  font-size:22px;font-weight:900;color:var(--navy);line-height:1.2;
+  text-align:center;letter-spacing:-.02em;
+  position:relative;z-index:1;
+}
+.intro-lede{
+  font-size:14.5px;line-height:1.6;color:var(--text-mid);
+  text-align:center;font-weight:500;
+  position:relative;z-index:1;
+}
+.intro-meta{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:4px;position:relative;z-index:1}
+.meta-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--cream-warm);color:var(--navy);
+  font-size:12px;font-weight:700;padding:6px 12px;border-radius:99px;
+  border:1.5px solid var(--border);
+}
+.start-btn{
+  margin-top:10px;
+  background:linear-gradient(135deg, var(--rust) 0%, #E87B3D 100%);
+  color:#fff;border:none;padding:15px 20px;border-radius:14px;
+  font-family:inherit;font-size:16px;font-weight:800;cursor:pointer;
+  transition:transform .15s,box-shadow .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:var(--shadow-warm);
+  letter-spacing:.01em;
+  position:relative;z-index:1;
+}
+.start-btn:hover{box-shadow:0 6px 20px rgba(217,96,40,.3);transform:translateY(-1px)}
+.start-btn:active{transform:translateY(0) scale(.98)}
+
+/* Question card */
+.q-card{
+  background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:22px 20px;display:flex;flex-direction:column;gap:16px;
+  border:1px solid var(--border);
+}
+.q-type-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--forest);color:#fff;
+  font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  padding:6px 12px;border-radius:99px;width:fit-content;
+}
+.q-text{font-size:17px;font-weight:700;line-height:1.5;color:var(--navy);letter-spacing:-.01em}
+.options{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.opt{
+  background:var(--cream-warm);border:2px solid var(--border);border-radius:14px;
+  padding:14px 16px;font-family:inherit;font-size:15px;font-weight:600;
+  color:var(--text-dark);cursor:pointer;text-align:left;
+  transition:all .15s;display:flex;align-items:center;gap:12px;line-height:1.4;
+}
+.opt:hover:not(:disabled){border-color:var(--rust);background:#fff;transform:translateX(2px)}
+.opt:disabled{cursor:default}
+.opt-marker{
+  width:28px;height:28px;border-radius:50%;
+  border:2px solid var(--border-strong);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:900;color:var(--text-light);background:#fff;
+  font-family:'Nunito',sans-serif;
+}
+.opt.correct{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.opt.correct .opt-marker{border-color:var(--green);background:var(--green);color:#fff}
+.opt.wrong{border-color:var(--red);background:var(--red-bg);color:var(--red)}
+.opt.wrong .opt-marker{border-color:var(--red);background:var(--red);color:#fff}
+
+/* Feedback */
+.feedback{
+  border-radius:14px;padding:14px 16px;font-size:14px;line-height:1.55;
+  display:none;flex-direction:column;gap:6px;
+}
+.feedback.visible{display:flex}
+.feedback.correct{background:var(--green-bg);border-left:4px solid var(--green);color:#1F5C3B}
+.feedback.wrong{background:var(--red-bg);border-left:4px solid var(--red);color:#7A2618}
+.feedback-title{font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.feedback-body{font-size:14px;line-height:1.55;font-weight:500}
+
+/* Next */
+.next-btn{
+  background:var(--navy);color:#fff;border:none;padding:14px 18px;
+  border-radius:14px;font-family:inherit;font-size:15px;font-weight:800;
+  cursor:pointer;transition:transform .15s,background .2s;
+  display:none;align-items:center;justify-content:center;gap:8px;
+}
+.next-btn.visible{display:flex}
+.next-btn:hover{background:var(--navy-soft)}
+.next-btn:active{transform:scale(.98)}
+
+/* Results */
+.results-card{
+  background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:28px 22px;display:flex;flex-direction:column;gap:16px;
+  align-items:center;text-align:center;border:1px solid var(--border);
+}
+.score-circle{
+  width:150px;height:150px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;position:relative;
+}
+.score-circle::before{
+  content:'';position:absolute;inset:12px;background:var(--cream-warm);
+  border-radius:50%;
+}
+.score-text{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:2px}
+.score-num{font-size:38px;font-weight:900;color:var(--navy);line-height:1}
+.score-denom{font-size:13px;color:var(--text-light);font-weight:700}
+.results-title{font-size:24px;font-weight:900;color:var(--navy);line-height:1.2;letter-spacing:-.02em}
+.results-msg{font-size:14.5px;line-height:1.55;color:var(--text-mid);max-width:320px;font-weight:500}
+.results-actions{display:flex;gap:10px;width:100%;margin-top:8px}
+.results-btn{
+  flex:1;border:none;padding:14px 16px;border-radius:14px;
+  font-family:inherit;font-size:14.5px;font-weight:800;cursor:pointer;
+  transition:all .15s;
+}
+.results-btn.primary{background:var(--rust);color:#fff;box-shadow:var(--shadow-warm)}
+.results-btn.primary:hover{background:var(--rust-dark)}
+.results-btn.secondary{background:var(--cream-warm);color:var(--navy);border:1.5px solid var(--border-strong)}
+.results-btn.secondary:hover{background:#fff}
+.results-btn:active{transform:scale(.98)}
+
+/* Review */
+.review-header{
+  font-size:17px;font-weight:900;color:var(--navy);
+  padding:0 4px;margin-top:4px;letter-spacing:-.01em;
+}
+.review-item{
+  background:var(--card-bg);border-radius:var(--radius-sm);box-shadow:var(--shadow);
+  padding:16px 18px;display:flex;flex-direction:column;gap:8px;
+  border-left:4px solid var(--green);border:1px solid var(--border);border-left-width:4px;
+}
+.review-item.wrong{border-left-color:var(--red)}
+.review-top{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.review-number{
+  background:var(--navy);color:#fff;width:24px;height:24px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;
+}
+.review-status{color:var(--green)}
+.review-item.wrong .review-status{color:var(--red)}
+.review-q{font-size:14.5px;font-weight:700;line-height:1.45;color:var(--navy)}
+.review-answer-row{display:flex;flex-direction:column;gap:3px;font-size:13.5px;line-height:1.5}
+.review-answer-row .label{font-weight:800;color:var(--text-light);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.review-your{color:var(--red);font-weight:600}
+.review-correct{color:var(--green);font-weight:700}
+.review-item:not(.wrong) .review-your{color:var(--green)}
+.review-explain{
+  font-size:13px;line-height:1.55;color:var(--text-mid);
+  background:var(--cream-warm);border-radius:10px;padding:10px 12px;margin-top:4px;
+  font-weight:500;
+}
+
+/* Footer */
+.renardo-footer{
+  text-align:center;padding:14px 16px 20px;font-size:11px;color:var(--text-light);
+  font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+}
+.renardo-footer span{color:var(--rust)}
+
+@media (min-width:640px){
+  .main{max-width:680px;margin:0 auto;width:100%}
+  .q-text{font-size:18px}
+  .intro-title{font-size:24px}
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-icon">
+    <img src="renardo-icon.png" alt="Renardo" />
+  </div>
+  <div class="app-header-text">
+    <div class="app-header-title">Fenet's Story — Reading Quiz</div>
+    <div class="app-header-sub">MORE! 9e · Unit 6 — Then and Now</div>
+  </div>
+  <span class="header-brand">Renardo</span>
+</header>
+
+<div class="progress-section" id="progressSection">
+  <div class="progress-top">
+    <span class="progress-label">Question</span>
+    <span class="progress-counter"><span class="current" id="progCur">1</span> / <span id="progTot">12</span></span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
+</div>
+
+<main class="main" id="main">
+
+  <section class="intro-card" id="intro">
+    <div class="intro-hero"><img src="renardo-icon.png" alt="Renardo reading" /></div>
+    <div class="intro-title">Then and Now — Fenet's journey from Ethiopia to Australia</div>
+    <p class="intro-lede">
+      Listen to the audio, read the text, then test your comprehension.
+      12 questions on reading detail, inference, and comparative adjectives.
+    </p>
+    <div class="intro-meta">
+      <span class="meta-chip">🎧 Listen twice</span>
+      <span class="meta-chip">⏱️ ~6 minutes</span>
+      <span class="meta-chip">🎯 A2 → A2+</span>
+    </div>
+    <button class="start-btn" id="startBtn">Start the quiz →</button>
+  </section>
+
+</main>
+
+<div class="renardo-footer">
+  Made with <span>♥</span> by Renardo Academy
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    type: 'Gist',
+    q: 'What is the article mainly about?',
+    options: [
+      'A holiday in Africa',
+      'An immigrant in Australia',
+      'A holiday in Australia',
+      'Tourism in Ethiopia'
+    ],
+    correct: 1,
+    explain: 'The article tells the story of Fenet, who moved from Ethiopia to Australia — she is an immigrant, not a tourist.'
+  },
+  {
+    type: 'True / False',
+    q: 'Fenet moved to Australia five years ago.',
+    options: ['True', 'False'],
+    correct: 1,
+    explain: 'The text says "She moved to Australia two years ago" — not five.'
+  },
+  {
+    type: 'True / False',
+    q: 'In Ethiopia, Fenet lived with all her family.',
+    options: ['True', 'False'],
+    correct: 0,
+    explain: '"I lived in a town with all my family. Our house was always full of people."'
+  },
+  {
+    type: 'True / False',
+    q: 'When Fenet arrived in Australia, she spoke good English.',
+    options: ['True', 'False'],
+    correct: 1,
+    explain: '"When Fenet arrived in Australia, she didn\'t speak English." That is why she went to language classes first.'
+  },
+  {
+    type: 'True / False',
+    q: 'Fenet found secondary school easy at first.',
+    options: ['True', 'False'],
+    correct: 1,
+    explain: '"That wasn\'t easy. The lessons were more difficult and no one talked to me."'
+  },
+  {
+    type: 'True / False',
+    q: 'Fenet sometimes got lost in Sydney.',
+    options: ['True', 'False'],
+    correct: 0,
+    explain: '"I got lost all the time… I got lost going to the shops and I even got lost at school."'
+  },
+  {
+    type: 'Comparative',
+    q: 'Which word from the text is the opposite of easier?',
+    options: ['more difficult', 'harder', 'worse', 'slower'],
+    correct: 0,
+    explain: '"The lessons were more difficult and no one talked to me."'
+  },
+  {
+    type: 'Comparative',
+    q: 'Which word from the text is the opposite of less friendly?',
+    options: ['nicer', 'friendlier', 'more friendly', 'kinder'],
+    correct: 1,
+    explain: '"Now the other students are friendlier." Adjectives in -y → -ier (friendly → friendlier).'
+  },
+  {
+    type: 'Comparative',
+    q: 'Which word from the text is the opposite of less crowded?',
+    options: ['busier', 'fuller', 'more crowded', 'crowdeder'],
+    correct: 2,
+    explain: '"The streets are more crowded, but it\'s very modern and exciting." Long adjectives take more, never the -er ending.'
+  },
+  {
+    type: 'Comparative',
+    q: 'Which word from the text is the opposite of bigger?',
+    options: ['littler', 'smaller', 'more small', 'tinier'],
+    correct: 1,
+    explain: '"My town in Ethiopia was much smaller." Smaller is the standard comparative of small.'
+  },
+  {
+    type: 'Detail',
+    q: 'What did Fenet do when she first arrived in Australia?',
+    options: [
+      'She started secondary school right away.',
+      'She went back to Ethiopia for a year.',
+      'She went to language classes.',
+      'She worked in her family\'s shop.'
+    ],
+    correct: 2,
+    explain: '"At first she didn\'t go to school — she went to language classes" because she didn\'t speak English yet.'
+  },
+  {
+    type: 'Inference',
+    q: 'Why is life at secondary school easier for Fenet now?',
+    options: [
+      'The lessons are less difficult than before.',
+      'She has moved back to Ethiopia.',
+      'The other students are friendlier and she understands the work.',
+      'She doesn\'t go to school anymore.'
+    ],
+    correct: 2,
+    explain: '"Now the other students are friendlier and it\'s easier for me to do the work." Two reasons: friendlier students + better comprehension.'
+  }
+];
+
+const state = {
+  idx: 0,
+  answers: new Array(QUESTIONS.length).fill(null)
+};
+
+const $ = sel => document.querySelector(sel);
+const main = $('#main');
+const progressSection = $('#progressSection');
+const progFill = $('#progFill');
+const progCur = $('#progCur');
+const progTot = $('#progTot');
+
+function el(tag, className, text) {
+  const n = document.createElement(tag);
+  if (className) n.className = className;
+  if (text !== undefined) n.textContent = text;
+  return n;
+}
+
+progTot.textContent = QUESTIONS.length;
+$('#startBtn').addEventListener('click', startQuiz);
+
+function startQuiz() {
+  state.idx = 0;
+  state.answers = new Array(QUESTIONS.length).fill(null);
+  progressSection.classList.add('visible');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[state.idx];
+  progCur.textContent = state.idx + 1;
+  progFill.style.width = (state.idx / QUESTIONS.length * 100) + '%';
+
+  main.textContent = '';
+  const card = el('section', 'q-card');
+  card.appendChild(el('span', 'q-type-pill', q.type));
+  card.appendChild(el('div', 'q-text', q.q));
+
+  const opts = el('div', 'options');
+  q.options.forEach((optText, i) => {
+    const btn = el('button', 'opt');
+    btn.appendChild(el('span', 'opt-marker', String.fromCharCode(65 + i)));
+    btn.appendChild(el('span', null, optText));
+    btn.addEventListener('click', () => selectOption(i));
+    opts.appendChild(btn);
+  });
+  card.appendChild(opts);
+
+  const fb = el('div', 'feedback');
+  fb.id = 'fb';
+  card.appendChild(fb);
+
+  const nextBtn = el('button', 'next-btn',
+    state.idx === QUESTIONS.length - 1 ? 'See results →' : 'Next question →');
+  nextBtn.id = 'nextBtn';
+  nextBtn.addEventListener('click', next);
+  card.appendChild(nextBtn);
+
+  main.appendChild(card);
+  main.scrollTop = 0;
+}
+
+function selectOption(i) {
+  const q = QUESTIONS[state.idx];
+  if (state.answers[state.idx] !== null) return;
+
+  state.answers[state.idx] = i;
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach((btn, idx) => {
+    btn.disabled = true;
+    if (idx === q.correct) btn.classList.add('correct');
+    else if (idx === i) btn.classList.add('wrong');
+  });
+
+  const fb = $('#fb');
+  const correct = i === q.correct;
+  fb.className = 'feedback visible ' + (correct ? 'correct' : 'wrong');
+  fb.textContent = '';
+  fb.appendChild(el('span', 'feedback-title', correct ? '✓ Correct' : '✗ Not quite'));
+  fb.appendChild(el('span', 'feedback-body', q.explain));
+
+  $('#nextBtn').classList.add('visible');
+  progFill.style.width = ((state.idx + 1) / QUESTIONS.length * 100) + '%';
+}
+
+function next() {
+  if (state.idx < QUESTIONS.length - 1) {
+    state.idx++;
+    renderQuestion();
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  progressSection.classList.remove('visible');
+  const total = QUESTIONS.length;
+  const correct = state.answers.reduce(
+    (acc, ans, i) => acc + (ans === QUESTIONS[i].correct ? 1 : 0), 0);
+  const pct = Math.round(correct / total * 100);
+
+  let title, msg, colorVar;
+  if (pct >= 85) {
+    title = 'Excellent work! 🦊';
+    msg = 'You really understood Fenet\'s story. Ready to move on to the grammar exercises.';
+    colorVar = 'var(--green)';
+  } else if (pct >= 65) {
+    title = 'Good job!';
+    msg = 'You got the main ideas. Review the questions you missed, then continue.';
+    colorVar = 'var(--forest)';
+  } else if (pct >= 45) {
+    title = 'Not bad — keep going';
+    msg = 'Listen to the audio one more time and read through the missed questions below.';
+    colorVar = 'var(--rust)';
+  } else {
+    title = 'Let\'s try again';
+    msg = 'Re-read the text carefully, then redo the quiz. You\'ve got this.';
+    colorVar = 'var(--red)';
+  }
+
+  main.textContent = '';
+  const card = el('section', 'results-card');
+
+  const circle = el('div', 'score-circle');
+  circle.style.background = `conic-gradient(${colorVar} ${pct * 3.6}deg, var(--border) 0deg)`;
+  const scoreText = el('div', 'score-text');
+  scoreText.appendChild(el('span', 'score-num', String(correct)));
+  scoreText.appendChild(el('span', 'score-denom', `out of ${total}`));
+  circle.appendChild(scoreText);
+  card.appendChild(circle);
+
+  card.appendChild(el('div', 'results-title', title));
+  card.appendChild(el('div', 'results-msg', msg));
+
+  const actions = el('div', 'results-actions');
+  const retryBtn = el('button', 'results-btn secondary', '↻ Try again');
+  retryBtn.addEventListener('click', () => location.reload());
+  const reviewBtn = el('button', 'results-btn primary', 'Review answers ↓');
+  reviewBtn.id = 'reviewBtn';
+  reviewBtn.addEventListener('click', renderReview);
+  actions.appendChild(retryBtn);
+  actions.appendChild(reviewBtn);
+  card.appendChild(actions);
+
+  main.appendChild(card);
+}
+
+function renderReview() {
+  const reviewBtn = $('#reviewBtn');
+  if (reviewBtn) reviewBtn.style.display = 'none';
+
+  const header = el('div', 'review-header', 'Answer-by-answer review');
+  main.appendChild(header);
+
+  QUESTIONS.forEach((q, i) => {
+    const userIdx = state.answers[i];
+    const isCorrect = userIdx === q.correct;
+    const item = el('section', 'review-item' + (isCorrect ? '' : ' wrong'));
+
+    const top = el('div', 'review-top');
+    top.appendChild(el('span', 'review-number', String(i + 1)));
+    top.appendChild(el('span', 'review-status', isCorrect ? '✓ Correct' : '✗ Incorrect'));
+    item.appendChild(top);
+
+    item.appendChild(el('div', 'review-q', q.q));
+
+    const yourRow = el('div', 'review-answer-row');
+    yourRow.appendChild(el('span', 'label', 'Your answer'));
+    yourRow.appendChild(el('span', 'review-your',
+      userIdx === null ? '(no answer)' : q.options[userIdx]));
+    item.appendChild(yourRow);
+
+    if (!isCorrect) {
+      const correctRow = el('div', 'review-answer-row');
+      correctRow.appendChild(el('span', 'label', 'Correct answer'));
+      correctRow.appendChild(el('span', 'review-correct', q.options[q.correct]));
+      item.appendChild(correctRow);
+    }
+
+    item.appendChild(el('div', 'review-explain', '💡 ' + q.explain));
+    main.appendChild(item);
+  });
+
+  header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+
+</body>
+</html>

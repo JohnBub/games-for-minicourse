@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BA3 Game Hub — Varieties of English Exam Trainer</title>
+<style>
+  :root{
+    --ox:#7a1f1f; --ox2:#9a2d2d; --ink:#1b1b1b; --mute:#5a5a5a;
+    --paper:#fbf7ee; --card:#fffdf7; --rule:#d8cfbd; --hit:#f3e7c9;
+    --good:#2d7a3a; --bad:#c33; --blue:#2b4b6f; --gold:#b58b2c;
+    --warn:#b8751f;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:"EB Garamond","Iowan Old Style","Apple Garamond",Georgia,serif;
+       background:var(--paper);color:var(--ink);line-height:1.5;font-size:17px}
+  header{background:var(--ox);color:#f7ead1;padding:14px 22px;border-bottom:4px double #f7ead1;
+         display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  header h1{margin:0;font-size:22px;font-weight:600;letter-spacing:.3px}
+  header .meta{font-size:13px;opacity:.9;font-style:italic}
+  .statbar{background:#2c1212;color:#e6d9b9;padding:8px 22px;font-size:13.5px;
+           display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+  .statbar b{color:#fff7d9;font-size:14.5px}
+  .statbar .elo{color:var(--gold)}
+  .statbar .streak{color:#ffd78a}
+  .statbar .correct{color:#9cd89c}
+  .statbar .wrong{color:#ffb3a7}
+
+  nav.tabs{background:#f2e9d0;padding:0 22px;border-bottom:2px solid var(--rule);
+           display:flex;gap:0;flex-wrap:wrap;align-items:flex-end}
+  nav.tabs button{background:transparent;border:none;padding:14px 18px;cursor:pointer;
+                  font:inherit;font-size:15px;color:var(--mute);border-bottom:3px solid transparent;
+                  transition:.12s}
+  nav.tabs button:hover{color:var(--ox)}
+  nav.tabs button.active{color:var(--ox);border-bottom-color:var(--ox);font-weight:600;background:var(--paper)}
+  nav.tabs button .emoji{font-size:17px;margin-right:4px}
+
+  main{max-width:920px;margin:0 auto;padding:22px 26px 60px}
+
+  .panel{display:none}
+  .panel.active{display:block}
+
+  .q-card{background:var(--card);border:1px solid var(--rule);padding:22px 26px;margin:16px 0;
+          border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .q-kicker{font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px}
+  .q-prompt{font-size:18px;margin-bottom:6px;color:var(--ink)}
+  .q-ipa{font-family:"Doulos SIL","Charis SIL","Gentium","DejaVu Sans",monospace;
+         font-size:34px;color:var(--ox);background:#f3eddc;padding:12px 20px;border-radius:4px;
+         display:inline-block;margin:10px 0;font-weight:500;letter-spacing:.5px}
+  .q-word{font-size:26px;color:var(--ink);font-style:italic;margin-right:12px}
+  .q-hint{font-size:14px;color:var(--mute);font-style:italic;margin:6px 0}
+  .q-rule-box{background:#f6f1e3;border-left:4px solid var(--gold);padding:10px 14px;border-radius:2px;
+              margin:10px 0 16px;font-size:14.5px;line-height:1.55}
+  .q-rule-box .rh{font-variant:small-caps;letter-spacing:1px;font-size:12px;color:var(--gold);font-weight:600;margin-bottom:4px;display:block}
+  .q-rule-box blockquote{margin:4px 0 6px;padding-left:10px;border-left:2px solid var(--rule);font-style:italic}
+  .q-rule-box .src{font-size:12px;color:var(--mute);font-style:italic}
+
+  .options{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:14px}
+  .opt{background:#fdf8e6;border:1.5px solid var(--rule);padding:14px 16px;cursor:pointer;
+       text-align:left;font:inherit;font-size:16px;border-radius:3px;transition:.12s;position:relative}
+  .opt:hover:not([disabled]){background:var(--hit);border-color:var(--ox);transform:translateX(2px)}
+  .opt[disabled]{cursor:default}
+  .opt.correct{background:#e3f1e3;border-color:var(--good);color:#1a4a1a}
+  .opt.wrong{background:#ffeae6;border-color:var(--bad);color:#5a1a1a}
+  .opt.dim{opacity:.55}
+  .opt.correct::after{content:"\2713";position:absolute;right:10px;top:8px;color:var(--good);font-size:18px;font-weight:700}
+  .opt.wrong::after{content:"\2717";position:absolute;right:10px;top:8px;color:var(--bad);font-size:18px;font-weight:700}
+
+  .feedback{margin-top:14px;padding:12px 16px;border-radius:3px;font-size:15px;display:none}
+  .feedback.show{display:block}
+  .feedback.ok{background:#e3f1e3;border-left:4px solid var(--good)}
+  .feedback.err{background:#ffeae6;border-left:4px solid var(--bad)}
+  .feedback .verdict{font-size:17px;font-weight:600;margin-bottom:8px}
+  .feedback .explain{font-size:14.5px;line-height:1.55}
+  .feedback .src{font-size:12.5px;color:var(--mute);font-style:italic;margin-top:8px;padding-top:6px;border-top:1px dashed var(--rule)}
+
+  .suspects{background:#fff;border:1px solid var(--rule);padding:10px 14px;border-radius:3px;margin-top:10px;font-size:14px}
+  .suspects h4{margin:0 0 6px 0;color:var(--ox);font-size:13.5px;font-variant:small-caps;letter-spacing:1px}
+  .suspects ul{margin:0;padding-left:18px}
+  .suspects li{margin-bottom:3px}
+
+  .controls{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+  .btn{background:var(--ox);color:#f7ead1;border:none;padding:9px 18px;cursor:pointer;
+       font:inherit;font-size:14.5px;border-radius:3px;transition:.12s}
+  .btn:hover{background:var(--ox2)}
+  .btn.sec{background:#6a6a6a}
+  .btn.sec:hover{background:#4a4a4a}
+  .btn.big{padding:12px 24px;font-size:16px}
+  .btn.gold{background:var(--gold);color:#1b1b1b}
+  .btn.gold:hover{background:#cea141}
+
+  .tier-picker{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
+  .tier-picker .chip{background:var(--card);border:1.5px solid var(--rule);padding:6px 14px;
+                     border-radius:16px;cursor:pointer;font-size:13.5px;transition:.12s}
+  .tier-picker .chip:hover{border-color:var(--ox)}
+  .tier-picker .chip.on{background:var(--ox);color:#f7ead1;border-color:var(--ox)}
+
+  .welcome-box{background:var(--card);border:1px solid var(--rule);padding:18px 22px;border-radius:4px;margin-bottom:16px}
+  .welcome-box h2{margin-top:0;color:var(--ox);font-size:20px}
+  .welcome-box p{margin:8px 0}
+  .welcome-box ul{margin:8px 0;padding-left:22px}
+
+  .timer{font-family:"Doulos SIL","DejaVu Sans Mono",monospace;font-size:22px;color:var(--ox);font-weight:600}
+  .timer.warning{color:var(--warn)}
+  .timer.critical{color:var(--bad);animation:pulse 0.6s infinite alternate}
+  @keyframes pulse{from{opacity:1}to{opacity:.6}}
+
+  .multiplier{background:var(--gold);color:#1b1b1b;padding:2px 10px;border-radius:10px;font-size:13px;font-weight:600}
+
+  /* 2T1L specific */
+  .statements{display:flex;flex-direction:column;gap:10px;margin:16px 0}
+  .stmt{background:#fdf8e6;border:1.5px solid var(--rule);padding:14px 18px;cursor:pointer;
+        font-size:16px;border-radius:3px;transition:.12s;text-align:left;font:inherit;position:relative;padding-left:48px}
+  .stmt:hover:not([disabled]){background:var(--hit);border-color:var(--ox)}
+  .stmt[disabled]{cursor:default}
+  .stmt .num{position:absolute;left:14px;top:14px;width:24px;height:24px;border-radius:50%;
+             background:var(--rule);color:var(--ink);display:inline-flex;align-items:center;justify-content:center;
+             font-size:13px;font-weight:600}
+  .stmt.truth{background:#e3f1e3;border-color:var(--good)}
+  .stmt.truth::after{content:"TRUE";position:absolute;right:14px;top:16px;color:var(--good);font-weight:600;font-size:12px;letter-spacing:1px}
+  .stmt.lie{background:#ffeae6;border-color:var(--bad)}
+  .stmt.lie::after{content:"LIE";position:absolute;right:14px;top:16px;color:var(--bad);font-weight:600;font-size:12px;letter-spacing:1px}
+  .stmt.picked-lie{box-shadow:0 0 0 3px var(--bad) inset}
+  .stmt.picked-truth{box-shadow:0 0 0 3px var(--good) inset}
+
+  /* Heatmap specific */
+  .heat-wrap{overflow-x:auto;margin:16px 0;background:var(--card);border:1px solid var(--rule);padding:14px;border-radius:4px}
+  table.heatmap{border-collapse:collapse;font-size:12px;width:100%}
+  table.heatmap th{background:#efe6cc;padding:6px 8px;text-align:left;font-size:11.5px;
+                   font-weight:600;color:var(--ink);border:1px solid var(--rule);position:sticky;top:0}
+  table.heatmap th.rowhead{background:#efe6cc;text-align:right;font-weight:600;position:sticky;left:0}
+  table.heatmap td{border:1px solid var(--rule);padding:0;width:32px;height:28px;text-align:center;cursor:pointer;
+                   font-size:11px;color:#3a3a3a;transition:.12s;position:relative}
+  table.heatmap td:hover{outline:2px solid var(--ox);outline-offset:-2px;z-index:2}
+  .cell-untested{background:#eee;color:#999}
+  .cell-red{background:#f5b8b8;color:#4a0000}
+  .cell-orange{background:#f7d9a3;color:#4a2800}
+  .cell-yellow{background:#fbeb9f;color:#453a00}
+  .cell-green{background:#b7dfba;color:#0d3c15}
+  .cell-lock{background:#d8cfbd;color:#555}
+
+  .heat-legend{font-size:12.5px;color:var(--mute);margin:8px 0;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .heat-legend .sw{display:inline-block;width:14px;height:14px;border:1px solid var(--rule);vertical-align:middle;margin-right:4px}
+
+  .boss-card{background:linear-gradient(135deg,#f6f1e3,#fff);border:2px solid var(--gold);
+             padding:20px 24px;border-radius:6px;margin:12px 0 20px;box-shadow:0 2px 8px rgba(181,139,44,.2)}
+  .boss-card .badge{background:var(--gold);color:#1b1b1b;padding:3px 12px;border-radius:12px;
+                    font-size:11.5px;font-weight:700;letter-spacing:1.5px;display:inline-block;margin-bottom:8px}
+  .boss-card h3{margin:4px 0 8px;color:var(--ox)}
+  .boss-card.done{opacity:.7;background:#f3eddc}
+  .boss-card.done .badge{background:var(--good);color:#fff}
+
+  .scoreboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:10px 0}
+  .sbox{background:#fff;border:1px solid var(--rule);padding:10px;text-align:center;border-radius:3px}
+  .sbox .sn{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:1px}
+  .sbox .sv{font-size:22px;color:var(--ox);font-weight:600;margin-top:2px}
+  .sbox.elo .sv{color:var(--gold)}
+
+  .foot{text-align:center;color:var(--mute);font-size:12px;margin-top:30px;font-style:italic}
+  details.tech{font-size:12.5px;color:var(--mute);margin-top:12px}
+  details.tech summary{cursor:pointer}
+  details.tech code{background:#efe6cc;padding:1px 5px;border-radius:2px;font-size:11.5px}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>BA3 Game Hub &mdash; Varieties of English Exam Trainer</h1>
+    <div class="meta">Four modes &middot; Shared mastery heatmap &middot; Citations from Stuart-Smith, Bauer, Ihsane 2026, Puskas 2025</div>
+  </div>
+  <button class="btn sec" id="reset-all-btn" title="Wipe all progress + daily boss + Elo">Reset all</button>
+</header>
+
+<div class="statbar">
+  <span class="elo">Detective Elo: <b id="s-elo">1200</b></span>
+  <span class="streak">Duel streak: <b id="s-streak">0</b> <span class="multiplier" id="s-mult" style="display:none">x1</span></span>
+  <span>Best streak: <b id="s-best">0</b></span>
+  <span class="correct">Total correct: <b id="s-correct">0</b></span>
+  <span class="wrong">Total wrong: <b id="s-wrong">0</b></span>
+  <span>Accuracy: <b id="s-acc">&ndash;</b></span>
+</div>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="detective" class="active"><span class="emoji">&#128373;</span>Variety Detective</button>
+  <button data-tab="duel"><span class="emoji">&#9876;</span>Rule-Application Duel</button>
+  <button data-tab="twotruths"><span class="emoji">&#127922;</span>Two-Truths-One-Lie</button>
+  <button data-tab="heatmap"><span class="emoji">&#128293;</span>Mastery Heatmap</button>
+</nav>
+
+<main>
+
+  <!-- ============ DETECTIVE PANEL ============ -->
+  <section class="panel active" id="panel-detective">
+    <div class="welcome-box">
+      <h2>Variety Detective &mdash; blind-IPA identification</h2>
+      <p>You see the IPA. Not the word. Pick the variety. Three difficulty tiers. Your Elo rating adjusts by how hard the item was &mdash; correct guesses on outer-circle items move you up faster; wrong guesses on tier-1 items cost more.</p>
+      <div class="tier-picker" id="detective-tiers">
+        <button class="chip on" data-tier="1">Tier 1 &mdash; Inner circle (RP / ScotE / SAE / IrE)</button>
+        <button class="chip" data-tier="2">Tier 2 &mdash; Cross-family (&plusmn;AAVE, GAusE, Northern)</button>
+        <button class="chip" data-tier="3">Tier 3 &mdash; Outer circle (IndE, NigE, SinE, JC)</button>
+        <button class="chip" data-tier="all">All tiers &mdash; mixed deck</button>
+      </div>
+    </div>
+    <div id="detective-q"></div>
+  </section>
+
+  <!-- ============ DUEL PANEL ============ -->
+  <section class="panel" id="panel-duel">
+    <div class="welcome-box">
+      <h2>Rule-Application Duel &mdash; stopwatch mode</h2>
+      <p>A phonological rule is stated verbatim from the source. You apply it to a word. Streak multipliers: <b>3 in a row = &times;1.5</b>, <b>6 = &times;2</b>, <b>10 = &times;3</b>. A wrong answer or a 20-second timeout breaks the streak.</p>
+      <p>Rules drill: <b>SVLR</b> (Stuart-Smith 57), <b>yod-dropping</b> (Ihsane 2026 W5a), <b>rhoticity</b>, <b>TRAP-BATH split</b>, <b>T-flapping</b>, <b>TH-stopping</b>, <b>dark /l/</b> (Bauer 36).</p>
+    </div>
+    <div id="duel-q"></div>
+  </section>
+
+  <!-- ============ TWOTRUTHS PANEL ============ -->
+  <section class="panel" id="panel-twotruths">
+    <div class="welcome-box">
+      <h2>Two-Truths-One-Lie &mdash; spot the misstatement</h2>
+      <p>Each card presents three statements about one variety. Two are accurate; one is a canonical exam trap (drawn from the 30-trap catalogue in <code>Derivative-B-Canonical-Traps.md</code>). You have 30 seconds to pick the lie. Hover any statement after the reveal to see the source citation.</p>
+    </div>
+    <div id="twotruths-q"></div>
+  </section>
+
+  <!-- ============ HEATMAP PANEL ============ -->
+  <section class="panel" id="panel-heatmap">
+    <div class="welcome-box">
+      <h2>Mastery Heatmap + Daily Boss</h2>
+      <p>Every question you answer in the other three modes updates this grid. Cells show your last 20 attempts at a variety &times; feature pair. Click any cell to drill five quick questions on that cell.</p>
+    </div>
+    <div id="boss-slot"></div>
+    <div class="heat-legend">
+      <span><span class="sw cell-untested"></span>Untested</span>
+      <span><span class="sw cell-red"></span>&lt; 40%</span>
+      <span><span class="sw cell-orange"></span>40-59%</span>
+      <span><span class="sw cell-yellow"></span>60-79%</span>
+      <span><span class="sw cell-green"></span>&ge; 80%</span>
+    </div>
+    <div class="heat-wrap">
+      <table class="heatmap" id="heatmap-table"></table>
+    </div>
+    <details class="tech">
+      <summary>How the heatmap works (localStorage schema)</summary>
+      <p>Each cell stores the last 20 <code>1</code>/<code>0</code> attempts as an array at key <code>ba3-gamehub-v1.attempts[Variety|Feature]</code>. Accuracy is rolling over that window. The Daily Boss auto-selects the cell with the lowest accuracy and at least 3 attempts, breaking ties by least-recently tested.</p>
+    </details>
+  </section>
+
+</main>
+
+<p class="foot">BA3 Game Hub v1 &middot; built 2026-04-24 &middot; companion to Variety-ID-Game.html</p>
+
+<script>
+/* ============================================================
+   DATA: RULES (for Duel mode) — each has a verbatim quote + items
+   ============================================================ */
+const RULES = [
+  {
+    id:"svlr", name:"Scottish Vowel Length Rule (SVLR)",
+    variety:"ScotE",
+    quote:"vowels are phonetically long in certain environments: before voiced fricatives, before /r/, and before a boundary, including a morpheme boundary. Thus the vowels in breathe, beer, bee, and agreed are longer than in brief, bead, and greed.",
+    source:"Stuart-Smith 56-57",
+    scopeNote:"Applies only to /i/, /u/, and the diphthong /aɪ/ (Stuart-Smith 57). Do not infer the contrapositive.",
+    items:[
+      {word:"bee",    env:"morpheme boundary (word-final)", long:true,  why:"Morpheme-final boundary triggers SVLR."},
+      {word:"breathe",env:"voiced fricative /ð/",           long:true,  why:"/ð/ is a voiced fricative — triggers SVLR."},
+      {word:"beer",   env:"/r/",                            long:true,  why:"Pre-/r/ triggers SVLR."},
+      {word:"agreed", env:"morpheme boundary (agree+ed)",   long:true,  why:"The morpheme boundary between *agree* and *-ed* triggers SVLR."},
+      {word:"brief",  env:"voiceless fricative /f/",        long:false, why:"/f/ is voiceless — outside SVLR lengthening environments."},
+      {word:"bead",   env:"voiced stop /d/",                long:false, why:"/d/ is a stop, not a fricative — outside SVLR."},
+      {word:"greed",  env:"voiced stop /d/",                long:false, why:"/d/ is a stop; SVLR specifies *fricatives*."},
+      {word:"leave",  env:"voiced fricative /v/",           long:true,  why:"/v/ is a voiced fricative — triggers SVLR."},
+      {word:"leaf",   env:"voiceless fricative /f/",        long:false, why:"/f/ is voiceless — short."},
+      {word:"tide",   env:"diphthong /aɪ/ + voiced stop",   long:false, why:"Even though /aɪ/ is in SVLR scope, /d/ is not a lengthening environment."},
+      {word:"tie",    env:"/aɪ/ + morpheme boundary",       long:true,  why:"/aɪ/ before a word/morpheme boundary — lengthens."},
+      {word:"tied",   env:"/aɪ/ + morpheme boundary (tie+ed)", long:true, why:"tie+ed: morpheme boundary triggers SVLR."}
+    ],
+    question: it => `Does SVLR lengthen the vowel in <i>${it.word}</i>?`,
+    options: ["Long (lengthened)", "Short (not lengthened)"],
+    answer: it => it.long ? 0 : 1
+  },
+  {
+    id:"yod-drop", name:"Yod-dropping (SAE)",
+    variety:"SAE",
+    quote:"SAE drops /j/ after alveolars: tune [tun] (SAE) vs. [tjuːn] (RP); new [nu] (SAE) vs. [njuː] (RP); duke [duk] (SAE) vs. [djuːk] (RP). This makes SAE a 'yod-dropping' variety. Note that yod is retained after non-alveolars: cue [kjuː], pew [pjuː].",
+    source:"Ihsane 2026 W5a §1.9",
+    scopeNote:"Drops /j/ only after alveolar consonants (t, d, n, s, z, l, r). Retains /j/ after non-alveolars (k, g, p, b, m, f, v, h).",
+    items:[
+      {word:"new",  onset:"/n/ alveolar nasal",        drops:true,  why:"/n/ is alveolar — yod drops."},
+      {word:"tune", onset:"/t/ alveolar stop",         drops:true,  why:"/t/ is alveolar — yod drops."},
+      {word:"duke", onset:"/d/ alveolar stop",         drops:true,  why:"/d/ is alveolar — yod drops."},
+      {word:"suit", onset:"/s/ alveolar fricative",    drops:true,  why:"/s/ is alveolar — yod drops in SAE."},
+      {word:"lute", onset:"/l/ alveolar lateral",      drops:true,  why:"/l/ is alveolar — yod drops."},
+      {word:"news", onset:"/n/ alveolar nasal",        drops:true,  why:"/n/ is alveolar — yod drops. Classic SAE [nuz] vs. RP [njuːz]."},
+      {word:"cue",  onset:"/k/ velar stop",            drops:false, why:"/k/ is *not* alveolar — yod retained in both SAE and RP: [kjuː]."},
+      {word:"pew",  onset:"/p/ bilabial stop",         drops:false, why:"/p/ is *not* alveolar — yod retained: [pjuː]."},
+      {word:"few",  onset:"/f/ labiodental fricative", drops:false, why:"/f/ is *not* alveolar — yod retained: [fjuː]."},
+      {word:"mute", onset:"/m/ bilabial nasal",        drops:false, why:"/m/ is *not* alveolar — yod retained: [mjuːt]."},
+      {word:"huge", onset:"/h/ glottal",               drops:false, why:"/h/ is *not* alveolar — yod retained: [hjuːdʒ]."}
+    ],
+    question: it => `In SAE, does yod-dropping apply in <i>${it.word}</i>?`,
+    options: ["Yes &mdash; /j/ drops", "No &mdash; /j/ retained"],
+    answer: it => it.drops ? 0 : 1
+  },
+  {
+    id:"bath-split", name:"TRAP-BATH split",
+    variety:"RP vs SAE/Northern",
+    quote:"South uses /ɑː/ in BATH items (long, back); North uses /a/ or /æ/ (short, front). The posh (Southern / RP) variant is the long back one; the short front variant is Northern.",
+    source:"Ihsane 2026 W3 §3.1; Canonical Trap 12",
+    scopeNote:"The BATH set is only those Wells-set items before a voiceless fricative or nasal+consonant (dance, laugh, path, fast). Not all /æ/ words.",
+    items:[
+      {word:"dance", inBATH:true,  why:"BATH set — pre-nasal-cluster."},
+      {word:"laugh", inBATH:true,  why:"BATH set — before voiceless fricative /f/."},
+      {word:"path",  inBATH:true,  why:"BATH set — before /θ/."},
+      {word:"fast",  inBATH:true,  why:"BATH set — before /st/ cluster."},
+      {word:"staff", inBATH:true,  why:"BATH set — before /f/."},
+      {word:"trap",  inBATH:false, why:"The canonical TRAP keyword — short /æ/ in both North and South."},
+      {word:"cat",   inBATH:false, why:"TRAP set — short /æ/ in both."},
+      {word:"bag",   inBATH:false, why:"TRAP set — before voiced stop /g/, not a BATH environment."},
+      {word:"ham",   inBATH:false, why:"TRAP set — /m/ alone (not nasal cluster), doesn't trigger BATH."},
+      {word:"plant", inBATH:true,  why:"BATH set — pre-/nt/ cluster."}
+    ],
+    question: it => `Is <i>${it.word}</i> in the BATH lexical set (&rarr; long [ɑː] in RP, short [a/æ] in the North)?`,
+    options: ["Yes &mdash; BATH (Southern [ɑː])", "No &mdash; stays TRAP"],
+    answer: it => it.inBATH ? 0 : 1
+  },
+  {
+    id:"rhoticity", name:"Rhoticity",
+    variety:"multiple",
+    quote:"Scottish Standard English is generally rhotic (Wells 1982: 10-11).",
+    source:"Stuart-Smith 62",
+    scopeNote:"Rhoticity = post-vocalic /r/ pronounced. Rhotic: ScotE, SAE, IrE. Non-rhotic: RP, GAusE, AAVE, SinE, JC. (From W4 §5.2 + Canonical Trap 1.)",
+    items:[
+      {variety:"ScotE", rhotic:true,  why:"Retained archaism from Early Modern English (Stuart-Smith 62)."},
+      {variety:"SAE",   rhotic:true,  why:"Retained archaism — 17c colonial English was rhotic."},
+      {variety:"IrE",   rhotic:true,  why:"Generally rhotic; often with retroflex [ɽ]."},
+      {variety:"RP",    rhotic:false, why:"Non-rhotic since the 18-19c innovation of Southern English."},
+      {variety:"GAusE", rhotic:false, why:"Non-rhotic — carries Southern BrE innovation."},
+      {variety:"AAVE",  rhotic:false, why:"Variable but predominantly non-rhotic."},
+      {variety:"SinE",  rhotic:false, why:"Non-rhotic (Canonical Trap 1)."},
+      {variety:"GenAm (alias SAE)", rhotic:true, why:"Rhotic — shared with ScotE and IrE."},
+      {variety:"Northern English (Geordie, Lancs, Yorks)", rhotic:false, why:"Non-rhotic (except small pockets of Lancashire)."}
+    ],
+    question: it => `Is <b>${it.variety}</b> rhotic (post-vocalic /r/ pronounced)?`,
+    options: ["Rhotic", "Non-rhotic"],
+    answer: it => it.rhotic ? 0 : 1
+  },
+  {
+    id:"th-stopping", name:"TH-stopping",
+    variety:"IrE / IndE / AAVE",
+    quote:"TH-stopping = /θ ð/ become stops [t d] or dentals [t̪ d̪]. IrE: dental [t̪ d̪] (thin [t̪ɪn], this [d̪ɪs]). IndE: also dental. AAVE: initial alveolar stops — thing [tɪŋ], those [dɒz]. Contrast with TH-fronting (AAVE final, Cockney): /θ/ → [f], /ð/ → [v].",
+    source:"Ihsane 2026 Ch3 (IrE), Ch5 (AAVE), Ch9 (IndE)",
+    scopeNote:"Stopping and fronting are DIFFERENT processes. Stopping: TH → [t/d/t̪/d̪]. Fronting: TH → [f/v]. AAVE uses stopping word-initially and fronting word-finally.",
+    items:[
+      {variety:"IrE",  word:"thin",   expected:"[t̪ɪn]",  process:"TH-stopping (dental)", correct:true, why:"IrE: initial /θ/ → dental [t̪]."},
+      {variety:"IrE",  word:"thin",   expected:"[fɪn]",   process:"TH-fronting", correct:false, why:"IrE stops, doesn't front. [fɪn] is Cockney/AAVE-final."},
+      {variety:"AAVE", word:"thing",  expected:"[tɪŋ]",   process:"TH-stopping (initial)", correct:true, why:"AAVE uses initial TH-stopping."},
+      {variety:"AAVE", word:"bath",   expected:"[bæf]",   process:"TH-fronting (final)", correct:true, why:"AAVE uses final TH-fronting."},
+      {variety:"AAVE", word:"bath",   expected:"[bæt]",   process:"TH-stopping (final)", correct:false, why:"AAVE does NOT stop finally — it fronts. [bæt] is wrong."},
+      {variety:"IndE", word:"this",   expected:"[d̪ɪs]",  process:"TH-dentalisation", correct:true, why:"IndE uses dental stops for TH."},
+      {variety:"RP",   word:"thin",   expected:"[θɪn]",   process:"no TH change", correct:true, why:"RP preserves /θ/ intact."},
+      {variety:"Cockney", word:"think", expected:"[fɪŋk]", process:"TH-fronting", correct:true, why:"Cockney/Estuary: initial TH-fronting."}
+    ],
+    question: it => `In <b>${it.variety}</b>, is <i>${it.word}</i> &rarr; <span class='q-ipa' style='font-size:22px;padding:6px 12px;margin:0 4px'>${it.expected}</span> a correct application of <b>${it.process}</b>?`,
+    options: ["Correct", "Wrong"],
+    answer: it => it.correct ? 0 : 1
+  },
+  {
+    id:"dark-l", name:"Dark /l/ generalisation",
+    variety:"multiple",
+    quote:"/l/ is dark in all positions in Scottish English and clear in all positions in Irish varieties.",
+    source:"Bauer 36",
+    scopeNote:"Dark /l/ = velarised [ɫ]. Clear /l/ = non-velarised [l]. RP has positional distribution (clear pre-vocalic, dark post-vocalic). Cockney L-vocalises ([ʊ]).",
+    items:[
+      {variety:"ScotE", position:"any",        realisation:"dark [ɫ]",    correct:true, why:"Bauer: dark in all positions."},
+      {variety:"ScotE", position:"any",        realisation:"clear [l]",   correct:false, why:"Bauer explicitly states dark in all positions."},
+      {variety:"IrE",   position:"any",        realisation:"clear [l]",   correct:true, why:"Bauer: clear in all positions."},
+      {variety:"IrE",   position:"any",        realisation:"dark [ɫ]",    correct:false, why:"Wrong — IrE is clear in all positions (Bauer 36)."},
+      {variety:"RP",    position:"pre-vocalic (light)", realisation:"clear [l]", correct:true, why:"RP: clear pre-vocalic."},
+      {variety:"RP",    position:"post-vocalic (call)", realisation:"dark [ɫ]", correct:true, why:"RP: dark post-vocalically."},
+      {variety:"Cockney", position:"post-vocalic", realisation:"vocalised [ʊ]", correct:true, why:"Cockney L-vocalisation: milk → [mɪʊk]."}
+    ],
+    question: it => `In <b>${it.variety}</b>, is /l/ in the <i>${it.position}</i> position realised as <b>${it.realisation}</b>?`,
+    options: ["Correct", "Wrong"],
+    answer: it => it.correct ? 0 : 1
+  }
+];
+
+/* ============================================================
+   DATA: TWO-TRUTHS-ONE-LIE CARDS — canonical traps catalogue
+   ============================================================ */
+const TWOTRUTH_CARDS = [
+  {
+    topic:"Scottish English",
+    statements:[
+      {text:"ScotE applies the Scottish Vowel Length Rule, lengthening vowels before /r/, voiced fricatives, and morpheme boundaries.", truth:true, src:"Stuart-Smith 57"},
+      {text:"SVLR predicts that all ScotE vowels are short outside the three lengthening contexts.", truth:false, src:"Canonical Trap 14 — the rule only specifies lengthening; short-elsewhere is a tendency, not a rule entailment"},
+      {text:"ScotE is generally rhotic and retains /x/ in words like <i>loch</i>.", truth:true, src:"Stuart-Smith 62, 64"}
+    ],
+    lesson:"The classic SVLR trap is stating its contrapositive. The rule defines *where vowels are long* — not *where they must be short*."
+  },
+  {
+    topic:"Southern American English",
+    statements:[
+      {text:"SAE has the TRAP-BATH split: dance is [dɑːns] and trap is [træp].", truth:false, src:"Canonical Trap — SAE is flat BATH: [dæns], not split. Split is Southern British."},
+      {text:"SAE drops /j/ after alveolars: new [nu], tune [tun], duke [duk].", truth:true, src:"Ihsane 2026 W5a §1.9"},
+      {text:"SAE flaps intervocalic /t/: better [ˈbɛɾɚ], latter [ˈlæɾɚ].", truth:true, src:"Ihsane 2026 W5a §1.8"}
+    ],
+    lesson:"Getting the BATH split backward (or attributing it to SAE) is Canonical Trap 12. SAE keeps BATH flat/short like the North."
+  },
+  {
+    topic:"Irish English",
+    statements:[
+      {text:"The after-perfect I'm after seeing her means I want to see her (intentional).", truth:false, src:"Canonical Trap 8 — it's a hot-news perfect: 'I have just seen her'"},
+      {text:"IrE has TH-stopping to dental stops: thin [t̪ɪn], this [d̪ɪs].", truth:true, src:"Ihsane 2026 Ch3"},
+      {text:"Habitual do be is a Northern IrE feature; Southern IrE uses bare be: they be shooting.", truth:true, src:"Ihsane 2026 Ch3"}
+    ],
+    lesson:"The after-perfect is a calque of Irish Gaelic *tar éis + verbal noun* — always parse as perfect, never as intention (Canonical Trap 8)."
+  },
+  {
+    topic:"African American Vernacular English",
+    statements:[
+      {text:"AAVE he be working means he is working right now (progressive).", truth:false, src:"Canonical Trap 15 — habitual be expresses RECURRING activity, not progressive"},
+      {text:"AAVE has independent morphosyntactic innovations (habitual be, stressed BEEN, invariant be done) distinguishing it from Southern US English.", truth:true, src:"Canonical Trap 5"},
+      {text:"AAVE uses TH-stopping word-initially ([tɪŋ] for thing) and TH-fronting word-finally ([bæf] for bath).", truth:true, src:"Ihsane 2026 Ch5"}
+    ],
+    lesson:"Habitual be, progressive -ing, and stressed BEEN are three different aspects (Canonical Trap 15). Don't conflate."
+  },
+  {
+    topic:"Indian English",
+    statements:[
+      {text:"The invariant tag in IndE is is it?, regardless of matrix clause.", truth:false, src:"Canonical Trap 16 — the IndE invariant tag is isn't it?"},
+      {text:"I live in Mumbai only uses only as a focus/emphatic particle (not restrictive), calqued on Hindi hi.", truth:true, src:"Canonical Trap 17"},
+      {text:"IndE has retroflex stops [ʈ ɖ] for /t d/, substrate-sourced from Hindi/Tamil.", truth:true, src:"Canonical Trap 21 + Ihsane 2026 W9"}
+    ],
+    lesson:"Getting the invariant tag wrong (is it? vs. isn't it?) is Canonical Trap 16. NigE uses is it? or abi?; IndE uses isn't it?."
+  },
+  {
+    topic:"Singapore English / Singlish",
+    statements:[
+      {text:"Singlish discourse particles — lah, leh, lor, meh, hor — have specific and non-interchangeable pragmatic values.", truth:true, src:"Canonical Trap 18"},
+      {text:"Singlish is a degraded or broken form of Singapore Standard English.", truth:false, src:"Canonical Traps 6 + 27 — Singlish is a systematic variety on a diglossic continuum, not broken SinE"},
+      {text:"SinE is non-rhotic (car [ka]).", truth:true, src:"Ihsane 2026 Ch8"}
+    ],
+    lesson:"Particles are a SYSTEM: lah = assertion/solidarity, leh = softener, lor = resignation, meh = incredulous, hor = seeking agreement (Canonical Trap 18)."
+  },
+  {
+    topic:"Nigerian English",
+    statements:[
+      {text:"NigE reduplication (small-small, now-now) calques Yoruba/Igbo patterns and marks intensification or distribution.", truth:true, src:"Canonical Trap 21 + Ihsane 2026 Ch6"},
+      {text:"NigE features can be described simply as colonial English residue.", truth:false, src:"Canonical Trap 23 — 'colonial English' needs unpacking into when, what register, what superstrate, what substrate"},
+      {text:"Syllable-timing with full vowels in unstressed syllables (pho-to-GRA-phy with full [o] and [a]) is characteristic of NigE.", truth:true, src:"Canonical Trap 4"}
+    ],
+    lesson:"Full vowels in unstressed syllables = syllable-timing, not stress-timing (Canonical Trap 4). Stress-timed varieties reduce to schwa."
+  },
+  {
+    topic:"RP vs Northern English",
+    statements:[
+      {text:"Northern BrEng uses /ɑː/ in BATH items like dance; Southern BrEng uses /æ/.", truth:false, src:"Canonical Trap 12 — the geography is inverted: SOUTH = [ɑː], NORTH = [a/æ]"},
+      {text:"Northern English typically has the FOOT-STRUT merger: both FOOT and STRUT are [ʊ].", truth:true, src:"Ihsane 2026 Ch2"},
+      {text:"Northern English often has monophthongal FACE [feː] and GOAT [ɡɔː], contrasting with Southern diphthongs [feɪ] / [əʊ].", truth:true, src:"Ihsane 2026 Ch2"}
+    ],
+    lesson:"The TRAP-BATH mnemonic: posh (Southern/RP) is long-back [ɑː]; working-class/Northern is short-front (Canonical Trap 12)."
+  },
+  {
+    topic:"General Australian English",
+    statements:[
+      {text:"GAusE is rhotic, with strong post-vocalic /r/.", truth:false, src:"GAusE is non-rhotic like RP (Canonical Trap 1 pool)"},
+      {text:"GAusE uses the -ie and -o diminutive suffixes productively: barbie (barbecue), smoko (work break), arvo (afternoon).", truth:true, src:"Ihsane 2026 Ch4"},
+      {text:"Sentence-final but is a GAusE morphosyntactic feature: Funny old bag. I quite like her but.", truth:true, src:"Ihsane 2026 Ch4"}
+    ],
+    lesson:"Don't default to 'rhotic' for any Southern Hemisphere variety — GAusE carries Southern British non-rhoticity."
+  },
+  {
+    topic:"Jamaican Creole",
+    statements:[
+      {text:"JC lacks a tense-aspect-mood system and is therefore 'broken English'.", truth:false, src:"Canonical Trap 3 — JC has a complete TAM system via pre-verbal particles: mi ron, mi a ron, mi did ron, mi a go ron"},
+      {text:"JC did is a past-tense particle, not the English emphatic auxiliary: mi did ron = 'I ran'.", truth:true, src:"Canonical Trap 19"},
+      {text:"Describing varieties by what they 'lack' (tense inflection, copula, articles) is a rhetoric trap.", truth:true, src:"Canonical Traps 3, 26, 27"}
+    ],
+    lesson:"TAM particles ARE the tense system — mi ron / mi a ron / mi did ron / mi a go ron each have specific values (Canonical Trap 19)."
+  },
+  {
+    topic:"General methodology",
+    statements:[
+      {text:"A non-rhotic sample is sufficient to classify a variety as RP.", truth:false, src:"Canonical Trap 1 (RP-as-default) — non-rhoticity is shared by RP, Cockney, Scouse, Geordie, GAusE, AAVE, SinE, JC, Gullah, HCE"},
+      {text:"A single phonological feature identifies an accent, not a variety; variety status requires ≥2 levels (phonology + morphosyntax or lexicon).", truth:true, src:"Canonical Trap 2"},
+      {text:"Every factual claim in an exam answer requires a parenthetical citation (Author Page).", truth:true, src:"Canonical Trap 29 + Geneva Style Sheet §3.2"}
+    ],
+    lesson:"Non-rhoticity is SHARED across 10+ varieties. Use it as a negative diagnostic (rules OUT ScotE/SAE/IrE), not a positive ID."
+  }
+];
+
+/* ============================================================
+   DATA: DETECTIVE ITEMS (blind IPA) — curated highest-signal items
+   ============================================================ */
+const DETECTIVE_ITEMS = [
+  /* Tier 1: inner-circle iconic items */
+  {ipa:"[lɔx]", variety:"ScotE", tier:1, signature:"velar fricative /x/", source:"Ihsane 2026 Ch3",
+   options:["ScotE","RP","IrE","SAE"], suspects:["/x/ surfaces only in ScotE among English varieties","loch, Auchtermuchty, Bach — all have [x]"]},
+  {ipa:"[mɑːn]", variety:"AAVE", tier:2, signature:"PRICE monophthong", source:"Ihsane 2026 Ch5",
+   options:["AAVE","SAE","IndE","IrE"], suspects:["PRICE → [ɑː] (monophthong) is an AAVE signature","Southern SAE also monophthongises but word is 'mine' not 'mind'"]},
+  {ipa:"[dæns]", variety:"SAE", tier:1, signature:"BATH flat",
+   source:"Ihsane 2026 Ch4", options:["SAE","RP","GAusE","ScotE"],
+   suspects:["Flat [æ] in dance = SAE/Northern English","RP would be [dɑːns]"]},
+  {ipa:"[dɑːns]", variety:"RP", tier:1, signature:"BATH broad",
+   source:"Ihsane 2026 Ch2", options:["RP","SAE","AAVE","IrE"],
+   suspects:["Long [ɑː] in dance = Southern British (RP/GAusE)","SAE would be [dæns]"]},
+  {ipa:"[ˈbɛɾɚ]", variety:"SAE", tier:1, signature:"T-flapping + rhotic",
+   source:"Ihsane 2026 W5a §1.8", options:["SAE","RP","ScotE","GAusE"],
+   suspects:["Flap [ɾ] intervocalically + rhotic [ɚ] = SAE","RP would have [t] and [ə]"]},
+  {ipa:"[feː]", variety:"ScotE", tier:1, signature:"FACE monophthong",
+   source:"Ihsane 2026 Ch3", options:["ScotE","RP","Northern English","IrE"],
+   suspects:["FACE → monophthong [eː] is ScotE or Northern","Northern also does this — check for rhoticity to disambiguate"]},
+  {ipa:"[t̪ɪn]", variety:"IrE", tier:1, signature:"TH-stopping (dental)",
+   source:"Ihsane 2026 Ch3", options:["IrE","IndE","AAVE","RP"],
+   suspects:["Dental stop [t̪] for /θ/ = IrE or IndE","Contrast with AAVE which uses alveolar [t]"]},
+  {ipa:"[d̪ɪs]", variety:"IrE", tier:1, signature:"TH-stopping (dental)",
+   source:"Ihsane 2026 Ch3", options:["IrE","IndE","AAVE","Cockney"],
+   suspects:["Dental stop [d̪] for /ð/ in this = IrE/IndE","AAVE uses alveolar [d]; Cockney would front to [v]"]},
+  {ipa:"[biː]", variety:"ScotE", tier:2, signature:"SVLR — morpheme boundary",
+   source:"Stuart-Smith 56", options:["ScotE","RP","SAE","AAVE"],
+   suspects:["Long [iː] at word boundary could be any variety","But the word bee at morpheme boundary is a canonical SVLR example in ScotE"]},
+
+  /* Tier 2: cross-family */
+  {ipa:"[kɑː]", variety:"RP", tier:2, signature:"non-rhoticity",
+   source:"Ihsane 2026 Ch2", options:["RP","GAusE","AAVE","SinE"],
+   suspects:["Non-rhotic [kɑː] for car — shared by RP, GAusE, AAVE, SinE","Need morphosyntax/lexicon to disambiguate"]},
+  {ipa:"[bæf]", variety:"AAVE", tier:2, signature:"TH-fronting word-final",
+   source:"Ihsane 2026 Ch5", options:["AAVE","Cockney","RP","IrE"],
+   suspects:["[bæf] for bath = final TH-fronting","Both AAVE and Cockney do this — disambiguate with other features"]},
+  {ipa:"[seːm]", variety:"AAVE", tier:2, signature:"FACE before nasal → [ɛː]",
+   source:"Ihsane 2026 Ch5", options:["AAVE","SAE","ScotE","RP"],
+   suspects:["[ɛː] for same — FACE collapsing before nasal is AAVE","Long monophthong distinguishes from [seɪm]"]},
+  {ipa:"[stɹʊt]", variety:"Northern English", tier:2, signature:"FOOT-STRUT merger",
+   source:"Ihsane 2026 Ch2", options:["Northern English","RP","ScotE","SAE"],
+   suspects:["[stɹʊt] instead of [stɹʌt] = FOOT-STRUT merger","Exclusively Northern (from Birmingham up)"]},
+  {ipa:"[ɡɔː]", variety:"ScotE", tier:2, signature:"GOAT monophthong",
+   source:"Ihsane 2026 Ch3", options:["ScotE","Northern English","RP","IrE"],
+   suspects:["Monophthongal GOAT [ɡɔː] = ScotE or Northern","Hint: IrE and RP are diphthongal [ɡəʊ]"]},
+  {ipa:"[iː sɛd]", variety:"GAusE", tier:2, signature:"H-dropping",
+   source:"Ihsane 2026 Ch4", options:["GAusE","Cockney","RP","SAE"],
+   suspects:["H-dropped he said → [iː sɛd] = Cockney or GAusE","Common in broad Australian"]},
+
+  /* Tier 3: outer-circle */
+  {ipa:"[ʈaɪm]", variety:"IndE", tier:3, signature:"retroflex /t/",
+   source:"Ihsane 2026 W9", options:["IndE","SinE","NigE","AAVE"],
+   suspects:["Retroflex [ʈ] for /t/ = IndE signature","Substrate from Hindi/Tamil (Canonical Trap 21)"]},
+  {ipa:"[ka]", variety:"SinE", tier:3, signature:"non-rhoticity + vowel shortening",
+   source:"Ihsane 2026 Ch8", options:["SinE","JC","AAVE","NigE"],
+   suspects:["Very short [ka] for car = SinE (non-rhotic + clipped)","Contrast RP's [kɑː] length"]},
+  {ipa:"[ˈkɔːɳəɾ]", variety:"IndE", tier:3, signature:"retroflex /n/ + tap /r/",
+   source:"Ihsane 2026 W9", options:["IndE","SinE","NigE","IrE"],
+   suspects:["Retroflex [ɳ] in corner + tap [ɾ] = IndE","The retroflex series is a South Asian fingerprint"]},
+  {ipa:"[small small]", variety:"NigE", tier:3, signature:"reduplication",
+   source:"Ihsane 2026 Ch6", options:["NigE","JC","SinE","GAusE"],
+   suspects:["Reduplication = West African substrate (Yoruba/Igbo)","NigE: small-small, now-now, half-half"]},
+  {ipa:"[Can lah]", variety:"SinE", tier:3, signature:"lah particle",
+   source:"Ihsane 2026 Ch8", options:["SinE","JC","AAVE","IndE"],
+   suspects:["Final particle lah = Singlish (assertion/solidarity)","See Canonical Trap 18 for particle system"]},
+  {ipa:"[mi did ron]", variety:"JC", tier:3, signature:"past-tense TAM particle",
+   source:"Ihsane 2026 W11", options:["JC","Gullah","AAVE","NigE"],
+   suspects:["did as past-tense particle before verb = JC TAM","Not the English emphatic auxiliary (Canonical Trap 19)"]},
+  {ipa:"[dɛm know say]", variety:"Gullah", tier:3, signature:"say complementiser",
+   source:"Ihsane 2026 W11", options:["Gullah","JC","NigE","AAVE"],
+   suspects:["say as complementiser (= English 'that') = Gullah/JC","Calqued from Yoruba pé (Canonical Trap 20)"]}
+];
+
+/* Variety list for the heatmap rows */
+const VARIETIES = ["RP","ScotE","IrE","Northern English","SAE","GAusE","AAVE","IndE","NigE","SinE","JC"];
+
+/* Feature list for the heatmap columns — the exam-yield core */
+const FEATURES = [
+  "SVLR",
+  "rhoticity",
+  "yod-dropping",
+  "TRAP-BATH split",
+  "TH-stopping",
+  "TH-fronting",
+  "T-flapping",
+  "T-glottalisation",
+  "dark /l/",
+  "L-vocalisation",
+  "FACE monophthong",
+  "GOAT monophthong",
+  "FOOT-STRUT merger",
+  "PRICE monophthong",
+  "retroflex consonants",
+  "reduplication",
+  "habitual be",
+  "invariant tag",
+  "after-perfect",
+  "TAM particles",
+  "discourse particles (lah/mah)"
+];
+
+/* Mapping: every question type increments attempts for a given (variety, feature) pair.
+   Below we set up defaults for each question → which cell to log to. */
+
+/* ============================================================
+   STATE + PERSISTENCE (localStorage)
+   ============================================================ */
+const STORAGE_KEY = "ba3-gamehub-v1";
+let state = loadState();
+
+function defaultState() {
+  return {
+    elo: 1200,
+    streak: 0,
+    bestStreak: 0,
+    totalCorrect: 0,
+    totalWrong: 0,
+    attempts: {},   // "Variety|Feature" -> [1,0,1,1,...] last 20
+    dailyBoss: { date: "", answered: false, correct: null },
+    detectiveTier: "1"
+  };
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return defaultState();
+    const s = JSON.parse(raw);
+    return Object.assign(defaultState(), s);
+  } catch(e) { return defaultState(); }
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch(e) { /* silently ignore — incognito or quota */ }
+}
+function logAttempt(variety, feature, correct) {
+  const key = variety + "|" + feature;
+  if (!state.attempts[key]) state.attempts[key] = [];
+  state.attempts[key].push(correct ? 1 : 0);
+  if (state.attempts[key].length > 20) state.attempts[key].shift();
+  if (correct) { state.totalCorrect++; } else { state.totalWrong++; }
+  saveState();
+  updateStatbar();
+}
+function cellAccuracy(variety, feature) {
+  const arr = state.attempts[variety + "|" + feature];
+  if (!arr || !arr.length) return null;
+  return arr.reduce((a,b)=>a+b, 0) / arr.length;
+}
+function cellCount(variety, feature) {
+  const arr = state.attempts[variety + "|" + feature];
+  return arr ? arr.length : 0;
+}
+
+/* ============================================================
+   STATBAR
+   ============================================================ */
+function updateStatbar() {
+  $("s-elo").textContent = Math.round(state.elo);
+  $("s-streak").textContent = state.streak;
+  $("s-best").textContent = state.bestStreak;
+  $("s-correct").textContent = state.totalCorrect;
+  $("s-wrong").textContent = state.totalWrong;
+  const total = state.totalCorrect + state.totalWrong;
+  $("s-acc").textContent = total ? Math.round(100 * state.totalCorrect / total) + "%" : "–";
+  const mult = multiplierFor(state.streak);
+  if (mult > 1) {
+    $("s-mult").style.display = "inline-block";
+    $("s-mult").textContent = "×" + mult;
+  } else {
+    $("s-mult").style.display = "none";
+  }
+}
+function multiplierFor(streak) {
+  if (streak >= 10) return 3;
+  if (streak >= 6)  return 2;
+  if (streak >= 3)  return 1.5;
+  return 1;
+}
+
+/* ============================================================
+   TABS
+   ============================================================ */
+function $(id) { return document.getElementById(id); }
+function setupTabs() {
+  document.querySelectorAll("nav.tabs button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("nav.tabs button").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+      btn.classList.add("active");
+      $("panel-" + btn.dataset.tab).classList.add("active");
+      if (btn.dataset.tab === "detective") nextDetective();
+      if (btn.dataset.tab === "duel") nextDuel();
+      if (btn.dataset.tab === "twotruths") nextTwoTruth();
+      if (btn.dataset.tab === "heatmap") renderHeatmap();
+    });
+  });
+}
+
+/* ============================================================
+   DETECTIVE MODE (blind-IPA, Elo)
+   ============================================================ */
+let detectiveCurrent = null;
+function nextDetective() {
+  const tier = state.detectiveTier;
+  const pool = (tier === "all") ? DETECTIVE_ITEMS : DETECTIVE_ITEMS.filter(i => String(i.tier) === tier);
+  if (!pool.length) {
+    $("detective-q").innerHTML = "<p>No items at this tier.</p>";
+    return;
+  }
+  detectiveCurrent = pool[Math.floor(Math.random() * pool.length)];
+  renderDetective(detectiveCurrent);
+}
+function renderDetective(it) {
+  const tierExpected = it.tier === 1 ? 1200 : it.tier === 2 ? 1350 : 1500;
+  $("detective-q").innerHTML = `
+    <div class="q-card">
+      <div class="q-kicker">Tier ${it.tier} &middot; Expected rating ${tierExpected}</div>
+      <div class="q-prompt">Which variety produces this IPA?</div>
+      <div class="q-ipa">${it.ipa}</div>
+      <div class="options" id="det-opts">
+        ${it.options.map((o,i) => `<button class="opt" data-i="${i}" data-v="${o}">${o}</button>`).join("")}
+      </div>
+      <div class="feedback" id="det-fb"></div>
+      <div class="controls" id="det-ctrls" style="display:none">
+        <button class="btn" onclick="nextDetective()">Next item &rarr;</button>
+      </div>
+    </div>
+  `;
+  document.querySelectorAll("#det-opts .opt").forEach(btn => {
+    btn.addEventListener("click", () => detectiveAnswer(btn.dataset.v));
+  });
+}
+function detectiveAnswer(picked) {
+  const it = detectiveCurrent;
+  const correct = picked === it.variety;
+  const fb = $("det-fb");
+  const opts = document.querySelectorAll("#det-opts .opt");
+  opts.forEach(btn => {
+    btn.setAttribute("disabled", "true");
+    if (btn.dataset.v === it.variety) btn.classList.add("correct");
+    else if (btn.dataset.v === picked) btn.classList.add("wrong");
+    else btn.classList.add("dim");
+  });
+
+  /* Elo update — K factor adjusted by tier */
+  const K = 32;
+  const expected = eloExpected(state.elo, tierRating(it.tier));
+  const actual = correct ? 1 : 0;
+  const delta = Math.round(K * (actual - expected));
+  state.elo += delta;
+  if (correct) { state.streak++; if (state.streak > state.bestStreak) state.bestStreak = state.streak; }
+  else { state.streak = 0; }
+
+  logAttempt(it.variety, it.signature, correct);
+  saveState();
+  updateStatbar();
+
+  fb.className = "feedback show " + (correct ? "ok" : "err");
+  fb.innerHTML = `
+    <div class="verdict">${correct ? "Correct!" : "Not quite."} Elo ${delta >= 0 ? "+" : ""}${delta} &rarr; ${Math.round(state.elo)}</div>
+    <div class="explain"><b>${it.variety}</b> &mdash; ${it.signature}.</div>
+    <div class="suspects">
+      <h4>Suspects panel</h4>
+      <ul>${it.suspects.map(s => "<li>" + s + "</li>").join("")}</ul>
+    </div>
+    <div class="src">Source: ${it.source}</div>
+  `;
+  $("det-ctrls").style.display = "flex";
+}
+function tierRating(tier) { return tier === 1 ? 1200 : tier === 2 ? 1400 : 1600; }
+function eloExpected(ra, rb) { return 1 / (1 + Math.pow(10, (rb - ra) / 400)); }
+
+function setupDetectiveTiers() {
+  document.querySelectorAll("#detective-tiers .chip").forEach(c => {
+    if (c.dataset.tier === state.detectiveTier) c.classList.add("on"); else c.classList.remove("on");
+    c.addEventListener("click", () => {
+      document.querySelectorAll("#detective-tiers .chip").forEach(x => x.classList.remove("on"));
+      c.classList.add("on");
+      state.detectiveTier = c.dataset.tier;
+      saveState();
+      nextDetective();
+    });
+  });
+}
+
+/* ============================================================
+   DUEL MODE (rule application + stopwatch)
+   ============================================================ */
+let duelCurrent = null;
+let duelTimer = null;
+let duelTimeLeft = 20;
+function nextDuel() {
+  stopDuelTimer();
+  const rule = RULES[Math.floor(Math.random() * RULES.length)];
+  const it = rule.items[Math.floor(Math.random() * rule.items.length)];
+  duelCurrent = { rule, it };
+  renderDuel(rule, it);
+}
+function renderDuel(rule, it) {
+  $("duel-q").innerHTML = `
+    <div class="q-card">
+      <div class="q-kicker">Rule &middot; ${rule.name}</div>
+      <div class="q-rule-box">
+        <span class="rh">Rule (verbatim)</span>
+        <blockquote>&ldquo;${rule.quote}&rdquo;</blockquote>
+        <span class="src">&mdash; ${rule.source}</span>
+        ${rule.scopeNote ? `<div style="margin-top:6px;font-size:13px;color:#555"><b>Scope:</b> ${rule.scopeNote}</div>` : ""}
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0">
+        <div class="q-prompt">${rule.question(it)}</div>
+        <div class="timer" id="duel-timer">20.0s</div>
+      </div>
+      <div class="options" id="duel-opts">
+        ${rule.options.map((o,i) => `<button class="opt" data-i="${i}">${o}</button>`).join("")}
+      </div>
+      <div class="feedback" id="duel-fb"></div>
+      <div class="controls" id="duel-ctrls" style="display:none">
+        <button class="btn" onclick="nextDuel()">Next duel &rarr;</button>
+      </div>
+    </div>
+  `;
+  document.querySelectorAll("#duel-opts .opt").forEach(btn => {
+    btn.addEventListener("click", () => duelAnswer(parseInt(btn.dataset.i, 10)));
+  });
+  startDuelTimer();
+}
+function startDuelTimer() {
+  duelTimeLeft = 20;
+  renderDuelTimer();
+  duelTimer = setInterval(() => {
+    duelTimeLeft -= 0.1;
+    if (duelTimeLeft <= 0) {
+      duelTimeLeft = 0;
+      stopDuelTimer();
+      duelTimeout();
+    }
+    renderDuelTimer();
+  }, 100);
+}
+function stopDuelTimer() { if (duelTimer) { clearInterval(duelTimer); duelTimer = null; } }
+function renderDuelTimer() {
+  const el = $("duel-timer");
+  if (!el) return;
+  el.textContent = duelTimeLeft.toFixed(1) + "s";
+  el.className = "timer" + (duelTimeLeft < 5 ? " critical" : duelTimeLeft < 10 ? " warning" : "");
+}
+function duelTimeout() {
+  duelAnswer(-1, true);
+}
+function duelAnswer(picked, timedOut) {
+  stopDuelTimer();
+  const { rule, it } = duelCurrent;
+  const correctIdx = rule.answer(it);
+  const correct = picked === correctIdx;
+  const opts = document.querySelectorAll("#duel-opts .opt");
+  opts.forEach((btn, i) => {
+    btn.setAttribute("disabled", "true");
+    if (i === correctIdx) btn.classList.add("correct");
+    else if (i === picked) btn.classList.add("wrong");
+    else btn.classList.add("dim");
+  });
+  const mult = multiplierFor(state.streak);
+  if (correct && !timedOut) {
+    state.streak++;
+    if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+  } else {
+    state.streak = 0;
+  }
+  logAttempt(rule.variety.split(" ")[0].replace(/[^A-Za-z]/g,""), rule.name.split(" ")[0], correct && !timedOut);
+  updateStatbar();
+  saveState();
+  const fb = $("duel-fb");
+  fb.className = "feedback show " + (correct ? "ok" : "err");
+  fb.innerHTML = `
+    <div class="verdict">${timedOut ? "Time out \u2014 streak reset." : correct ? "Correct!" + (mult>1?" <span class='multiplier'>\u00d7"+mult+"</span>":"") : "Wrong \u2014 streak reset."}</div>
+    <div class="explain">${it.why || ""}</div>
+    <div class="src">${rule.source}</div>
+  `;
+  $("duel-ctrls").style.display = "flex";
+}
+
+/* ============================================================
+   TWO-TRUTHS-ONE-LIE
+   ============================================================ */
+let twoTruthCurrent = null;
+let twoTruthTimer = null;
+let twoTruthTimeLeft = 30;
+function nextTwoTruth() {
+  stopTwoTruthTimer();
+  const c = TWOTRUTH_CARDS[Math.floor(Math.random() * TWOTRUTH_CARDS.length)];
+  /* shuffle statements */
+  const shuffled = c.statements.map((s,i) => ({...s, origIdx:i}));
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  twoTruthCurrent = { card: c, order: shuffled };
+  renderTwoTruth();
+}
+function renderTwoTruth() {
+  const { card, order } = twoTruthCurrent;
+  $("twotruths-q").innerHTML = `
+    <div class="q-card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="q-kicker">Two truths, one lie</div>
+          <div class="q-prompt" style="margin-top:4px"><b>Topic:</b> ${card.topic}</div>
+        </div>
+        <div class="timer" id="twot-timer">30.0s</div>
+      </div>
+      <p class="q-hint">Click the statement you believe is the lie.</p>
+      <div class="statements" id="twot-stmts">
+        ${order.map((s,i) => `<button class="stmt" data-i="${i}"><span class="num">${i+1}</span>${s.text}</button>`).join("")}
+      </div>
+      <div class="feedback" id="twot-fb"></div>
+      <div class="controls" id="twot-ctrls" style="display:none">
+        <button class="btn" onclick="nextTwoTruth()">Next card &rarr;</button>
+      </div>
+    </div>
+  `;
+  document.querySelectorAll("#twot-stmts .stmt").forEach(btn => {
+    btn.addEventListener("click", () => twoTruthAnswer(parseInt(btn.dataset.i, 10)));
+  });
+  startTwoTruthTimer();
+}
+function startTwoTruthTimer() {
+  twoTruthTimeLeft = 30;
+  renderTwoTruthTimer();
+  twoTruthTimer = setInterval(() => {
+    twoTruthTimeLeft -= 0.1;
+    if (twoTruthTimeLeft <= 0) {
+      twoTruthTimeLeft = 0;
+      stopTwoTruthTimer();
+      twoTruthAnswer(-1, true);
+    }
+    renderTwoTruthTimer();
+  }, 100);
+}
+function stopTwoTruthTimer() { if (twoTruthTimer) { clearInterval(twoTruthTimer); twoTruthTimer = null; } }
+function renderTwoTruthTimer() {
+  const el = $("twot-timer");
+  if (!el) return;
+  el.textContent = twoTruthTimeLeft.toFixed(1) + "s";
+  el.className = "timer" + (twoTruthTimeLeft < 5 ? " critical" : twoTruthTimeLeft < 10 ? " warning" : "");
+}
+function twoTruthAnswer(pickedIdx, timedOut) {
+  stopTwoTruthTimer();
+  const { card, order } = twoTruthCurrent;
+  const correctIdx = order.findIndex(s => !s.truth);
+  const correct = pickedIdx === correctIdx;
+  const stmts = document.querySelectorAll("#twot-stmts .stmt");
+  stmts.forEach((btn, i) => {
+    btn.setAttribute("disabled", "true");
+    const s = order[i];
+    if (!s.truth) btn.classList.add("lie");
+    else btn.classList.add("truth");
+    if (i === pickedIdx) btn.classList.add(s.truth ? "picked-truth" : "picked-lie");
+  });
+  if (correct && !timedOut) {
+    state.streak++;
+    if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+  } else {
+    state.streak = 0;
+  }
+  logAttempt(card.topic.split(" ")[0], "misstatements", correct && !timedOut);
+  updateStatbar();
+  saveState();
+  const fb = $("twot-fb");
+  fb.className = "feedback show " + (correct ? "ok" : "err");
+  fb.innerHTML = `
+    <div class="verdict">${timedOut ? "Time out \u2014 the lie was statement " + (correctIdx+1) : correct ? "Correct!" : "Wrong \u2014 the lie was statement " + (correctIdx+1)}</div>
+    <div class="explain"><b>Takeaway:</b> ${card.lesson}</div>
+    <div class="src" style="margin-top:6px">
+      ${order.map((s,i) => `<div><b>${i+1}.</b> ${s.truth ? "<span style='color:var(--good)'>Truth</span>" : "<span style='color:var(--bad)'>Lie</span>"} &mdash; <i>${s.src}</i></div>`).join("")}
+    </div>
+  `;
+  $("twot-ctrls").style.display = "flex";
+}
+
+/* ============================================================
+   HEATMAP + DAILY BOSS
+   ============================================================ */
+function renderHeatmap() {
+  /* Daily boss */
+  const today = new Date().toISOString().slice(0,10);
+  if (state.dailyBoss.date !== today) {
+    state.dailyBoss = { date: today, answered: false, correct: null };
+    saveState();
+  }
+  renderBoss();
+
+  /* Build matrix */
+  const tbl = $("heatmap-table");
+  let html = "<thead><tr><th class='rowhead'>Variety / Feature</th>";
+  FEATURES.forEach(f => { html += `<th title="${f}">${f.length > 18 ? f.slice(0,16) + "…" : f}</th>`; });
+  html += "</tr></thead><tbody>";
+  VARIETIES.forEach(v => {
+    html += `<tr><th class='rowhead'>${v}</th>`;
+    FEATURES.forEach(f => {
+      const acc = cellAccuracy(v, f);
+      const n = cellCount(v, f);
+      let cls = "cell-untested", label = "\u2013";
+      if (acc !== null) {
+        const pct = Math.round(acc * 100);
+        label = pct + "%";
+        if (acc >= 0.8) cls = "cell-green";
+        else if (acc >= 0.6) cls = "cell-yellow";
+        else if (acc >= 0.4) cls = "cell-orange";
+        else cls = "cell-red";
+      }
+      html += `<td class='${cls}' title='${v} × ${f}: ${n} attempts' data-v='${v}' data-f='${f}'>${label}</td>`;
+    });
+    html += "</tr>";
+  });
+  html += "</tbody>";
+  tbl.innerHTML = html;
+  tbl.querySelectorAll("td[data-v]").forEach(td => {
+    td.addEventListener("click", () => {
+      /* Could open a mini-drill here. For now, just alert with accuracy context. */
+      const v = td.dataset.v, f = td.dataset.f;
+      const arr = state.attempts[v+"|"+f];
+      const n = arr ? arr.length : 0;
+      const acc = n ? Math.round(100 * arr.reduce((a,b)=>a+b,0) / n) : null;
+      alert(`${v} × ${f}\n\n${n} attempts recorded.\n${acc !== null ? "Rolling accuracy: " + acc + "%" : "No data yet — play the other modes to build this cell."}\n\nCell colour updates automatically as you play Detective, Duel, and 2T1L.`);
+    });
+  });
+}
+function renderBoss() {
+  const slot = $("boss-slot");
+  /* Pick the weakest cell with >= 3 attempts */
+  let target = null;
+  let worst = 1.1;
+  for (const k in state.attempts) {
+    const arr = state.attempts[k];
+    if (arr.length < 3) continue;
+    const acc = arr.reduce((a,b)=>a+b,0) / arr.length;
+    if (acc < worst) { worst = acc; target = k; }
+  }
+  if (!target) {
+    slot.innerHTML = `
+      <div class="boss-card">
+        <span class="badge">Daily boss</span>
+        <h3>No boss today &mdash; the armoury is empty</h3>
+        <p>Play a few rounds of Detective, Duel, or 2T1L first. Once you've logged at least 3 attempts in any variety&times;feature cell, the boss can pick your weakest one and generate a question from it.</p>
+      </div>
+    `;
+    return;
+  }
+  const [variety, feature] = target.split("|");
+  const acc = Math.round(100 * worst);
+  const done = state.dailyBoss.answered;
+  slot.innerHTML = `
+    <div class="boss-card${done?" done":""}">
+      <span class="badge">${done ? (state.dailyBoss.correct ? "Boss defeated" : "Boss survived today") : "Daily boss"}</span>
+      <h3>Your weakest cell: <b>${variety} &times; ${feature}</b> (${acc}%)</h3>
+      <p>${done ? "Come back tomorrow for a fresh boss, or keep playing the other modes to change the landscape." : "Jump to whichever mode tests this pairing and knock it down. Come back here when your cell accuracy improves."}</p>
+      ${done ? "" : "<p style='font-size:13.5px;color:var(--mute)'>Tip: 2T1L catches conceptual traps; Duel catches rule application; Detective catches phonological fingerprinting.</p>"}
+    </div>
+  `;
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function init() {
+  setupTabs();
+  setupDetectiveTiers();
+  updateStatbar();
+  nextDetective();
+  $("reset-all-btn").addEventListener("click", () => {
+    if (confirm("Wipe ALL progress including Elo, streaks, heatmap data, and daily boss?")) {
+      state = defaultState();
+      saveState();
+      updateStatbar();
+      nextDetective();
+      nextDuel();
+      nextTwoTruth();
+      renderHeatmap();
+    }
+  });
+}
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>

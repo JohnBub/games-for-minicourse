@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IPA Interactive Tutor — Varieties of English</title>
+<style>
+  :root {
+    --bg: #f7f4ec;
+    --paper: #fffdf7;
+    --ink: #1f1a15;
+    --ink-soft: #4a413a;
+    --muted: #857a6f;
+    --rule: #d9d1c2;
+    --rule-soft: #ebe4d4;
+    --accent: #8a4a1f;
+    --accent-soft: #c69875;
+    --highlight: #fff1d4;
+    --voiced: #f3e6c9;
+    --voiceless: #f8efdd;
+    --hover: #f0e7d2;
+    --correct: #1f5c3a;
+    --wrong: #8a2331;
+    --shadow: 0 1px 2px rgba(60,40,20,0.08), 0 4px 14px rgba(60,40,20,0.06);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Charter", "Iowan Old Style", "Georgia", "Palatino Linotype", serif;
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  body {
+    min-height: 100vh;
+    padding: 28px 40px 80px;
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+  header.page {
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 18px;
+    margin-bottom: 22px;
+  }
+  header.page h1 {
+    font-size: 28px;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+  }
+  header.page .sub {
+    color: var(--muted);
+    font-style: italic;
+    font-size: 14px;
+  }
+  .voice-picker {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .voice-picker label { font-weight: 600; color: var(--ink-soft); }
+  .voice-picker select {
+    padding: 4px 8px;
+    font-size: 13px;
+    font-family: inherit;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: var(--paper);
+    color: var(--ink);
+    max-width: 320px;
+  }
+  .voice-picker button {
+    padding: 4px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: var(--paper);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .voice-picker button:hover { background: var(--hover); }
+  .voice-picker .voice-hint { font-size: 11.5px; font-style: italic; }
+  nav.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin: 18px 0 24px;
+    border-bottom: 1px solid var(--rule);
+  }
+  nav.tabs button {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 10px 16px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: all 0.15s;
+  }
+  nav.tabs button:hover { color: var(--ink); background: var(--hover); }
+  nav.tabs button.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    font-weight: 600;
+  }
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadeIn 0.2s; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  h2 { font-size: 22px; margin: 0 0 14px; letter-spacing: -0.005em; }
+  h3 { font-size: 17px; margin: 24px 0 10px; color: var(--accent); font-weight: 600; letter-spacing: 0.01em; }
+  h4 { font-size: 15px; margin: 18px 0 8px; }
+  p { margin: 0 0 12px; }
+
+  .intro-card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 20px 24px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
+  }
+  .callout {
+    background: var(--highlight);
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    margin: 14px 0;
+    font-size: 14.5px;
+  }
+  .callout strong { color: var(--accent); }
+
+  .ipa { font-family: "Doulos SIL", "Charis SIL", "Gentium Plus", "Lucida Sans Unicode", "Arial Unicode MS", serif; }
+  .ipa-box { display: inline-block; padding: 2px 7px; background: var(--paper); border: 1px solid var(--rule); border-radius: 3px; font-family: "Doulos SIL", "Charis SIL", "Gentium Plus", "Lucida Sans Unicode", "Arial Unicode MS", serif; font-size: 1.05em; }
+
+  /* Chart styles */
+  .chart-wrap { background: var(--paper); border: 1px solid var(--rule); border-radius: 4px; padding: 18px; box-shadow: var(--shadow); margin-bottom: 22px; overflow-x: auto; }
+  table.ipa-chart { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 14px; }
+  table.ipa-chart th, table.ipa-chart td {
+    border: 1px solid var(--rule);
+    padding: 0;
+    text-align: center;
+    vertical-align: middle;
+    height: 44px;
+  }
+  table.ipa-chart th {
+    background: var(--rule-soft);
+    color: var(--ink-soft);
+    font-weight: 600;
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 6px 4px;
+  }
+  table.ipa-chart th.row-label {
+    text-align: left;
+    padding-left: 10px;
+    font-size: 12px;
+    min-width: 98px;
+  }
+  .cell {
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    gap: 0;
+    height: 44px;
+    cursor: pointer;
+    transition: background 0.12s;
+    font-family: "Doulos SIL", "Charis SIL", "Gentium Plus", "Lucida Sans Unicode", serif;
+    font-size: 18px;
+  }
+  .cell > span {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .cell.empty { cursor: default; background: repeating-linear-gradient(45deg, transparent, transparent 4px, #0001 4px, #0001 5px); opacity: 0.5; }
+  .cell.empty:hover { background: repeating-linear-gradient(45deg, transparent, transparent 4px, #0001 4px, #0001 5px); }
+  .cell:hover { background: var(--hover); }
+  .cell.active { background: var(--highlight); box-shadow: inset 0 0 0 2px var(--accent); }
+  .cell .vl { color: var(--ink); }
+  .cell .vd { color: var(--accent); font-weight: 600; }
+  .cell.split { background: linear-gradient(to right, var(--voiceless) 50%, var(--voiced) 50%); }
+  .cell > span:hover { background: rgba(0,0,0,0.04); }
+
+  /* Detail panel */
+  .detail {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 18px 22px;
+    margin-bottom: 18px;
+    min-height: 120px;
+    box-shadow: var(--shadow);
+  }
+  .detail .glyph {
+    display: inline-block;
+    font-family: "Doulos SIL", "Charis SIL", "Gentium Plus", "Lucida Sans Unicode", serif;
+    font-size: 48px;
+    line-height: 1;
+    vertical-align: middle;
+    margin-right: 18px;
+    color: var(--accent);
+  }
+  .detail .info { display: inline-block; vertical-align: middle; }
+  .detail .info h3 { margin: 0 0 4px; color: var(--ink); font-size: 18px; }
+  .detail .info .features { color: var(--muted); font-size: 13px; font-style: italic; }
+  .detail .examples { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .cue-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .cue-box {
+    padding: 12px 14px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--ink);
+    border-radius: 3px;
+  }
+  .cue-box.cue-en {
+    background: #eef1eb;
+    border-left: 3px solid #4a6b57;
+  }
+  .cue-box.cue-fr {
+    background: linear-gradient(to right, var(--highlight), var(--voiceless) 80%);
+    border-left: 3px solid var(--accent);
+  }
+  .cue-label {
+    display: inline-block;
+    color: white;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-right: 8px;
+    vertical-align: 1px;
+    font-family: system-ui, sans-serif;
+    font-weight: 600;
+  }
+  .cue-label.en { background: #4a6b57; }
+  .cue-label.fr { background: var(--accent); }
+  .cue-box.cue-en b { color: #2d4a38; }
+  .cue-box.cue-fr b { color: var(--accent); }
+  @media (max-width: 780px) {
+    .cue-grid { grid-template-columns: 1fr; }
+  }
+  .ex-chip {
+    background: var(--rule-soft);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 6px 10px;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .ex-chip:hover { background: var(--highlight); }
+  .ex-chip .word { font-weight: 500; }
+  .ex-chip .tr { font-family: "Doulos SIL", "Charis SIL", "Gentium Plus", "Lucida Sans Unicode", serif; color: var(--accent); }
+  .speaker { background: none; border: none; font-size: 14px; cursor: pointer; color: var(--muted); padding: 0 4px; }
+  .speaker:hover { color: var(--accent); }
+
+  /* Legend */
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--ink-soft); margin-top: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .swatch { display: inline-block; width: 14px; height: 14px; border: 1px solid var(--rule); border-radius: 2px; }
+  .swatch.vl { background: var(--voiceless); }
+  .swatch.vd { background: var(--voiced); }
+
+  /* Vowel quadrilateral */
+  .vowel-wrap { background: var(--paper); border: 1px solid var(--rule); border-radius: 4px; padding: 22px; box-shadow: var(--shadow); margin-bottom: 18px; }
+  svg.quad { width: 100%; height: auto; max-width: 680px; display: block; margin: 0 auto; }
+  svg.quad text.axis { font-size: 11px; fill: var(--muted); font-family: inherit; letter-spacing: 0.05em; }
+  svg.quad text.vowel {
+    font-family: "Doulos SIL", "Charis SIL", "Gentium Plus", "Lucida Sans Unicode", serif;
+    font-size: 18px;
+    fill: var(--ink);
+    cursor: pointer;
+    transition: fill 0.12s;
+  }
+  svg.quad text.vowel:hover { fill: var(--accent); }
+  svg.quad text.vowel.active { fill: var(--accent); font-weight: 700; }
+
+  /* Lexical sets grid */
+  .ls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .ls-card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  .ls-card:hover { background: var(--highlight); border-color: var(--accent-soft); }
+  .ls-card .name { font-variant: small-caps; font-weight: 600; letter-spacing: 0.1em; color: var(--accent); font-size: 14px; }
+  .ls-card .sym { font-family: "Doulos SIL", "Charis SIL", "Gentium Plus", "Lucida Sans Unicode", serif; font-size: 18px; margin: 2px 0; }
+  .ls-card .word { font-size: 13px; color: var(--ink-soft); }
+
+  /* Diacritics */
+  .dia-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+  .dia-card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+  .dia-card .sym { font-family: "Doulos SIL", "Charis SIL", "Gentium Plus", "Lucida Sans Unicode", serif; font-size: 22px; color: var(--accent); margin-right: 8px; vertical-align: middle; }
+  .dia-card .name { font-weight: 600; }
+  .dia-card .desc { color: var(--ink-soft); margin-top: 4px; font-size: 13px; }
+  .dia-card .ex { margin-top: 6px; font-family: "Doulos SIL", "Charis SIL", "Gentium Plus", "Lucida Sans Unicode", serif; font-size: 15px; }
+  .dia-card .ex .word-key { font-family: inherit; color: var(--muted); font-size: 13px; margin-left: 4px; }
+
+  /* Varieties */
+  .var-table { width: 100%; border-collapse: collapse; background: var(--paper); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; box-shadow: var(--shadow); }
+  .var-table th, .var-table td { border: 1px solid var(--rule); padding: 10px 14px; text-align: left; font-size: 14px; vertical-align: top; }
+  .var-table th { background: var(--rule-soft); font-weight: 600; color: var(--ink-soft); font-size: 12.5px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .var-table td.feat { font-weight: 600; background: var(--voiceless); }
+  .var-table .tr { font-family: "Doulos SIL", "Charis SIL", "Gentium Plus", "Lucida Sans Unicode", serif; color: var(--accent); }
+
+  /* Quiz */
+  .quiz-card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 22px 24px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+  .quiz-prompt { font-size: 22px; margin: 10px 0 18px; text-align: center; }
+  .quiz-prompt .big-ipa { font-family: "Doulos SIL", "Charis SIL", "Gentium Plus", "Lucida Sans Unicode", serif; font-size: 44px; color: var(--accent); letter-spacing: 0.02em; }
+  .quiz-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 18px 0; }
+  .quiz-options button {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 12px;
+    font-family: inherit;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.12s;
+    color: var(--ink);
+  }
+  .quiz-options button:hover { background: var(--hover); border-color: var(--accent-soft); }
+  .quiz-options button.correct { background: #d9eadd; border-color: var(--correct); color: var(--correct); font-weight: 600; }
+  .quiz-options button.wrong { background: #f0d6da; border-color: var(--wrong); color: var(--wrong); }
+  .quiz-options button.reveal { background: #d9eadd; border-color: var(--correct); color: var(--correct); }
+  .quiz-stats { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+  .quiz-controls { display: flex; gap: 10px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  .btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 10px 18px;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: background 0.12s;
+  }
+  .btn:hover { background: #6b381a; }
+  .btn.secondary { background: var(--paper); color: var(--ink); border: 1px solid var(--rule); }
+  .btn.secondary:hover { background: var(--hover); }
+  .quiz-feedback { text-align: center; min-height: 24px; margin-top: 8px; font-size: 14px; }
+  .quiz-feedback.correct { color: var(--correct); }
+  .quiz-feedback.wrong { color: var(--wrong); }
+
+  .quiz-mode-select { display: flex; gap: 8px; justify-content: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .quiz-mode-select button {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--ink-soft);
+  }
+  .quiz-mode-select button.on { background: var(--accent); color: white; border-color: var(--accent); }
+
+  /* Typing mode */
+  .quiz-typing { display: flex !important; flex-direction: column; gap: 10px; }
+  .quiz-input {
+    width: 100%;
+    padding: 14px 16px;
+    font-family: inherit;
+    font-size: 20px;
+    background: var(--paper);
+    border: 2px solid var(--rule);
+    border-radius: 4px;
+    color: var(--ink);
+    transition: border-color 0.15s;
+  }
+  .quiz-input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .quiz-input.correct {
+    border-color: var(--correct);
+    background: #d9eadd;
+  }
+  .quiz-input.wrong {
+    border-color: var(--wrong);
+    background: #f0d6da;
+  }
+  .quiz-typing-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* Variety chip */
+  .variety-chip {
+    display: inline-block;
+    font-size: 11px;
+    font-family: system-ui, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 3px 9px;
+    border-radius: 10px;
+    margin-left: 10px;
+    vertical-align: middle;
+    font-weight: 600;
+    color: white;
+  }
+  .variety-RP      { background: #4a5c6a; }
+  .variety-SAE     { background: #8a4a1f; }
+  .variety-IrE     { background: #3d6e4f; }
+  .variety-ScotE   { background: #5a4e85; }
+  .variety-GAusE   { background: #8b5a2b; }
+  .variety-Cockney { background: #7a3d3d; }
+
+  .phrase-note {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-style: italic;
+    padding: 8px 12px;
+    background: var(--highlight);
+    border-left: 2px solid var(--accent-soft);
+    border-radius: 0 3px 3px 0;
+    text-align: left;
+  }
+
+  .quiz-feedback.hint { color: var(--accent); font-style: italic; }
+
+  .paragraph-ref {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 14px 20px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
+  }
+  .paragraph-ref summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--accent);
+    font-size: 14.5px;
+    user-select: none;
+  }
+  .paragraph-ref summary:hover { color: var(--ink); }
+  .paragraph-ref .para-text {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule-soft);
+    font-size: 14px;
+    line-height: 1.65;
+  }
+  .paragraph-ref .para-text .ipa {
+    background: var(--highlight);
+    padding: 2px 4px;
+    border-radius: 2px;
+    display: inline-block;
+    font-size: 14px;
+    line-height: 1.8;
+  }
+
+  /* Misc */
+  .small { font-size: 13px; color: var(--muted); }
+  .pill { display: inline-block; background: var(--rule-soft); color: var(--ink-soft); padding: 2px 8px; border-radius: 10px; font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase; }
+  footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--rule); color: var(--muted); font-size: 12.5px; text-align: center; }
+
+  @media (max-width: 780px) {
+    body { padding: 18px 16px 60px; }
+    .quiz-options { grid-template-columns: 1fr; }
+    .quiz-prompt .big-ipa { font-size: 34px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="page">
+  <h1>IPA — An Interactive Tutor</h1>
+  <div class="sub">for BA3 Varieties of English · click any symbol to hear the example word</div>
+  <div class="voice-picker">
+    <label for="voice-select">Voice:</label>
+    <select id="voice-select"><option>Loading…</option></select>
+    <button type="button" id="voice-test" title="Test the selected voice">▸ test</button>
+    <span class="voice-hint">★ = higher-quality (Siri / Enhanced / Premium / Google)</span>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-panel="start" class="active">Start Here</button>
+  <button data-panel="consonants">Consonants</button>
+  <button data-panel="vowels">Vowels</button>
+  <button data-panel="lexsets">Lexical Sets</button>
+  <button data-panel="diacritics">Diacritics</button>
+  <button data-panel="varieties">Varieties</button>
+  <button data-panel="quiz">Practice</button>
+</nav>
+
+<!-- ================= START ================= -->
+<section class="panel active" id="panel-start">
+  <div class="intro-card">
+    <h2>What IPA is, and what it is not</h2>
+    <p>The International Phonetic Alphabet is a one-to-one mapping between symbols and speech sounds. It exists because English spelling isn't — the letter <em>c</em> in <em>cat</em>, <em>cell</em>, and <em>ocean</em> represents three different sounds. IPA fixes the symbol, not the spelling, so that <span class="ipa-box">[k]</span> always means one sound, no matter what language it appears in.</p>
+    <p>When you read a transcription, the brackets tell you what kind of claim is being made. Slashes <span class="ipa-box">/ /</span> mark a <strong>phonemic</strong> transcription — a claim about which meaningful sound-categories a word contains. Square brackets <span class="ipa-box">[ ]</span> mark a <strong>phonetic</strong> transcription — a claim about how the word was actually produced, including fine detail. In practice, a line like <span class="ipa">['fɑːðə]</span> uses square brackets because it records what a specific speaker did, down to the length mark and the final schwa.</p>
+    <div class="callout">
+      <strong>Read me aloud.</strong> The fastest way to learn IPA is to <em>pronounce</em> the symbol as you read it, checking yourself against an example word. This tutor lets you click any symbol to hear an English word it appears in. Use it.
+    </div>
+  </div>
+
+  <div class="intro-card">
+    <h2>How to approach this tutor</h2>
+    <p>Work through the tabs in order the first time. <strong>Consonants</strong> is the gentlest start: each symbol appears in a chart sorted by where and how the sound is made in your mouth. <strong>Vowels</strong> is the hardest because vowels have no contact point — you learn them by their position in an imaginary mouth-shaped quadrilateral. <strong>Lexical Sets</strong> are Wells's way of tying vowels to keywords: when you see <span class="pill">kit</span> you know you mean the vowel in <em>bid</em>, regardless of variety.</p>
+    <p><strong>Diacritics</strong> are the small marks that sit on or around a symbol to record fine detail: length, aspiration, dark-<em>l</em>, nasalisation. They are the bread and butter of variety description. <strong>Varieties</strong> lines up ScotE, SAE, and RP so you can see which features differ. <strong>Practice</strong> is a click-through quiz.</p>
+  </div>
+
+  <div class="intro-card">
+    <h2>A worked example: your <em>father / harder</em> clip</h2>
+    <p>You saw the transcription <span class="ipa-box">['fɑːðə]</span> for <em>father</em> and <span class="ipa-box">['hɑːrdɚ]</span> for <em>harder</em>. Read the first one left to right:</p>
+    <ul>
+      <li><span class="ipa-box">[ˈ]</span> is a stress mark — the syllable to the right is stressed.</li>
+      <li><span class="ipa-box">[f]</span> is a voiceless labiodental fricative (top teeth on bottom lip).</li>
+      <li><span class="ipa-box">[ɑː]</span> is an open back unrounded vowel, held long (the colon-like mark <span class="ipa-box">[ː]</span> means length).</li>
+      <li><span class="ipa-box">[ð]</span> is the voiced <em>th</em> of <em>this</em>.</li>
+      <li><span class="ipa-box">[ə]</span> is schwa — an unstressed central vowel.</li>
+    </ul>
+    <p>Now <em>harder</em>: everything works the same, but the <span class="ipa-box">[r]</span> after the long <span class="ipa-box">[ɑː]</span> is pronounced (the speaker is rhotic in that position), and the final syllable is written <span class="ipa-box">[dɚ]</span> — an r-coloured schwa, meaning the schwa and the <em>r</em> are produced together as a single rhotic vowel. Variable rhoticity inside a single clip is exactly the kind of fine detail IPA was built to record.</p>
+  </div>
+</section>
+
+<!-- ================= CONSONANTS ================= -->
+<section class="panel" id="panel-consonants">
+  <h2>Consonants (Pulmonic)</h2>
+  <p class="small">Click any cell. Voiceless consonants are on the left side of a cell, voiced on the right. Hatched cells are articulations judged impossible.</p>
+
+  <div class="chart-wrap">
+    <table class="ipa-chart" id="consonant-chart"></table>
+    <div class="legend">
+      <div class="legend-item"><span class="swatch vl"></span>voiceless</div>
+      <div class="legend-item"><span class="swatch vd"></span>voiced</div>
+      <div class="legend-item"><span class="swatch" style="background:repeating-linear-gradient(45deg,transparent,transparent 4px,#0001 4px,#0001 5px)"></span>impossible</div>
+    </div>
+  </div>
+
+  <div class="detail" id="cons-detail">
+    <div class="glyph">·</div>
+    <div class="info">
+      <h3>Click a consonant to begin</h3>
+      <div class="features">Cells show place (where), manner (how), and voicing.</div>
+    </div>
+  </div>
+
+  <div class="intro-card">
+    <h3>How to read this chart</h3>
+    <p>Columns are <strong>place of articulation</strong> — where in the mouth the constriction happens, moving from the front (bilabial = both lips) to the back (glottal = vocal folds). Rows are <strong>manner of articulation</strong> — how the airstream is obstructed. A plosive blocks the air completely then releases it; a fricative squeezes it through a narrow gap; a nasal redirects it through the nose; an approximant barely obstructs it at all.</p>
+    <p>Voicing is the third dimension: your vocal folds either vibrate (voiced, like <span class="ipa-box">[b z v ð]</span>) or stay apart (voiceless, like <span class="ipa-box">[p s f θ]</span>). Touch your throat and say <em>sssss</em> then <em>zzzzz</em> — the buzz in the second one is voicing.</p>
+  </div>
+</section>
+
+<!-- ================= VOWELS ================= -->
+<section class="panel" id="panel-vowels">
+  <h2>Vowels</h2>
+  <p class="small">The quadrilateral represents the mouth in cross-section: front of the mouth on the left, high on top. Click any vowel.</p>
+
+  <div class="vowel-wrap">
+    <svg class="quad" viewBox="0 0 680 400" xmlns="http://www.w3.org/2000/svg" id="vowel-svg">
+      <!-- trapezoid outline -->
+      <polygon points="100,60 580,60 520,340 160,340" fill="none" stroke="#d9d1c2" stroke-width="1.5"/>
+      <!-- horizontal guides -->
+      <line x1="115" y1="153" x2="565" y2="153" stroke="#ebe4d4" stroke-width="1"/>
+      <line x1="130" y1="246" x2="550" y2="246" stroke="#ebe4d4" stroke-width="1"/>
+      <!-- vertical guides -->
+      <line x1="240" y1="60" x2="280" y2="340" stroke="#ebe4d4" stroke-width="1"/>
+      <line x1="340" y1="60" x2="340" y2="340" stroke="#ebe4d4" stroke-width="1"/>
+      <line x1="440" y1="60" x2="400" y2="340" stroke="#ebe4d4" stroke-width="1"/>
+      <!-- axis labels -->
+      <text class="axis" x="340" y="30" text-anchor="middle">FRONT — CENTRAL — BACK</text>
+      <text class="axis" x="60" y="70">CLOSE</text>
+      <text class="axis" x="60" y="163">CLOSE-MID</text>
+      <text class="axis" x="60" y="256">OPEN-MID</text>
+      <text class="axis" x="60" y="350">OPEN</text>
+      <!-- vowels placed; populated by JS too but we keep structural ones inline -->
+    </svg>
+  </div>
+
+  <div class="detail" id="vowel-detail">
+    <div class="glyph">·</div>
+    <div class="info">
+      <h3>Click a vowel to begin</h3>
+      <div class="features">Vowels vary on three dimensions: height (close–open), backness (front–back), and rounding.</div>
+    </div>
+  </div>
+
+  <div class="intro-card">
+    <h3>The three dimensions of a vowel</h3>
+    <p><strong>Height</strong> is how far the tongue is from the roof of the mouth. In <span class="ipa-box">[i]</span> (FLEECE) the tongue is high and close; in <span class="ipa-box">[a]</span> the jaw is dropped and the tongue is low. <strong>Backness</strong> is where the tongue's highest point sits — <span class="ipa-box">[i]</span> is front, <span class="ipa-box">[u]</span> is back. <strong>Rounding</strong> describes the lips: <span class="ipa-box">[u]</span> rounds, <span class="ipa-box">[i]</span> spreads. English mostly rounds its back vowels, which is why RP <span class="ipa-box">[ɔː]</span> (THOUGHT) feels different from the unrounded <span class="ipa-box">[ɑː]</span> (PALM).</p>
+    <p>Vowels can also be <strong>long</strong> (written with the length mark <span class="ipa-box">[ː]</span>) or short, <strong>tense</strong> or <strong>lax</strong>, and they can glide from one position to another — a <strong>diphthong</strong> like <span class="ipa-box">[aɪ]</span> in PRICE is a single vowel that moves as you say it.</p>
+  </div>
+</section>
+
+<!-- ================= LEXICAL SETS ================= -->
+<section class="panel" id="panel-lexsets">
+  <h2>Wells's Lexical Sets</h2>
+  <p>Because the same vowel can have different IPA values across varieties (the PALM vowel is <span class="ipa-box">[ɑː]</span> in RP but can be <span class="ipa-box">[a]</span> or <span class="ipa-box">[ɑ]</span> in GAusE), John Wells (1982) proposed to name each vowel after a <em>keyword</em>: the vowel in <em>bid</em> is simply the KIT vowel, everywhere. This is the common currency your textbooks use.</p>
+
+  <h3>Short vowels (checked)</h3>
+  <div class="ls-grid" data-group="checked"></div>
+
+  <h3>Long vowels and diphthongs (free)</h3>
+  <div class="ls-grid" data-group="free"></div>
+
+  <h3>Pre-rhotic vowels (the &ldquo;r&rdquo; sets)</h3>
+  <p class="small">These sets behave very differently in rhotic varieties (ScotE, SAE) vs. non-rhotic (RP, AusE). In rhotic varieties the <em>r</em> is pronounced; in non-rhotic varieties the vowel is lengthened, centralised, or diphthongised instead.</p>
+  <div class="ls-grid" data-group="rhotic"></div>
+
+  <h3>Weak / unstressed</h3>
+  <div class="ls-grid" data-group="weak"></div>
+
+  <div class="intro-card">
+    <h3>Why lexical sets matter for you</h3>
+    <p>When Stuart-Smith writes that Scottish English has <em>no length contrast in the BATH set</em>, she isn't talking about the spelling &mdash; she's talking about every word that patterns like <em>bath, grass, pass, laugh, staff, dance, sample, plant</em>. RP lengthens these to <span class="ipa-box">[ɑː]</span>; most ScotE speakers keep them short <span class="ipa-box">[a]</span>, identical to the TRAP vowel. The keyword saves you paragraphs of wordlists.</p>
+    <p>Three lexical-set splits are constantly invoked in our course: <strong>TRAP/BATH</strong> (where a variety splits <em>trap</em> from <em>bath</em>), <strong>LOT/THOUGHT</strong> (the cot–caught merger in much of GA), and <strong>FOOT/STRUT</strong> (merged in northern English, split in RP). Learn these three splits cold.</p>
+  </div>
+</section>
+
+<!-- ================= DIACRITICS ================= -->
+<section class="panel" id="panel-diacritics">
+  <h2>Diacritics</h2>
+  <p>Diacritics are the small marks that modify a base symbol. They are how IPA records fine articulatory detail — and they are where narrow phonetic transcription earns its keep in variety studies.</p>
+
+  <h3>Length, stress, and tone</h3>
+  <div class="dia-list" data-group="suprasegmental"></div>
+
+  <h3>Consonant diacritics</h3>
+  <div class="dia-list" data-group="consonantal"></div>
+
+  <h3>Vowel diacritics</h3>
+  <div class="dia-list" data-group="vocalic"></div>
+
+  <div class="intro-card">
+    <h3>The diacritics you will actually use in this course</h3>
+    <p>Four diacritics do most of the work in our lectures. <strong>Length <span class="ipa-box">[ː]</span></strong> is everywhere: the Scottish Vowel Length Rule (SVLR), for instance, is a claim about <em>when the length mark is justified</em>. <strong>Aspiration <span class="ipa-box">[ʰ]</span></strong> distinguishes most English syllable-initial voiceless stops — <em>pen</em> is <span class="ipa-box">[pʰɛn]</span>, not <span class="ipa-box">[pɛn]</span>. <strong>Velarisation <span class="ipa-box">[ˠ]</span></strong> or <span class="ipa-box">[ɫ]</span> marks the &ldquo;dark&rdquo; <em>l</em> that Bauer (28) and Stuart-Smith (63) write about for ScotE. <strong>Nasalisation <span class="ipa-box">[̃]</span></strong> — the tilde <em>above</em> a vowel — records the vowel-through-nose resonance you hear in French <em>bon</em> or in anticipatory-nasalisation varieties like Nigerian English.</p>
+  </div>
+</section>
+
+<!-- ================= VARIETIES ================= -->
+<section class="panel" id="panel-varieties">
+  <h2>Variety comparison</h2>
+  <p>The IPA tools above become useful the moment you start comparing. Below are the features our course keeps returning to, lined up across the three varieties most central to your midterm: <strong>RP</strong> (non-rhotic, reference), <strong>ScotE</strong> (rhotic, SVLR), and <strong>SAE</strong> / General American (rhotic, cot–caught merger in much of the country).</p>
+
+  <div class="chart-wrap">
+    <table class="var-table">
+      <thead>
+        <tr>
+          <th style="width: 22%">Feature</th>
+          <th>RP</th>
+          <th>ScotE</th>
+          <th>SAE / GA</th>
+        </tr>
+      </thead>
+      <tbody id="var-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="intro-card">
+    <h3>Reading a feature line in practice</h3>
+    <p>Take rhoticity. In RP, <em>harder</em> is <span class="ipa-box">[ˈhɑːdə]</span> — the orthographic <em>r</em> is silent, leaving a long vowel and a final schwa. In SAE, the same word is <span class="ipa-box">[ˈhɑːɹdɚ]</span> — the <em>r</em> is produced both pre-consonantally <em>and</em> as an r-coloured schwa. In ScotE, rhoticity is variable and often realised with a tap <span class="ipa-box">[ɾ]</span> rather than an approximant <span class="ipa-box">[ɹ]</span>: <span class="ipa-box">[ˈhɑɾdəɾ]</span>. The clip you were analysing — <em>father</em> non-rhotic, <em>harder</em> rhotic — is exactly what Stuart-Smith (57) means when she calls ScotE rhoticity &ldquo;variable.&rdquo;</p>
+    <p>Now take the SVLR: in ScotE, the vowel is long only before a voiced fricative, <em>r</em>, or a morpheme boundary. So the FLEECE vowel in <em>greed</em> is short <span class="ipa-box">[i]</span>, but in <em>agreed</em> it is long <span class="ipa-box">[iː]</span> — same spelling, different morphological structure. Diacritics alone tell you which claim is being made.</p>
+  </div>
+</section>
+
+<!-- ================= QUIZ ================= -->
+<section class="panel" id="panel-quiz">
+  <h2>Practice</h2>
+
+  <details class="paragraph-ref">
+    <summary>📖 Reference: the midterm elicitation paragraph ("Please call Stella…")</summary>
+    <div class="para-text">
+      <p><b>English text</b><br>
+      Please call Stella. Ask her to bring these things with her from the store: Six spoons of fresh snow peas, five thick slabs of blue cheese, and maybe a snack for her brother Bob. We also need a small plastic snake and a big toy frog for the kids. She can scoop these things into three red bags, and we will go meet her Wednesday at the train station.</p>
+
+      <p><b>RP reference transcription</b> (from Wells' lexical-set defaults):<br>
+      <span class="ipa">[pliːz kʰɔːl ˈstɛlə. ɑːsk hɜː tə brɪŋ ðiːz θɪŋz wɪð hɜː frəm ðə stɔː: sɪks spuːnz əv frɛʃ snəʊ pʰiːz, faɪv θɪk slæbz əv bluː tʃiːz, ənd ˈmeɪbi ə snæk fɔː hɜː ˈbrʌðə bɒb. wi ˈɔːlsəʊ niːd ə smɔːl ˈplæstɪk sneɪk ənd ə bɪɡ tɔɪ frɒɡ fɔː ðə kʰɪdz. ʃi kən skuːp ðiːz θɪŋz ˈɪntə θriː rɛd bæɡz, ənd wi wɪl ɡəʊ miːt hɜː ˈwɛnzdeɪ ət ðə tʰreɪn ˈsteɪʃən.]</span></p>
+
+      <p class="small">This is the passage the GMU accent archive used in your midterm. Every phrase in the <em>phrase</em> quiz mode below is either verbatim from the Puskás 2024 corrigé or assembled from attested word-level transcriptions. Read the whole paragraph aloud once — it covers nearly every English phoneme.</p>
+    </div>
+  </details>
+  <p class="small">Five modes. <b>Level 1</b> is multiple-choice reading. <b>Level 2</b> asks you to <em>type</em> the word — much harder. Words are drawn from your midterm paragraph, the Puskás corrigé (IrE/GAusE), Stuart-Smith, Bauer, and the Wells lexical sets. Variety tags (ScotE, SAE, IrE, GAusE, RP) show which accent the transcription reflects.</p>
+
+  <div class="quiz-mode-select" id="quiz-mode-select">
+    <button class="on" data-mode="ipa2word">IPA → word · Lvl 1</button>
+    <button data-mode="ipa2word_type">IPA → word · Lvl 2 (type)</button>
+    <button data-mode="phrase">phrase · type it</button>
+    <button data-mode="word2ipa">word → IPA</button>
+    <button data-mode="lexset">word → lexical set</button>
+    <button data-mode="diacritic">diacritic</button>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-stats">
+      <span id="quiz-score">Score: 0 / 0</span>
+      <span id="quiz-streak" class="small"></span>
+    </div>
+    <div class="quiz-prompt" id="quiz-prompt"></div>
+    <div class="quiz-options" id="quiz-options"></div>
+    <div class="quiz-feedback" id="quiz-feedback"></div>
+    <div class="quiz-controls">
+      <button class="btn" id="quiz-next">Next question</button>
+      <button class="btn secondary" id="quiz-reset">Reset score</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  IPA tutor · built for BA3 Varieties of English, Spring 2026 · offline-friendly, self-contained HTML · audio via your browser's speech synthesis
+</footer>
+
+<script>
+/* =====================================================================
+   DATA
+   ===================================================================== */
+
+// ---- Consonants: English-relevant pulmonic set, with chart position ----
+// placeIdx: 0 bilabial · 1 labiodental · 2 dental · 3 alveolar · 4 postalveolar · 5 palatal · 6 velar · 7 glottal
+// mannerIdx: 0 plosive · 1 nasal · 2 trill · 3 tap · 4 fricative · 5 affricate · 6 approximant · 7 lateral approx
+// voicing: 'vl' voiceless · 'vd' voiced
+const PLACES   = ['Bilabial','Labiodental','Dental','Alveolar','Postalveolar','Palatal','Velar','Glottal'];
+const MANNERS  = ['Plosive','Nasal','Trill','Tap/Flap','Fricative','Affricate','Approximant','Lateral approx.'];
+
+const CONSONANTS = [
+  // Plosives
+  { sym:'p', place:0, manner:0, voicing:'vl', name:'voiceless bilabial plosive',
+    cueEN:'The puff-of-air plosive. Hold your hand in front of your mouth and say <i>pen</i> — you feel the burst. In stressed syllable onsets English aspirates: [pʰ]. Compare <i>pen</i> (aspirated) with <i>spin</i> (no puff).',
+    cueFR:'Identique au [p] de <i>papa</i>. Différence clé : aspiration en début de syllabe tonique. Tenez une feuille devant votre bouche : elle bouge pour <i>pen</i>, pas pour <i>spin</i>.',
+    ex:[{w:'pen',t:'pʰɛn'},{w:'spin',t:'spɪn'},{w:'stop',t:'stɒp'},{w:'happy',t:'ˈhæpi'}] },
+  { sym:'b', place:0, manner:0, voicing:'vd', name:'voiced bilabial plosive',
+    cueEN:'The voiced twin of [p]. Feel your throat on a long <i>bee</i> — the buzz is voicing. Never aspirated.',
+    cueFR:'Identique au [b] de <i>bébé</i>. Jamais aspiré.',
+    ex:[{w:'bed',t:'bɛd'},{w:'cab',t:'kæb'},{w:'rubber',t:'ˈrʌbə'},{w:'about',t:'əˈbaʊt'}] },
+  { sym:'t', place:3, manner:0, voicing:'vl', name:'voiceless alveolar plosive',
+    cueEN:'Tongue tip on the bumpy alveolar ridge behind your top teeth. Aspirated [tʰ] at the start of a stressed syllable. In SAE, between vowels it becomes a tap [ɾ] — <i>butter</i> sounds like <i>budder</i>.',
+    cueFR:'<b>Alvéolaire</b> (sur la crête), pas dental comme en français. Reculez légèrement la langue. En anglais américain, entre voyelles, il devient un tap [ɾ] (<i>butter</i> → [ˈbʌɾɚ]).',
+    ex:[{w:'top',t:'tʰɒp'},{w:'stand',t:'stænd'},{w:'cat',t:'kʰæt'},{w:'better',t:'ˈbɛtə'}] },
+  { sym:'d', place:3, manner:0, voicing:'vd', name:'voiced alveolar plosive',
+    cueEN:'Voiced [t]. Same spot on the ridge, with vocal-cord buzz.',
+    cueFR:'Le [d] français est <b>dental</b> (contre les dents) ; l’anglais est <b>alvéolaire</b>. Reculez la langue d’un demi-centimètre. Différence subtile mais audible.',
+    ex:[{w:'dog',t:'dɒɡ'},{w:'red',t:'rɛd'},{w:'adore',t:'əˈdɔː'},{w:'bad',t:'bæd'}] },
+  { sym:'k', place:6, manner:0, voicing:'vl', name:'voiceless velar plosive',
+    cueEN:'Back of the tongue hits the soft palate: <i>cat</i>, <i>key</i>, <i>back</i>. Aspirated [kʰ] at the start of a stressed syllable (<i>cat</i> vs. <i>scat</i>).',
+    cueFR:'Identique au [k] de <i>café</i>, <i>quoi</i>. Aspiré [kʰ] en début de syllabe tonique.',
+    ex:[{w:'cat',t:'kʰæt'},{w:'sky',t:'skaɪ'},{w:'back',t:'bæk'},{w:'key',t:'kʰiː'}] },
+  { sym:'ɡ', place:6, manner:0, voicing:'vd', name:'voiced velar plosive',
+    cueEN:'Voiced [k]. Same back-of-tongue contact, with voicing. The IPA symbol is [ɡ] (open-loop), not typographic [g].',
+    cueFR:'Identique au [g] de <i>gare</i>. Le symbole IPA officiel est [ɡ] (boucle ouverte).',
+    ex:[{w:'go',t:'ɡəʊ'},{w:'bag',t:'bæɡ'},{w:'agree',t:'əˈɡriː'},{w:'ghost',t:'ɡəʊst'}] },
+  { sym:'ʔ', place:7, manner:0, voicing:'vl', name:'glottal stop',
+    cueEN:'The catch in <i>uh-oh</i>. In Cockney English it replaces [t] between vowels (<i>butter</i> [ˈbʌʔə]); in RP/SAE it often reinforces final [p t k]. Not a phoneme in English — an allophone that reveals accent.',
+    cueFR:'Le <b>coup de glotte</b> — fermeture brève des cordes vocales. Présent en français entre voyelles insistées : <i>a ! a !</i> [a.ʔa]. Pas phonémique en anglais non plus, mais très audible en Cockney.',
+    ex:[{w:'uh-oh',t:'ˈʔʌʔoʊ'},{w:'butter (Cockney)',t:'ˈbʌʔə'},{w:'Hawaii',t:'həˈwaɪʔi'}] },
+
+  // Nasals
+  { sym:'m', place:0, manner:1, voicing:'vd', name:'bilabial nasal',
+    cueEN:'The humming-through-closed-lips nasal. Cross-linguistically stable.',
+    cueFR:'Identique au [m] français.',
+    ex:[{w:'me',t:'miː'},{w:'ham',t:'hæm'},{w:'summer',t:'ˈsʌmə'},{w:'comb',t:'kəʊm'}] },
+  { sym:'n', place:3, manner:1, voicing:'vd', name:'alveolar nasal',
+    cueEN:'Tongue tip on the alveolar ridge, air through the nose. Same spot as [t, d, s, z, l].',
+    cueFR:'Alvéolaire (comme /t, d/), pas dental comme en français. Pointe de langue sur la crête.',
+    ex:[{w:'no',t:'nəʊ'},{w:'ran',t:'ræn'},{w:'sunny',t:'ˈsʌni'},{w:'knee',t:'niː'}] },
+  { sym:'ŋ', place:6, manner:1, voicing:'vd', name:'velar nasal',
+    cueEN:'The <i>-ing</i> sound at the end of <i>sing</i>, <i>long</i>, <i>thing</i>. Tongue at the velum, air through the nose. Never starts an English word. <i>Finger</i> has [ŋɡ] but <i>singer</i> has just [ŋ].',
+    cueFR:'<b>N’existe pas phonémiquement en français</b>, mais dans les emprunts : <i>parking</i> [paʁkiŋ], <i>shampooing</i>. Préparez un [k], puis libérez l’air par le nez, langue contre le voile.',
+    ex:[{w:'sing',t:'sɪŋ'},{w:'think',t:'θɪŋk'},{w:'finger',t:'ˈfɪŋɡə'},{w:'long',t:'lɒŋ'}] },
+
+  // Trill / tap
+  { sym:'r', place:3, manner:2, voicing:'vd', name:'alveolar trill',
+    cueEN:'The rolled-R of stage Scottish or Spanish <i>perro</i>. Genuine trills are rare in everyday English — mostly a stereotype of ScotE rather than its reality.',
+    cueFR:'Le [r] roulé de l’espagnol <i>perro</i> ou de l’italien <i>Roma</i>. La langue vibre contre la crête alvéolaire.',
+    ex:[{w:'Spanish perro',t:'ˈpero'},{w:'Italian Roma',t:'ˈroːma'}] },
+  { sym:'ɾ', place:3, manner:3, voicing:'vd', name:'alveolar tap/flap',
+    cueEN:'The quick-touch T that Americans use between vowels: <i>butter</i> [ˈbʌɾɚ], <i>water</i> [ˈwɔɾɚ], <i>city</i>. Not [t], not [d] — a single rapid contact. Also the default ScotE rhotic in many positions.',
+    cueFR:'<b>Un seul battement</b> — comme le [ɾ] italien ou espagnol <i>pero</i>. Proche du [r] français rapide en position intervocalique en parole familière.',
+    ex:[{w:'butter (AmE)',t:'ˈbʌɾɚ'},{w:'water (AmE)',t:'ˈwɔɾɚ'},{w:'very (ScotE)',t:'ˈvɛɾe'},{w:'Spanish pero',t:'ˈpeɾo'}] },
+
+  // Fricatives
+  { sym:'f', place:1, manner:4, voicing:'vl', name:'voiceless labiodental fricative',
+    cueEN:'Lower lip against top teeth, blow. <i>Fun</i>, <i>laugh</i>, <i>phone</i>.',
+    cueFR:'Identique au [f] de <i>fleur</i>.',
+    ex:[{w:'fun',t:'fʌn'},{w:'laugh',t:'lɑːf'},{w:'phone',t:'fəʊn'},{w:'cliff',t:'klɪf'}] },
+  { sym:'v', place:1, manner:4, voicing:'vd', name:'voiced labiodental fricative',
+    cueEN:'Voiced [f]. Same lip-and-teeth setup, with buzz.',
+    cueFR:'Identique au [v] de <i>vous</i>.',
+    ex:[{w:'van',t:'væn'},{w:'love',t:'lʌv'},{w:'seven',t:'ˈsɛvən'},{w:'of',t:'ɒv'}] },
+  { sym:'θ', place:2, manner:4, voicing:'vl', name:'voiceless dental fricative',
+    cueEN:'The <i>th</i> of <i>think</i>, <i>bath</i>, <i>nothing</i>. Tongue tip between (or just behind) the top teeth, blow. One of the rarest sounds in world languages — English is famous for having it. Children often can&rsquo;t produce it until age 6.',
+    cueFR:'<b>N’EXISTE PAS EN FRANÇAIS.</b> C’est le son qui trahit un francophone qui dit <i>sink</i> pour <i>think</i>. Imaginez un [f] fait avec la langue au lieu de la lèvre inférieure. Pointe de la langue légèrement entre les dents, soufflez.',
+    ex:[{w:'think',t:'θɪŋk'},{w:'bath',t:'bɑːθ'},{w:'thin',t:'θɪn'},{w:'nothing',t:'ˈnʌθɪŋ'}] },
+  { sym:'ð', place:2, manner:4, voicing:'vd', name:'voiced dental fricative',
+    cueEN:'The <i>th</i> of <i>this</i>, <i>father</i>, <i>mother</i>, <i>breathe</i>. Voiced partner of [θ]. Same tongue position, with vocal-cord buzz. In very casual speech, reduces toward [d] in many varieties.',
+    cueFR:'<b>N’EXISTE PAS EN FRANÇAIS.</b> Version <b>voisée</b> de [θ]. Les francophones le rendent souvent par [z] (<i>zis</i>) ou [d] (<i>dis</i>) — évitez les deux. Dites [θ] et ajoutez un bourdonnement des cordes vocales.',
+    ex:[{w:'this',t:'ðɪs'},{w:'father',t:'ˈfɑːðə'},{w:'mother',t:'ˈmʌðə'},{w:'breathe',t:'briːð'}] },
+  { sym:'s', place:3, manner:4, voicing:'vl', name:'voiceless alveolar fricative',
+    cueEN:'The hiss. Tongue near the alveolar ridge, narrow airstream. <i>Sun</i>, <i>miss</i>.',
+    cueFR:'Identique au [s] de <i>si</i>.',
+    ex:[{w:'sun',t:'sʌn'},{w:'miss',t:'mɪs'},{w:'face',t:'feɪs'},{w:'kiss',t:'kʰɪs'}] },
+  { sym:'z', place:3, manner:4, voicing:'vd', name:'voiced alveolar fricative',
+    cueEN:'Voiced [s]. Same hiss, with buzz. Often spelled &lt;s&gt; in English: <i>rose</i>, <i>is</i>, <i>lose</i>.',
+    cueFR:'Identique au [z] de <i>zéro</i>, <i>rose</i>.',
+    ex:[{w:'zoo',t:'zuː'},{w:'rose',t:'rəʊz'},{w:'jazz',t:'dʒæz'},{w:'lose',t:'luːz'}] },
+  { sym:'ʃ', place:4, manner:4, voicing:'vl', name:'voiceless postalveolar fricative',
+    cueEN:'The shush sound: <i>ship</i>, <i>wash</i>, <i>sure</i>, <i>nation</i>. Tongue further back than [s], lips slightly pushed forward.',
+    cueFR:'Identique au [ʃ] de <i>chat</i>, <i>cheval</i>.',
+    ex:[{w:'ship',t:'ʃɪp'},{w:'wash',t:'wɒʃ'},{w:'nation',t:'ˈneɪʃən'},{w:'sure',t:'ʃʊə'}] },
+  { sym:'ʒ', place:4, manner:4, voicing:'vd', name:'voiced postalveolar fricative',
+    cueEN:'The buzz of <i>measure</i>, <i>vision</i>, <i>garage</i>, <i>leisure</i>. Voiced [ʃ]. Usually spelled &lt;s&gt; (vision) or &lt;g&gt; (garage) — almost never &lt;j&gt; in native words.',
+    cueFR:'Identique au [ʒ] de <i>je</i>, <i>jamais</i>, <i>rouge</i>.',
+    ex:[{w:'measure',t:'ˈmɛʒə'},{w:'vision',t:'ˈvɪʒən'},{w:'garage',t:'ˈɡærɑːʒ'},{w:'leisure',t:'ˈlɛʒə'}] },
+  { sym:'x', place:6, manner:4, voicing:'vl', name:'voiceless velar fricative',
+    cueEN:'The Scottish <i>ch</i> of <i>loch</i>, the German <i>ch</i> of <i>Bach</i>, the Spanish <i>j</i> of <i>jamón</i>. In English, survives only in ScotE and loanwords (<i>Chanukah</i>). A [k] that leaks instead of closing.',
+    cueFR:'<b>N’existe ni en français ni en anglais standard.</b> Son allemand de <i>Bach</i>, <i>j</i> espagnol de <i>jamón</i>. Position [k] mais sans fermer — laissez l’air passer en frottant contre le voile du palais.',
+    ex:[{w:'loch (ScotE)',t:'lɒx'},{w:'Bach (German)',t:'bax'},{w:'jamón (Spanish)',t:'xaˈmon'},{w:'Chanukah',t:'ˈxɑnəkə'}] },
+  { sym:'h', place:7, manner:4, voicing:'vl', name:'voiceless glottal fricative',
+    cueEN:'A gentle breath with open vocal cords. <i>Hat</i>, <i>house</i>, <i>ahead</i>. Disappears in Cockney and some Caribbean varieties (h-dropping: &rsquo;at, &rsquo;ouse).',
+    cueFR:'Le <b>h aspiré</b> français n’est PAS un vrai [h] — c’est juste une absence de liaison. Le [h] anglais est un vrai souffle, comme soupirer ou faire de la buée sur une vitre.',
+    ex:[{w:'hat',t:'hæt'},{w:'behind',t:'bɪˈhaɪnd'},{w:'house',t:'haʊs'},{w:'ahead',t:'əˈhɛd'}] },
+
+  // Affricates
+  { sym:'tʃ', place:4, manner:5, voicing:'vl', name:'voiceless postalveolar affricate',
+    cueEN:'The <i>ch</i> of <i>chip</i>, <i>church</i>, <i>match</i>, <i>nature</i>. A [t] and [ʃ] fused into one sound — not two separate segments.',
+    cueFR:'<b>Pas natif en français</b>, mais dans les emprunts : <i>tchèque</i> [tʃɛk], <i>match</i>, <i>tchao</i>. [t] + [ʃ] prononcés comme un son unique.',
+    ex:[{w:'chip',t:'tʃɪp'},{w:'match',t:'mætʃ'},{w:'church',t:'tʃɜːtʃ'},{w:'nature',t:'ˈneɪtʃə'}] },
+  { sym:'dʒ', place:4, manner:5, voicing:'vd', name:'voiced postalveolar affricate',
+    cueEN:'The <i>j</i> of <i>judge</i>, <i>giant</i>, <i>bridge</i>, <i>edge</i>. Voiced affricate. Spelled &lt;j&gt;, &lt;g&gt; (before e, i, y), or &lt;dge&gt;.',
+    cueFR:'<b>Pas natif en français.</b> Dans les emprunts : <i>jazz</i> [dʒaz], <i>jean</i>, <i>gin</i>. <b>PIÈGE :</b> le &lt;j&gt; français de <i>jamais</i> est [ʒ], PAS [dʒ]. [dʒ] = [d] + [ʒ] collés.',
+    ex:[{w:'judge',t:'dʒʌdʒ'},{w:'giant',t:'ˈdʒaɪənt'},{w:'bridge',t:'brɪdʒ'},{w:'edge',t:'ɛdʒ'}] },
+
+  // Approximants
+  { sym:'ɹ', place:3, manner:6, voicing:'vd', name:'alveolar approximant',
+    cueEN:'The default English r in RP and SAE. Tongue tip curls back toward the roof of the mouth without touching — no contact, no vibration, no throat sound. Broad transcription uses /r/; narrow transcription uses [ɹ].',
+    cueFR:'<b>TRÈS différent du [ʁ] français uvulaire.</b> Le r anglais ne touche rien, ne gratte rien. Pointe recourbée vers l’arrière, sans contact. Zéro vibration dans la gorge.',
+    ex:[{w:'red',t:'ɹɛd'},{w:'hurry',t:'ˈhʌɹi'},{w:'around',t:'əˈɹaʊnd'},{w:'very',t:'ˈvɛɹi'}] },
+  { sym:'j', place:5, manner:6, voicing:'vd', name:'palatal approximant',
+    cueEN:'The <i>y</i> of <i>yes</i>, <i>young</i>, <i>yellow</i>. A very quick [i]-glide into the next vowel. Spelled &lt;y&gt; in English — NEVER &lt;j&gt;, which is the [dʒ] affricate.',
+    cueFR:'Identique au [j] de <i>yeux</i>, <i>hier</i>, <i>fille</i>. <b>PIÈGE :</b> en anglais il s’écrit &lt;y&gt;, pas &lt;j&gt; (qui est [dʒ] en anglais).',
+    ex:[{w:'yes',t:'jɛs'},{w:'you',t:'juː'},{w:'beyond',t:'bɪˈjɒnd'},{w:'yellow',t:'ˈjɛləʊ'}] },
+  { sym:'w', place:0, manner:6, voicing:'vd', name:'labial-velar approximant',
+    cueEN:'Round your lips and make a quick [u] that glides into the next vowel. <i>We</i>, <i>away</i>, <i>queen</i>. Articulated at two places at once — lips and velum.',
+    cueFR:'Identique au [w] de <i>oui</i>, <i>moi</i>, <i>week-end</i>. Articulé simultanément aux lèvres (arrondies) et au voile du palais.',
+    ex:[{w:'we',t:'wiː'},{w:'away',t:'əˈweɪ'},{w:'queen',t:'kwiːn'},{w:'twice',t:'twaɪs'}] },
+  { sym:'ʍ', place:0, manner:6, voicing:'vl', name:'voiceless labial-velar',
+    cueEN:'A voiceless [w] — like whispering &ldquo;w&rdquo;. Distinguishes <i>which</i> from <i>witch</i> and <i>whale</i> from <i>wail</i> in conservative ScotE and some older SAE speakers. Mostly gone from modern RP and General American.',
+    cueFR:'<b>N’existe pas en français.</b> Un [w] <b>chuchoté</b> — bouche en forme de [w], mais sans voix. Comme souffler pour éteindre une bougie en disant <i>ouh</i>.',
+    ex:[{w:'which (ScotE)',t:'ʍɪtʃ'},{w:'whale (ScotE)',t:'ʍeɪl'},{w:'what (ScotE)',t:'ʍɒt'}] },
+
+  // Lateral
+  { sym:'l', place:3, manner:7, voicing:'vd', name:'alveolar lateral approximant',
+    cueEN:'Tongue tip on the ridge, air escapes around the sides. English has TWO allophones: <b>clear</b> [l] at the start of a syllable (<i>leaf</i>), and <b>dark</b> [ɫ] at the end (<i>feel</i>). Same phoneme, different timbre. Dark [ɫ] has tongue retracted toward the velum, almost like an [ʊ].<br><b>Key for ScotE:</b> Bauer (28) writes that ScotE uses dark [ɫ] in <em>all</em> positions.',
+    cueFR:'Le [l] français est <b>toujours clair</b> (<i>lait</i>, <i>belle</i>). L’anglais a deux variantes allophoniques : <b>clair</b> [l] en début de syllabe, <b>sombre</b> [ɫ] en fin. Le [ɫ] sombre a la langue reculée, timbre presque [ʊ].',
+    ex:[{w:'leaf (clear l)',t:'liːf'},{w:'feel (dark l)',t:'fiːɫ'},{w:'light',t:'laɪt'},{w:'well',t:'wɛɫ'}] },
+];
+
+// ---- Vowels with SVG positions (x,y) inside 680x400 viewBox ----
+const VOWELS = [
+  // cardinal / English-relevant
+  { sym:'i',  label:'FLEECE', x:130, y:70,  name:'close front unrounded (tense)',
+    cueEN:'The <i>ee</i> of <i>see</i>, <i>meat</i>, <i>key</i>, <i>machine</i>. Tense, long, high front — the tongue is as close to the roof of the mouth as it gets without being a consonant.',
+    cueFR:'Identique au [i] de <i>si</i>, <i>fini</i>. Long en anglais : [iː].',
+    ex:[{w:'see',t:'siː'},{w:'meat',t:'miːt'},{w:'key',t:'kʰiː'},{w:'machine',t:'məˈʃiːn'}] },
+  { sym:'ɪ',  label:'KIT',    x:175, y:100, name:'near-close near-front unrounded (lax)',
+    cueEN:'The short, lax vowel of <i>bid</i>, <i>ship</i>, <i>village</i>. Shorter and more relaxed than [i]: tongue slightly lower and more central. Native English speakers hear <i>bid</i> and <i>bead</i> as completely different vowels.',
+    cueFR:'<b>N’existe pas en français.</b> Plus court et plus <b>relâché</b> que [i] — langue plus basse, plus centrale. Si vous dites <i>bid</i> avec un [i] français tendu, ça sonne comme <i>beed</i>.',
+    ex:[{w:'bid',t:'bɪd'},{w:'ship',t:'ʃɪp'},{w:'myth',t:'mɪθ'},{w:'village',t:'ˈvɪlɪdʒ'}] },
+  { sym:'e',  label:'FACE (ScotE)', x:155, y:160, name:'close-mid front unrounded',
+    cueEN:'In ScotE, <i>day</i> and <i>name</i> are pure monophthongs: [de], [nem]. In RP and SAE, FACE is a diphthong [eɪ] — the vowel glides upward. The Scottish version is short, crisp, and doesn’t move.',
+    cueFR:'Identique au [e] de <i>été</i>, <i>année</i>. Le monophtongue écossais.',
+    ex:[{w:'day (ScotE)',t:'de'},{w:'name (ScotE)',t:'nem'},{w:'café',t:'ˈkæfeɪ'}] },
+  { sym:'ɛ',  label:'DRESS',  x:185, y:220, name:'open-mid front unrounded',
+    cueEN:'The vowel of <i>bed</i>, <i>step</i>, <i>head</i>, <i>said</i>. Open-mid front — jaw lower than [e], higher than [æ].',
+    cueFR:'Identique au [ɛ] de <i>mère</i>, <i>belle</i>, <i>fête</i>.',
+    ex:[{w:'bed',t:'bɛd'},{w:'step',t:'stɛp'},{w:'head',t:'hɛd'},{w:'said',t:'sɛd'}] },
+  { sym:'æ',  label:'TRAP',   x:205, y:295, name:'near-open front unrounded',
+    cueEN:'The &ldquo;American-sounding&rdquo; vowel of <i>cat</i>, <i>bat</i>, <i>hand</i>, <i>family</i>. Jaw lower than [ɛ], lips spread. In very broad SAE, often raised and even diphthongised toward [eə] (<i>kyant</i> for <i>can&rsquo;t</i>).',
+    cueFR:'<b>N’EXISTE PAS EN FRANÇAIS.</b> Entre [a] de <i>patte</i> et [ɛ] de <i>belle</i>. Partez de [ɛ], baissez la mâchoire en étalant les lèvres. <b>Piège :</b> ne pas dire [kat] pour <i>cat</i>.',
+    ex:[{w:'cat',t:'kʰæt'},{w:'bat',t:'bæt'},{w:'hand',t:'hænd'},{w:'family',t:'ˈfæməli'}] },
+  { sym:'a',  label:'BATH (ScotE)', x:220, y:340, name:'open front unrounded',
+    cueEN:'In ScotE, BATH words (<i>bath</i>, <i>dance</i>, <i>pass</i>, <i>staff</i>) use the same short [a] as TRAP. Flat, clipped, no lengthening — RP would lengthen these to [ɑː]; ScotE doesn’t.',
+    cueFR:'Identique au [a] de <i>patte</i>, <i>chat</i>. En ScotE, BATH et TRAP ont la même voyelle (pas de division BATH).',
+    ex:[{w:'bath (ScotE)',t:'baθ'},{w:'dance (ScotE)',t:'dans'},{w:'pass (ScotE)',t:'pas'}] },
+
+  { sym:'ə',  label:'commA',  x:340, y:200, name:'mid central (schwa)',
+    cueEN:'The single most common vowel in spoken English. Every unstressed syllable drifts toward it: <i>about</i>, <i>sofa</i>, <i>comma</i>, <i>allow</i> — the unstressed bits are all [ə]. Central, short, almost colourless.',
+    cueFR:'Identique au [ə] de <i>le</i>, <i>je</i>, <i>de</i>. La <b>voyelle par défaut</b> de l’anglais parlé.',
+    ex:[{w:'about',t:'əˈbaʊt'},{w:'sofa',t:'ˈsəʊfə'},{w:'comma',t:'ˈkɒmə'},{w:'allow',t:'əˈlaʊ'}] },
+  { sym:'ɜ',  label:'NURSE (RP)', x:340, y:230, name:'open-mid central unrounded',
+    cueEN:'The vowel of <i>bird</i>, <i>nurse</i>, <i>fern</i>, <i>earn</i> in RP. Long [ɜː], central, unrounded. In SAE (rhotic) it merges with [ɚ] — r-coloured schwa: [bɝd].',
+    cueFR:'<b>N’existe pas en français.</b> Comme [œ] de <i>sœur</i>, <i>fleur</i>, <b>MAIS sans arrondir les lèvres</b>. Position linguale identique, lèvres étalées.',
+    ex:[{w:'bird (RP)',t:'bɜːd'},{w:'fern',t:'fɜːn'},{w:'nurse',t:'nɜːs'},{w:'earn',t:'ɜːn'}] },
+  { sym:'ɐ',  label:'STRUT (AusE)', x:340, y:280, name:'near-open central',
+    cueEN:'The Australian realisation of STRUT: more central than RP [ʌ]. <i>But</i> sounds almost like [bat] to a non-Aussie ear.',
+    cueFR:'Proche du [a] français mais un peu plus central. Variante australienne.',
+    ex:[{w:'but (AusE)',t:'bɐt'},{w:'cup (AusE)',t:'kɐp'}] },
+
+  { sym:'u',  label:'GOOSE',  x:560, y:75,  name:'close back rounded',
+    cueEN:'The <i>oo</i> of <i>boot</i>, <i>blue</i>, <i>true</i>, <i>who</i>. Long, high back, rounded lips. In modern SAE and younger RP speakers, it is increasingly <b>fronted</b> — closer to [ʉ] — a widely-noted change in progress.',
+    cueFR:'Identique au [u] de <i>où</i>, <i>tout</i>, <i>vous</i>. <b>PIÈGE :</b> pas [y] — l’anglais standard n’a pas la voyelle de <i>tu</i>.',
+    ex:[{w:'boot',t:'buːt'},{w:'blue',t:'bluː'},{w:'true',t:'tʰɹuː'},{w:'who',t:'huː'}] },
+  { sym:'ʊ',  label:'FOOT',   x:510, y:100, name:'near-close near-back rounded',
+    cueEN:'The short vowel of <i>put</i>, <i>book</i>, <i>good</i>, <i>could</i>. Lax — a bit lower, more central, and less rounded than [u]. In northern English, FOOT and STRUT are merged (<i>put</i> and <i>putt</i> both [pʊt]).',
+    cueFR:'<b>N’existe pas en français.</b> Plus court et plus <b>relâché</b> que [u], moins arrondi. Si vous dites <i>book</i> avec un [u] tendu, c’est trop long et trop tendu.',
+    ex:[{w:'put',t:'pʊt'},{w:'book',t:'bʊk'},{w:'good',t:'ɡʊd'},{w:'could',t:'kʰʊd'}] },
+  { sym:'o',  label:'GOAT (ScotE)', x:540, y:160, name:'close-mid back rounded',
+    cueEN:'In ScotE, <i>go</i> is simply [ɡo] — a pure monophthong. In RP it’s the diphthong [əʊ] (the vowel glides); in SAE it’s [oʊ]. The ScotE version is cleaner and shorter.',
+    cueFR:'Identique au [o] de <i>beau</i>, <i>rose</i>, <i>tôt</i>. Le monophtongue écossais.',
+    ex:[{w:'go (ScotE)',t:'ɡo'},{w:'coat (ScotE)',t:'kot'},{w:'rose (ScotE)',t:'roz'}] },
+  { sym:'ɔ',  label:'THOUGHT',x:510, y:220, name:'open-mid back rounded',
+    cueEN:'The vowel of <i>thought</i>, <i>caught</i>, <i>law</i>, <i>bought</i>. Long [ɔː] in RP, open-mid back, rounded. In much of SAE it has merged with [ɑ] (the cot–caught merger) — <i>cot</i> and <i>caught</i> become homophones.',
+    cueFR:'Identique au [ɔ] de <i>port</i>, <i>sort</i> — mais <b>long et très arrondi</b> en anglais : [ɔː].',
+    ex:[{w:'thought',t:'θɔːt'},{w:'caught',t:'kʰɔːt'},{w:'law',t:'lɔː'},{w:'bought',t:'bɔːt'}] },
+  { sym:'ʌ',  label:'STRUT',  x:430, y:260, name:'open-mid back unrounded',
+    cueEN:'The vowel of <i>but</i>, <i>cup</i>, <i>love</i>, <i>country</i>. Central-back, unrounded, short. Sounds almost muted — RP speakers perceive it as an &ldquo;emphatic schwa&rdquo;. In northern English it doesn’t exist: <i>strut</i> has [ʊ] instead.',
+    cueFR:'<b>N’existe pas en français.</b> Entre [a] et [ɔ], central-arrière, <b>non arrondi</b>. Partez d’un [a], reculez la langue, <b>ne pas arrondir</b>. Piège classique : ne pas confondre avec [ɑ] (PALM) ni avec [a].',
+    ex:[{w:'but',t:'bʌt'},{w:'cup',t:'kʰʌp'},{w:'love',t:'lʌv'},{w:'country',t:'ˈkʰʌntri'}] },
+  { sym:'ɒ',  label:'LOT (RP)',x:490, y:305, name:'open back rounded',
+    cueEN:'The RP vowel of <i>lot</i>, <i>cot</i>, <i>hot</i>, <i>body</i>. Open, back, lightly rounded. Americans don’t have this vowel — SAE <i>lot</i> is [lɑt] (merged with PALM).',
+    cueFR:'Proche du [ɔ] français mais <b>plus ouvert</b> (mâchoire plus basse) et <b>légèrement arrondi</b>. Spécifique à RP.',
+    ex:[{w:'lot (RP)',t:'lɒt'},{w:'cot (RP)',t:'kɒt'},{w:'hot (RP)',t:'hɒt'},{w:'body (RP)',t:'ˈbɒdi'}] },
+  { sym:'ɑ',  label:'PALM',   x:460, y:340, name:'open back unrounded',
+    cueEN:'The vowel of <i>palm</i>, <i>father</i>, <i>spa</i>, <i>calm</i>. Long, open, back, unrounded. <b>This is the vowel in your clip:</b> <i>father</i> [ˈfɑːðə]. In SAE it also covers LOT (<i>cot</i> [kɑt]); in RP it is strictly PALM.',
+    cueFR:'Proche du [ɑ] postérieur de <i>pâte</i> (français conservateur). <b>À distinguer</b> du [a] antérieur de <i>patte</i>. Long en anglais : [ɑː].',
+    ex:[{w:'palm',t:'pɑːm'},{w:'father',t:'ˈfɑːðə'},{w:'spa',t:'spɑː'},{w:'calm',t:'kʰɑːm'}] },
+];
+
+// ---- Lexical sets ----
+const LEXSETS = {
+  checked: [
+    { name:'KIT', sym:'ɪ', word:'bid' },
+    { name:'DRESS', sym:'ɛ', word:'bed' },
+    { name:'TRAP', sym:'æ', word:'bat' },
+    { name:'LOT', sym:'ɒ/ɑ', word:'cot' },
+    { name:'STRUT', sym:'ʌ', word:'cup' },
+    { name:'FOOT', sym:'ʊ', word:'put' },
+  ],
+  free: [
+    { name:'FLEECE', sym:'iː', word:'see' },
+    { name:'FACE', sym:'eɪ/e', word:'day' },
+    { name:'PALM', sym:'ɑː', word:'palm' },
+    { name:'THOUGHT', sym:'ɔː', word:'thought' },
+    { name:'GOAT', sym:'əʊ/oʊ/o', word:'goat' },
+    { name:'GOOSE', sym:'uː', word:'boot' },
+    { name:'PRICE', sym:'aɪ', word:'my' },
+    { name:'CHOICE', sym:'ɔɪ', word:'boy' },
+    { name:'MOUTH', sym:'aʊ', word:'now' },
+    { name:'BATH', sym:'ɑː/æ', word:'bath' },
+    { name:'CLOTH', sym:'ɒ/ɔ', word:'cloth' },
+  ],
+  rhotic: [
+    { name:'NURSE', sym:'ɜː/ɝ', word:'bird' },
+    { name:'NEAR', sym:'ɪə/ɪr', word:'near' },
+    { name:'SQUARE', sym:'ɛː/ɛr', word:'square' },
+    { name:'START', sym:'ɑː/ɑr', word:'start' },
+    { name:'NORTH', sym:'ɔː/ɔr', word:'north' },
+    { name:'FORCE', sym:'ɔː/or', word:'four' },
+    { name:'CURE', sym:'ʊə/ʊr', word:'poor' },
+  ],
+  weak: [
+    { name:'happY', sym:'i / ɪ', word:'happy' },
+    { name:'lettER', sym:'ə/ɚ', word:'letter' },
+    { name:'commA', sym:'ə', word:'sofa' },
+    { name:'horsES', sym:'ɪ/ə', word:'horses' },
+  ],
+};
+
+// ---- Diacritics ----
+const DIACRITICS = {
+  suprasegmental: [
+    { sym:'ː', name:'Long', desc:'Held noticeably longer than a plain segment. Placed after the segment.', ex:'sheep [ʃiːp]', key:'sheep' },
+    { sym:'ˑ', name:'Half-long', desc:'In between short and long.', ex:'[aˑ]', key:null },
+    { sym:'ˈ', name:'Primary stress', desc:'Placed before the stressed syllable.', ex:"photograph [ˈfəʊtəɡrɑːf]", key:'photograph' },
+    { sym:'ˌ', name:'Secondary stress', desc:'Weaker, non-primary stress.', ex:"photographic [ˌfəʊtəˈɡræfɪk]", key:'photographic' },
+    { sym:'.', name:'Syllable break', desc:'Optional mark separating syllables.', ex:'react [riˈækt] ~ [ri.ˈækt]', key:null },
+  ],
+  consonantal: [
+    { sym:'ʰ', name:'Aspirated', desc:'Puff of air after release. English syllable-initial voiceless stops are aspirated.', ex:'pen [pʰɛn]', key:'pen' },
+    { sym:'ˠ', name:'Velarised (dark l)', desc:'Tongue body raised to the velum. Hence &ldquo;dark&rdquo; [ɫ] or [lˠ].', ex:'feel [fiːɫ]', key:'feel' },
+    { sym:'ʲ', name:'Palatalised', desc:'Secondary raising of the tongue body to the palate. Common in Russian and Irish Gaelic.', ex:'[tʲ], [lʲ]', key:null },
+    { sym:'ʷ', name:'Labialised', desc:'Lip rounding added to a consonant.', ex:'[kʷ], [sʷ]', key:null },
+    { sym:'̥',  name:'Voiceless', desc:'Ring below a normally-voiced segment shows devoicing. &ldquo;[r̥]&rdquo; or &ldquo;[l̥]&rdquo; after a voiceless stop in English.', ex:'try [tr̥aɪ]', key:'try' },
+    { sym:'̩',  name:'Syllabic', desc:'Vertical line below a consonant: the consonant forms its own syllable nucleus.', ex:'button [ˈbʌtn̩]', key:'button' },
+    { sym:'̪',  name:'Dental', desc:'Bridge below the symbol: articulated at the teeth rather than at the alveolar ridge. Common for /t/, /n/, /l/ before a /θ/ or /ð/ in English, and variety-wide in Indian English.', ex:'width [wɪtˆθ] or [wɪt̪θ]', key:null },
+    { sym:'˞',  name:'Rhotic (r-coloured)', desc:'The &ldquo;hook&rdquo; mark: the segment is produced with r-colouring. Also written as [ɚ] for schwa, [ɝ] for NURSE.', ex:'letter (GA) [ˈlɛɾɚ]', key:'letter' },
+    { sym:'ʼ',  name:'Ejective', desc:'Apostrophe: stop made with a glottalic airstream. Not in standard English but common in many African and American languages.', ex:'[pʼ], [tʼ], [kʼ]', key:null },
+    { sym:'̚',  name:'Unreleased', desc:'Corner mark: the stop is formed but not audibly released. Common word-finally in many English varieties.', ex:'stop [stɒp̚]', key:null },
+  ],
+  vocalic: [
+    { sym:'̃',  name:'Nasalised', desc:'Tilde over a vowel: the vowel is produced with airflow through the nose. French <em>bon</em> [bɔ̃]; also before a nasal consonant in some varieties.', ex:'can\'t [kæ̃ʔ]', key:"can't" },
+    { sym:'̯',  name:'Non-syllabic', desc:'Inverted breve below: the vowel is the glide portion of a diphthong, not the nucleus.', ex:'my [ma͜ɪ] = [maɪ̯]', key:'my' },
+    { sym:'̽',  name:'Mid-centralised', desc:'Over-sign indicating a vowel is produced closer to schwa than its base symbol suggests.', ex:'[ɪ̽]', key:null },
+    { sym:'̈',  name:'Centralised', desc:'Diaeresis: the vowel is produced more towards the centre of the mouth than the base symbol.', ex:'[ë]', key:null },
+    { sym:'̝',  name:'Raised', desc:'Upward T: the vowel is slightly higher than the base symbol.', ex:'[e̝]', key:null },
+    { sym:'̞',  name:'Lowered', desc:'Downward T: the vowel is slightly lower.', ex:'[e̞]', key:null },
+  ],
+};
+
+// ---- Varieties features ----
+const VARIETIES = [
+  { feat:'Rhoticity', rp:'Non-rhotic. <i>harder</i> [ˈhɑːdə]. <i>r</i> only before a vowel.', scot:'Rhotic (variable). <i>harder</i> [ˈhɑɾdəɾ] or [ˈhɑrdɚ]. Tap or approximant.', sae:'Rhotic. <i>harder</i> [ˈhɑːɹdɚ]. Approximant everywhere.' },
+  { feat:'Dark l / clear l', rp:'Clear <span class="tr">[l]</span> in onset, dark <span class="tr">[ɫ]</span> in coda: <i>leaf</i> [liːf], <i>feel</i> [fiːɫ].', scot:'Dark <span class="tr">[ɫ]</span> in <em>all</em> positions (Bauer 28). Stuart-Smith: occasional clear [l] in SSE.', sae:'Dark <span class="tr">[ɫ]</span> broadly, with regional variation; some dialects keep clear [l] in onset.' },
+  { feat:'Scottish Vowel Length Rule (SVLR)', rp:'No SVLR. Length contrast is phonemic (e.g. SIT [ɪ] vs. SEAT [iː]).', scot:'Yes. Vowels are short unless followed by <i>r</i>, a voiced fricative, or a morpheme boundary (Stuart-Smith 57). <i>greed</i> [ɡrid] vs. <i>agreed</i> [əˈɡriːd].', sae:'No SVLR. Vowel length is allophonic (longer before voiced consonants).' },
+  { feat:'BATH set', rp:'Long <span class="tr">[ɑː]</span>: <i>bath</i> [bɑːθ], <i>dance</i> [dɑːns].', scot:'Short <span class="tr">[a]</span>, same as TRAP: <i>bath</i> [baθ].', sae:'Short <span class="tr">[æ]</span>, same as TRAP: <i>bath</i> [bæθ].' },
+  { feat:'LOT – THOUGHT', rp:'Distinct: <i>cot</i> [kɒt] ≠ <i>caught</i> [kɔːt].', scot:'Often merged to <span class="tr">[ɔ]</span>: <i>cot</i> = <i>caught</i>.', sae:'Increasingly merged (especially West, Canada); East/NYC preserves the distinction.' },
+  { feat:'FOOT – STRUT split', rp:'Split: <i>put</i> [pʊt] vs. <i>cut</i> [kʌt].', scot:'Split (merged with GOOSE in older speakers, e.g. [pʉt]).', sae:'Split: <i>put</i> [pʊt] vs. <i>cut</i> [kʌt].' },
+  { feat:'FACE / GOAT vowels', rp:'Diphthongs: <i>day</i> [deɪ], <i>go</i> [ɡəʊ].', scot:'Monophthongs: <i>day</i> [de], <i>go</i> [ɡo].', sae:'Diphthongs (often tenser): <i>day</i> [deɪ], <i>go</i> [ɡoʊ].' },
+  { feat:'wh / w merger', rp:'Merged: <i>which</i> = <i>witch</i> [wɪtʃ].', scot:'Distinct: <i>which</i> [ʍɪtʃ] ≠ <i>witch</i> [wɪtʃ].', sae:'Merged in most regions; distinction kept in parts of the South.' },
+  { feat:'Yod-dropping (in <i>new, tune</i>)', rp:'Yod retained: <i>new</i> [njuː], <i>tune</i> [tjuːn].', scot:'Yod retained.', sae:'Yod-dropping: <i>new</i> [nuː], <i>tune</i> [tuːn].' },
+  { feat:'T-flapping', rp:'Rare — tap mainly in fast speech.', scot:'Limited; taps can appear in /r/ position, not /t/.', sae:'Pervasive: <i>butter</i> [ˈbʌɾɚ], <i>water</i> [ˈwɔɾɚ].' },
+];
+
+/* =====================================================================
+   RENDERING
+   ===================================================================== */
+
+// Tabs
+document.querySelectorAll('#tabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#tabs button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.panel).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+
+// --- Audio via Web Speech API ---
+const VOICE_STORAGE_KEY = 'ipa-tutor-voice';
+let selectedVoice = null;
+let availableVoices = [];
+
+// Rank available voices so the best English voice floats to the top of the picker
+// and is auto-selected on first load. Siri voices are macOS neural; (Enhanced)
+// and (Premium) suffixes mark downloaded high-quality Apple voices; "Google ..."
+// are Chrome's cloud voices; the named fallback list covers standard macOS/iOS voices.
+function rankVoice(v) {
+  const name = v.name || '';
+  const uri = v.voiceURI || '';
+  const lang = (v.lang || '').toLowerCase();
+  if (!lang.startsWith('en')) return -1;
+  let score = 0;
+  if (/siri/i.test(name) || /siri/i.test(uri)) score += 1000;
+  if (/\bEnhanced\b/i.test(name)) score += 500;
+  if (/\bPremium\b/i.test(name) || /premium/i.test(uri)) score += 400;
+  if (/^Google /.test(name)) score += 300;
+  if (/neural/i.test(name) || /neural/i.test(uri)) score += 250;
+  const base = name.replace(/\s*\(.*\)\s*$/, '');
+  if (/^(Daniel|Samantha|Kate|Serena|Karen|Moira|Nicky|Martha|Fiona|Alex|Tessa|Allison|Ava|Susan|Tom|Fred|Oliver|Arthur|Jamie)$/.test(base)) score += 100;
+  if (lang === 'en-gb') score += 20;
+  else if (lang === 'en-us') score += 10;
+  if (v.default) score += 5;
+  return score;
+}
+
+function populateVoicePicker() {
+  const select = document.getElementById('voice-select');
+  if (!select || !('speechSynthesis' in window)) return;
+  availableVoices = window.speechSynthesis.getVoices()
+    .filter(v => (v.lang || '').toLowerCase().startsWith('en'))
+    .sort((a, b) => rankVoice(b) - rankVoice(a));
+  // Use DOM methods (not innerHTML) since voice names come from the OS.
+  while (select.firstChild) select.removeChild(select.firstChild);
+  if (availableVoices.length === 0) {
+    const opt = document.createElement('option');
+    opt.textContent = 'No English voices available';
+    select.appendChild(opt);
+    return;
+  }
+  const saved = localStorage.getItem(VOICE_STORAGE_KEY);
+  availableVoices.forEach(v => {
+    const score = rankVoice(v);
+    const tag = score >= 500 ? ' ★' : (score >= 250 ? ' ·' : '');
+    const opt = document.createElement('option');
+    opt.value = v.voiceURI;
+    opt.textContent = `${v.name} (${v.lang})${tag}`;
+    select.appendChild(opt);
+  });
+  const match = saved && availableVoices.find(v => v.voiceURI === saved);
+  selectedVoice = match || availableVoices[0];
+  select.value = selectedVoice.voiceURI;
+}
+
+function initVoicePicker() {
+  const select = document.getElementById('voice-select');
+  const test = document.getElementById('voice-test');
+  if (!select || !test || !('speechSynthesis' in window)) return;
+  populateVoicePicker();
+  // Chrome: voices load async; Safari: usually synchronous. Handle both.
+  window.speechSynthesis.addEventListener('voiceschanged', populateVoicePicker);
+  select.addEventListener('change', () => {
+    selectedVoice = availableVoices.find(v => v.voiceURI === select.value) || null;
+    if (selectedVoice) localStorage.setItem(VOICE_STORAGE_KEY, selectedVoice.voiceURI);
+  });
+  test.addEventListener('click', () => speak('The quick brown fox jumps over the lazy dog.'));
+}
+
+function speak(text, lang) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  if (selectedVoice) {
+    u.voice = selectedVoice;
+    u.lang = selectedVoice.lang;
+  } else {
+    u.lang = lang || 'en-GB';
+  }
+  u.rate = 0.85;
+  window.speechSynthesis.speak(u);
+}
+
+// --- Consonant chart ---
+function buildConsonantChart() {
+  const tbl = document.getElementById('consonant-chart');
+  let html = '<thead><tr><th class="row-label"></th>';
+  PLACES.forEach(p => html += `<th>${p}</th>`);
+  html += '</tr></thead><tbody>';
+
+  // Which cells are "impossible" (hatched) in the IPA chart - simplified
+  const impossible = {
+    // manner-place pairs
+    '1-0':true, // nasal bilabial is fine
+    // Trill - only a few places in English chart
+  };
+
+  MANNERS.forEach((m, mi) => {
+    html += `<tr><th class="row-label">${m}</th>`;
+    for (let pi = 0; pi < PLACES.length; pi++) {
+      const vl = CONSONANTS.find(c => c.place===pi && c.manner===mi && c.voicing==='vl');
+      const vd = CONSONANTS.find(c => c.place===pi && c.manner===mi && c.voicing==='vd');
+      if (!vl && !vd) {
+        // most empties we leave blank rather than hatched to keep the chart readable
+        html += `<td></td>`;
+      } else if (vl && vd) {
+        html += `<td><div class="cell split" data-sym="${vl.sym}|${vd.sym}"><span class="vl" data-sym="${vl.sym}">${vl.sym}</span><span class="vd" data-sym="${vd.sym}">${vd.sym}</span></div></td>`;
+      } else {
+        const c = vl || vd;
+        const cls = c.voicing === 'vl' ? 'vl' : 'vd';
+        html += `<td><div class="cell" data-sym="${c.sym}"><span class="${cls}" data-sym="${c.sym}">${c.sym}</span></div></td>`;
+      }
+    }
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  tbl.innerHTML = html;
+
+  // attach click handlers to individual spans (to distinguish vl/vd in split cells)
+  tbl.querySelectorAll('span[data-sym]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      showConsonantDetail(el.dataset.sym);
+    });
+  });
+}
+
+function showConsonantDetail(sym) {
+  const c = CONSONANTS.find(x => x.sym === sym);
+  if (!c) return;
+  document.querySelectorAll('#consonant-chart .cell').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll(`#consonant-chart span[data-sym="${sym}"]`).forEach(x => x.parentElement.classList.add('active'));
+
+  const det = document.getElementById('cons-detail');
+  const feats = `${c.voicing === 'vl' ? 'voiceless' : 'voiced'} · ${PLACES[c.place].toLowerCase()} · ${MANNERS[c.manner].toLowerCase()}`;
+  det.innerHTML = `
+    <span class="glyph">${c.sym}</span>
+    <div class="info">
+      <h3>${c.name}</h3>
+      <div class="features">${feats}</div>
+    </div>
+    <div class="cue-grid">
+      ${c.cueEN ? `<div class="cue-box cue-en"><span class="cue-label en">In English</span>${c.cueEN}</div>` : ''}
+      ${c.cueFR ? `<div class="cue-box cue-fr"><span class="cue-label fr">Pour le francophone</span>${c.cueFR}</div>` : ''}
+    </div>
+    ${c.note ? `<p style="margin-top:10px; font-size:14px; color:var(--ink-soft);">${c.note}</p>` : ''}
+    <div class="examples">
+      ${c.ex.map(e => `<div class="ex-chip" data-say="${e.w.replace(/ \([^)]+\)/,'')}"><span class="word">${e.w}</span><span class="tr ipa">[${e.t}]</span><button class="speaker" title="Play">▸</button></div>`).join('')}
+    </div>
+  `;
+  det.querySelectorAll('.ex-chip').forEach(chip => {
+    chip.addEventListener('click', () => speak(chip.dataset.say));
+  });
+}
+
+// --- Vowel chart ---
+function buildVowelChart() {
+  const svg = document.getElementById('vowel-svg');
+  VOWELS.forEach(v => {
+    const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x', v.x);
+    t.setAttribute('y', v.y);
+    t.setAttribute('text-anchor','middle');
+    t.setAttribute('class','vowel');
+    t.setAttribute('data-sym', v.sym);
+    t.textContent = v.sym;
+    svg.appendChild(t);
+
+    // label below
+    const lab = document.createElementNS('http://www.w3.org/2000/svg','text');
+    lab.setAttribute('x', v.x);
+    lab.setAttribute('y', v.y + 14);
+    lab.setAttribute('text-anchor','middle');
+    lab.setAttribute('class','axis');
+    lab.setAttribute('style','font-size:9.5px; pointer-events:none;');
+    lab.textContent = v.label.split(' ')[0];
+    svg.appendChild(lab);
+
+    t.addEventListener('click', () => showVowelDetail(v.sym));
+  });
+}
+
+function showVowelDetail(sym) {
+  const v = VOWELS.find(x => x.sym === sym);
+  if (!v) return;
+  document.querySelectorAll('#vowel-svg text.vowel').forEach(el => el.classList.remove('active'));
+  document.querySelector(`#vowel-svg text.vowel[data-sym="${sym}"]`).classList.add('active');
+
+  const det = document.getElementById('vowel-detail');
+  det.innerHTML = `
+    <span class="glyph">${v.sym}</span>
+    <div class="info">
+      <h3>${v.label} · ${v.name}</h3>
+      <div class="features">Lexical-set keyword: ${v.label}</div>
+    </div>
+    <div class="cue-grid">
+      ${v.cueEN ? `<div class="cue-box cue-en"><span class="cue-label en">In English</span>${v.cueEN}</div>` : ''}
+      ${v.cueFR ? `<div class="cue-box cue-fr"><span class="cue-label fr">Pour le francophone</span>${v.cueFR}</div>` : ''}
+    </div>
+    <div class="examples">
+      ${v.ex.map(e => `<div class="ex-chip" data-say="${e.w.replace(/ \([^)]+\)/,'')}"><span class="word">${e.w}</span><span class="tr ipa">[${e.t}]</span><button class="speaker" title="Play">▸</button></div>`).join('')}
+    </div>
+  `;
+  det.querySelectorAll('.ex-chip').forEach(chip => {
+    chip.addEventListener('click', () => speak(chip.dataset.say));
+  });
+}
+
+// --- Lexical sets ---
+function buildLexicalSets() {
+  Object.entries(LEXSETS).forEach(([group, list]) => {
+    const container = document.querySelector(`.ls-grid[data-group="${group}"]`);
+    if (!container) return;
+    list.forEach(s => {
+      const card = document.createElement('div');
+      card.className = 'ls-card';
+      card.innerHTML = `<div class="name">${s.name}</div><div class="sym">/${s.sym}/</div><div class="word">${s.word}</div>`;
+      card.addEventListener('click', () => speak(s.word));
+      container.appendChild(card);
+    });
+  });
+}
+
+// --- Diacritics ---
+// Combining marks need a placeholder (dotted circle ◌) to render visibly on their own
+const COMBINING_MARKS = new Set(['̥','̩','̪','̯','̝','̞','̃','̽','̈','̚']);
+function displayDiacritic(sym) {
+  if (COMBINING_MARKS.has(sym)) return '◌' + sym;
+  return sym;
+}
+
+function buildDiacritics() {
+  Object.entries(DIACRITICS).forEach(([group, list]) => {
+    const container = document.querySelector(`.dia-list[data-group="${group}"]`);
+    if (!container) return;
+    list.forEach(d => {
+      const card = document.createElement('div');
+      card.className = 'dia-card';
+      card.innerHTML = `
+        <span class="sym">${displayDiacritic(d.sym)}</span><span class="name">${d.name}</span>
+        <div class="desc">${d.desc}</div>
+        <div class="ex ipa">${d.ex}${d.key ? `<span class="word-key">· click to hear &ldquo;${d.key}&rdquo;</span>` : ''}</div>
+      `;
+      if (d.key) {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', () => speak(d.key));
+      }
+      container.appendChild(card);
+    });
+  });
+}
+
+// --- Varieties ---
+function buildVarieties() {
+  const tb = document.getElementById('var-tbody');
+  VARIETIES.forEach(v => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="feat">${v.feat}</td><td>${v.rp}</td><td>${v.scot}</td><td>${v.sae}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+/* =====================================================================
+   QUIZ
+   ===================================================================== */
+
+const QUIZ_POOL = {
+  // Words drawn from: Midterm paragraph ("Please call Stella..."), Puskás 2024 corrigé,
+  // Variety Comparison Master, Stuart-Smith, Bauer. Each entry tagged with variety
+  // where the transcription is variety-specific; untagged = RP default.
+  pairs: [
+    // ————— Midterm paragraph (Please call Stella — GMU accent archive) —————
+    { w:'call',     ipa:'kʰɔːl',       variety:'RP',    tags:['midterm'] },
+    { w:'call',     ipa:'kʰɑlˠ',       variety:'IrE',   tags:['midterm','dark-l'] },
+    { w:'call',     ipa:'kʰɒːlˠ',      variety:'GAusE', tags:['midterm','dark-l'] },
+    { w:'Stella',   ipa:'ˈstɛlə',      variety:'RP',    tags:['midterm'] },
+    { w:'Stella',   ipa:'stɛlɚ',       variety:'IrE',   tags:['midterm','rhotic'] },
+    { w:'ask',      ipa:'ɑːsk',        variety:'RP',    tags:['midterm','BATH'] },
+    { w:'her',      ipa:'hɜː',         variety:'RP',    tags:['midterm','NURSE'] },
+    { w:'her',      ipa:'hɚ',          variety:'IrE',   tags:['midterm','rhotic'] },
+    { w:'her',      ipa:'ə',           variety:'GAusE', tags:['midterm','h-drop'] },
+    { w:'bring',    ipa:'brɪŋ',        variety:'RP',    tags:['midterm','NG'] },
+    { w:'these',    ipa:'ðiːz',        variety:'RP',    tags:['midterm','TH'] },
+    { w:'these',    ipa:'d̪iːz',       variety:'IrE',   tags:['midterm','TH-stop'] },
+    { w:'things',   ipa:'θɪŋz',        variety:'RP',    tags:['midterm','TH','NG'] },
+    { w:'things',   ipa:'t̪ɪŋz',       variety:'IrE',   tags:['midterm','TH-stop'] },
+    { w:'store',    ipa:'stɔː',        variety:'RP',    tags:['midterm','NORTH'] },
+    { w:'store',    ipa:'stɔːɹ',       variety:'IrE',   tags:['midterm','rhotic'] },
+    { w:'store',    ipa:'stoː',        variety:'GAusE', tags:['midterm'] },
+    { w:'six',      ipa:'sɪks',        variety:'RP',    tags:['midterm','KIT'] },
+    { w:'spoons',   ipa:'spuːnz',      variety:'RP',    tags:['midterm','GOOSE'] },
+    { w:'fresh',    ipa:'frɛʃ',        variety:'RP',    tags:['midterm','DRESS'] },
+    { w:'fresh',    ipa:'fɹeʃ',        variety:'IrE',   tags:['midterm','DRESS-reversal'] },
+    { w:'snow',     ipa:'snəʊ',        variety:'RP',    tags:['midterm','GOAT'] },
+    { w:'snow',     ipa:'ʃnõ',         variety:'IrE',   tags:['midterm','monophthong','nasal'] },
+    { w:'peas',     ipa:'pʰiːz',       variety:'RP',    tags:['midterm','FLEECE'] },
+    { w:'five',     ipa:'faɪv',        variety:'RP',    tags:['midterm','PRICE'] },
+    { w:'thick',    ipa:'θɪk',         variety:'RP',    tags:['midterm','TH','KIT'] },
+    { w:'slabs',    ipa:'slæbz',       variety:'RP',    tags:['midterm','TRAP'] },
+    { w:'blue',     ipa:'bluː',        variety:'RP',    tags:['midterm','GOOSE'] },
+    { w:'blue',     ipa:'blʉ',         variety:'IrE',   tags:['midterm','fronted-u'] },
+    { w:'cheese',   ipa:'tʃiːz',       variety:'RP',    tags:['midterm','FLEECE'] },
+    { w:'maybe',    ipa:'ˈmeɪbi',      variety:'RP',    tags:['midterm','FACE'] },
+    { w:'snack',    ipa:'snæk',        variety:'RP',    tags:['midterm','TRAP'] },
+    { w:'snack',    ipa:'snæx',        variety:'IrE',   tags:['midterm','velar-fricative'] },
+    { w:'brother',  ipa:'ˈbrʌðə',      variety:'RP',    tags:['midterm','TH'] },
+    { w:'brother',  ipa:'brʌðəɹ',      variety:'IrE',   tags:['midterm','rhotic'] },
+    { w:'small',    ipa:'smɔːl',       variety:'RP',    tags:['midterm','THOUGHT'] },
+    { w:'plastic',  ipa:'ˈplæstɪk',    variety:'RP',    tags:['midterm','TRAP'] },
+    { w:'snake',    ipa:'sneɪk',       variety:'RP',    tags:['midterm','FACE'] },
+    { w:'snake',    ipa:'sneːk',       variety:'IrE',   tags:['midterm','monophthong'] },
+    { w:'snake',    ipa:'snæɪk',       variety:'GAusE', tags:['midterm','wide-dipht'] },
+    { w:'big',      ipa:'bɪɡ',         variety:'RP',    tags:['midterm','KIT'] },
+    { w:'toy',      ipa:'tɔɪ',         variety:'RP',    tags:['midterm','CHOICE'] },
+    { w:'frog',     ipa:'frɒɡ',        variety:'RP',    tags:['midterm','LOT'] },
+    { w:'kids',     ipa:'kʰɪdz',       variety:'RP',    tags:['midterm','KIT'] },
+    { w:'scoop',    ipa:'skuːp',       variety:'RP',    tags:['midterm','GOOSE'] },
+    { w:'three',    ipa:'θriː',        variety:'RP',    tags:['midterm','TH','FLEECE'] },
+    { w:'three',    ipa:'t̪riː',       variety:'IrE',   tags:['midterm','TH-stop'] },
+    { w:'red',      ipa:'rɛd',         variety:'RP',    tags:['midterm','DRESS'] },
+    { w:'bags',     ipa:'bæɡz',        variety:'RP',    tags:['midterm','TRAP'] },
+    { w:'meet',     ipa:'miːt',        variety:'RP',    tags:['midterm','FLEECE'] },
+    { w:'Wednesday',ipa:'ˈwɛnzdeɪ',    variety:'RP',    tags:['midterm','FACE'] },
+    { w:'train',    ipa:'tʰreɪn',      variety:'RP',    tags:['midterm','FACE'] },
+    { w:'train',    ipa:'tʰɹẽn',       variety:'IrE',   tags:['midterm','monophthong','nasal'] },
+    { w:'station',  ipa:'ˈsteɪʃən',    variety:'RP',    tags:['midterm','FACE'] },
+    { w:'station',  ipa:'steːʃən',     variety:'IrE',   tags:['midterm','monophthong'] },
+    { w:'please',   ipa:'pliːz',       variety:'RP',    tags:['midterm','FLEECE'] },
+    { w:'please',   ipa:'pʰliz',       variety:'IrE',   tags:['midterm','short-vowel'] },
+    { w:'go',       ipa:'ɡəʊ',         variety:'RP',    tags:['midterm','GOAT'] },
+    { w:'go',       ipa:'ɡoː',         variety:'IrE',   tags:['midterm','monophthong'] },
+    { w:'go',       ipa:'ɡo',          variety:'ScotE', tags:['GOAT','monophthong'] },
+    { w:'also',     ipa:'ˈɔːlsəʊ',     variety:'RP',    tags:['midterm'] },
+
+    // ————— Your original father/harder clip —————
+    { w:'father',   ipa:'ˈfɑːðə',      variety:'RP',    tags:['PALM','TH','anchor'] },
+    { w:'harder',   ipa:'ˈhɑːdə',      variety:'RP',    tags:['non-rhotic'] },
+    { w:'harder',   ipa:'ˈhɑːɹdɚ',     variety:'SAE',   tags:['rhotic'] },
+
+    // ————— ScotE-specific (Bauer, Stuart-Smith, Puskás Ch.3) —————
+    { w:'loch',     ipa:'lɒx',         variety:'ScotE', tags:['velar-fricative'] },
+    { w:'which',    ipa:'ʍɪtʃ',        variety:'ScotE', tags:['wh-w'] },
+    { w:'whale',    ipa:'ʍeɪl',        variety:'ScotE', tags:['wh-w'] },
+    { w:'witch',    ipa:'wɪtʃ',        variety:'RP',    tags:['wh-w'] },
+    { w:'bath',     ipa:'bɑːθ',        variety:'RP',    tags:['BATH'] },
+    { w:'bath',     ipa:'baθ',         variety:'ScotE', tags:['BATH','no-split'] },
+    { w:'bath',     ipa:'bæθ',         variety:'SAE',   tags:['BATH'] },
+    { w:'dance',    ipa:'dɑːns',       variety:'RP',    tags:['BATH'] },
+    { w:'dance',    ipa:'dans',        variety:'ScotE', tags:['BATH'] },
+    { w:'pass',     ipa:'pʰɑːs',       variety:'RP',    tags:['BATH'] },
+    { w:'pass',     ipa:'pas',         variety:'ScotE', tags:['BATH'] },
+    { w:'day',      ipa:'deɪ',         variety:'RP',    tags:['FACE'] },
+    { w:'day',      ipa:'de',          variety:'ScotE', tags:['FACE','monophthong'] },
+    { w:'name',     ipa:'neɪm',        variety:'RP',    tags:['FACE'] },
+    { w:'name',     ipa:'nem',         variety:'ScotE', tags:['FACE','monophthong'] },
+    { w:'greed',    ipa:'ɡrid',        variety:'ScotE', tags:['SVLR-short'] },
+    { w:'agreed',   ipa:'əˈɡriːd',     variety:'ScotE', tags:['SVLR-long'] },
+    { w:'leaf',     ipa:'liːf',        variety:'RP',    tags:['clear-l'] },
+    { w:'feel',     ipa:'fiːɫ',        variety:'RP',    tags:['dark-l'] },
+    { w:'light',    ipa:'laɪt',        variety:'RP',    tags:['clear-l'] },
+    { w:'well',     ipa:'wɛɫ',         variety:'RP',    tags:['dark-l'] },
+
+    // ————— SAE/GA-specific —————
+    { w:'butter',   ipa:'ˈbʌtə',       variety:'RP',    tags:['STRUT'] },
+    { w:'butter',   ipa:'ˈbʌɾɚ',       variety:'SAE',   tags:['tap','rhotic'] },
+    { w:'butter',   ipa:'ˈbʌʔə',       variety:'Cockney',tags:['glottal-stop'] },
+    { w:'cot',      ipa:'kʰɒt',        variety:'RP',    tags:['LOT'] },
+    { w:'cot',      ipa:'kʰɑt',        variety:'SAE',   tags:['cot-caught-merger'] },
+    { w:'caught',   ipa:'kʰɔːt',       variety:'RP',    tags:['THOUGHT'] },
+    { w:'caught',   ipa:'kʰɑt',        variety:'SAE',   tags:['cot-caught-merger'] },
+    { w:'water',    ipa:'ˈwɔːtə',      variety:'RP',    tags:['THOUGHT'] },
+    { w:'water',    ipa:'ˈwɔɾɚ',       variety:'SAE',   tags:['tap','rhotic'] },
+    { w:'very',     ipa:'ˈvɛri',       variety:'RP',    tags:[] },
+    { w:'very',     ipa:'ˈvɛɾe',       variety:'ScotE', tags:['tap'] },
+    { w:'bird',     ipa:'bɜːd',        variety:'RP',    tags:['NURSE'] },
+    { w:'bird',     ipa:'bɝd',         variety:'SAE',   tags:['NURSE','rhotic'] },
+    { w:'letter',   ipa:'ˈlɛtə',       variety:'RP',    tags:['lettER'] },
+    { w:'letter',   ipa:'ˈlɛɾɚ',       variety:'SAE',   tags:['tap','rhotic'] },
+
+    // ————— Lexical-set anchors (Wells) — RP default —————
+    { w:'bid',      ipa:'bɪd',         variety:'RP',    tags:['KIT','anchor'] },
+    { w:'bed',      ipa:'bɛd',         variety:'RP',    tags:['DRESS','anchor'] },
+    { w:'cat',      ipa:'kʰæt',        variety:'RP',    tags:['TRAP','anchor'] },
+    { w:'lot',      ipa:'lɒt',         variety:'RP',    tags:['LOT','anchor'] },
+    { w:'put',      ipa:'pʊt',         variety:'RP',    tags:['FOOT','anchor'] },
+    { w:'cup',      ipa:'kʰʌp',        variety:'RP',    tags:['STRUT','anchor'] },
+    { w:'see',      ipa:'siː',         variety:'RP',    tags:['FLEECE','anchor'] },
+    { w:'boot',     ipa:'buːt',        variety:'RP',    tags:['GOOSE','anchor'] },
+    { w:'palm',     ipa:'pʰɑːm',       variety:'RP',    tags:['PALM','anchor'] },
+    { w:'spa',      ipa:'spɑː',        variety:'RP',    tags:['PALM'] },
+    { w:'calm',     ipa:'kʰɑːm',       variety:'RP',    tags:['PALM'] },
+    { w:'thought',  ipa:'θɔːt',        variety:'RP',    tags:['THOUGHT'] },
+    { w:'bought',   ipa:'bɔːt',        variety:'RP',    tags:['THOUGHT'] },
+    { w:'fern',     ipa:'fɜːn',        variety:'RP',    tags:['NURSE'] },
+    { w:'nurse',    ipa:'nɜːs',        variety:'RP',    tags:['NURSE'] },
+    { w:'boy',      ipa:'bɔɪ',         variety:'RP',    tags:['CHOICE','anchor'] },
+    { w:'coin',     ipa:'kʰɔɪn',       variety:'RP',    tags:['CHOICE'] },
+    { w:'voice',    ipa:'vɔɪs',        variety:'RP',    tags:['CHOICE'] },
+    { w:'now',      ipa:'naʊ',         variety:'RP',    tags:['MOUTH','anchor'] },
+    { w:'house',    ipa:'haʊs',        variety:'RP',    tags:['MOUTH'] },
+    { w:'my',       ipa:'maɪ',         variety:'RP',    tags:['PRICE','anchor'] },
+    { w:'time',     ipa:'tʰaɪm',       variety:'RP',    tags:['PRICE'] },
+    { w:'near',     ipa:'nɪə',         variety:'RP',    tags:['NEAR'] },
+    { w:'hair',     ipa:'hɛə',         variety:'RP',    tags:['SQUARE'] },
+    { w:'four',     ipa:'fɔː',         variety:'RP',    tags:['FORCE'] },
+    { w:'poor',     ipa:'pʊə',         variety:'RP',    tags:['CURE'] },
+
+    // ————— TH sounds —————
+    { w:'think',    ipa:'θɪŋk',        variety:'RP',    tags:['TH','NG'] },
+    { w:'thin',     ipa:'θɪn',         variety:'RP',    tags:['TH'] },
+    { w:'thing',    ipa:'θɪŋ',         variety:'RP',    tags:['TH','NG'] },
+    { w:'nothing',  ipa:'ˈnʌθɪŋ',      variety:'RP',    tags:['TH','NG','schwa'] },
+    { w:'fifth',    ipa:'fɪfθ',        variety:'RP',    tags:['TH','cluster'] },
+    { w:'this',     ipa:'ðɪs',         variety:'RP',    tags:['TH'] },
+    { w:'mother',   ipa:'ˈmʌðə',       variety:'RP',    tags:['TH','schwa'] },
+    { w:'breathe',  ipa:'briːð',       variety:'RP',    tags:['TH','FLEECE'] },
+    { w:'weather',  ipa:'ˈwɛðə',       variety:'RP',    tags:['TH','schwa'] },
+    { w:'they',     ipa:'ðeɪ',         variety:'RP',    tags:['TH','FACE'] },
+
+    // ————— Tricky consonants —————
+    { w:'judge',    ipa:'dʒʌdʒ',       variety:'RP',    tags:['affricate'] },
+    { w:'measure',  ipa:'ˈmɛʒə',       variety:'RP',    tags:['ZH'] },
+    { w:'vision',   ipa:'ˈvɪʒən',      variety:'RP',    tags:['ZH'] },
+    { w:'garage',   ipa:'ˈɡærɑːʒ',     variety:'RP',    tags:['ZH'] },
+    { w:'church',   ipa:'tʃɜːtʃ',      variety:'RP',    tags:['affricate','NURSE'] },
+    { w:'match',    ipa:'mætʃ',        variety:'RP',    tags:['affricate'] },
+    { w:'chip',     ipa:'tʃɪp',        variety:'RP',    tags:['affricate'] },
+    { w:'sing',     ipa:'sɪŋ',         variety:'RP',    tags:['NG'] },
+    { w:'long',     ipa:'lɒŋ',         variety:'RP',    tags:['NG'] },
+    { w:'finger',   ipa:'ˈfɪŋɡə',      variety:'RP',    tags:['NG','schwa'] },
+    { w:'singer',   ipa:'ˈsɪŋə',       variety:'RP',    tags:['NG','schwa'] },
+    { w:'quick',    ipa:'kwɪk',        variety:'RP',    tags:[] },
+    { w:'yellow',   ipa:'ˈjɛləʊ',      variety:'RP',    tags:['GOAT'] },
+    { w:'you',      ipa:'juː',         variety:'RP',    tags:['GOOSE'] },
+    { w:'we',       ipa:'wiː',         variety:'RP',    tags:['FLEECE'] },
+    { w:'pen',      ipa:'pʰɛn',        variety:'RP',    tags:['aspiration'] },
+    { w:'spin',     ipa:'spɪn',        variety:'RP',    tags:['no-aspiration'] },
+
+    // ————— Schwa / unstressed —————
+    { w:'about',    ipa:'əˈbaʊt',      variety:'RP',    tags:['schwa'] },
+    { w:'sofa',     ipa:'ˈsəʊfə',      variety:'RP',    tags:['commA'] },
+    { w:'doctor',   ipa:'ˈdɒktə',      variety:'RP',    tags:['lettER'] },
+    { w:'summer',   ipa:'ˈsʌmə',       variety:'RP',    tags:['schwa'] },
+    { w:'comma',    ipa:'ˈkɒmə',       variety:'RP',    tags:['commA'] },
+
+    // ————— Consonant clusters —————
+    { w:'strength', ipa:'strɛŋθ',      variety:'RP',    tags:['cluster','TH','NG'] },
+    { w:'twelfth',  ipa:'twɛlfθ',      variety:'RP',    tags:['cluster','TH'] },
+    { w:'sixth',    ipa:'sɪksθ',       variety:'RP',    tags:['cluster','TH'] },
+  ],
+  // ————— PHRASES — sentence-level from Puskás 2024 corrigé, midterm elicitation paragraph
+  //                  ("Please call Stella..."), and variety comparison tables.
+  //                  Some are verbatim from the corrigé; others combine attested word-level
+  //                  transcriptions. Exam-style: you should recognise these phrases on sight.
+  phrases: [
+    // — Verbatim from Puskás 2024(a) corrigé, Irish English speaker (Strabane) —
+    { phrase:'a snack for',        ipa:'ə snæx fɚ',              variety:'IrE',   notes:'Velar fricative [x] in snack; rhotic [ɚ] in for.' },
+    { phrase:'also',               ipa:'ɑlˠso',                  variety:'IrE',   notes:'Dark [lˠ] — Northern Irish (Strabane, near Belfast).' },
+    // — Verbatim from Puskás 2024(a) corrigé, GAusE speaker (Sydney) —
+    { phrase:'call Stella',        ipa:'kʰɑːlˠ stɛ̜lə',          variety:'GAusE', notes:'Long [ɑː] vs IrE short [ɑ]; dark [lˠ] before consonant.' },
+    { phrase:'also',               ipa:'ɒlˠso',                  variety:'GAusE', notes:'Back rounded [ɒ] — GAusE lengthens IrE short vowels.' },
+    { phrase:'will go',            ipa:'wɪlˠ ɡɵ̃ʊ',               variety:'GAusE', notes:'Dark [lˠ] before consonant; nasalised diphthong in go.' },
+    { phrase:'small plastic',      ipa:'smɔl pʰlæstɪk',          variety:'GAusE', notes:'Clear [l] before vowel in small; aspirated [pʰ] in plastic.' },
+
+    // — From midterm paragraph, RP reference (the baseline for your comparisons) —
+    { phrase:'please call Stella', ipa:'pliːz kʰɔːl ˈstɛlə',     variety:'RP',    notes:'FLEECE [iː], THOUGHT [ɔː], DRESS [ɛ], commA [ə].' },
+    { phrase:'bring these things', ipa:'brɪŋ ðiːz θɪŋz',          variety:'RP',    notes:'Voiced [ð] in these, voiceless [θ] in things; [ŋ] velar nasal.' },
+    { phrase:'these things',       ipa:'ðiːz θɪŋz',               variety:'RP',    notes:'The TH contrast: voiced [ð] in these vs. voiceless [θ] in things.' },
+    { phrase:'six spoons',         ipa:'sɪks spuːnz',             variety:'RP',    notes:'KIT [ɪ] contrasts with GOOSE [uː].' },
+    { phrase:'snow peas',          ipa:'snəʊ pʰiːz',              variety:'RP',    notes:'GOAT diphthong [əʊ]; aspirated [pʰ] before FLEECE.' },
+    { phrase:'blue cheese',        ipa:'bluː tʃiːz',              variety:'RP',    notes:'Both GOOSE and FLEECE long; affricate [tʃ].' },
+    { phrase:'thick slabs',        ipa:'θɪk slæbz',               variety:'RP',    notes:'Voiceless TH [θ]; TRAP [æ] in slabs.' },
+    { phrase:'three red bags',     ipa:'θriː rɛd bæɡz',           variety:'RP',    notes:'TH + FLEECE; DRESS [ɛ]; TRAP [æ].' },
+    { phrase:'train station',      ipa:'tʰreɪn ˈsteɪʃən',         variety:'RP',    notes:'Aspirated [tʰ]; FACE diphthong [eɪ]; schwa in final syllable.' },
+    { phrase:'her brother Bob',    ipa:'hɜː ˈbrʌðə bɒb',          variety:'RP',    notes:'Non-rhotic NURSE [ɜː], lettER [ə]; LOT [ɒ].' },
+
+    // — Variety-contrast phrases reconstructed from corrigé-level observations —
+    { phrase:'her brother',        ipa:'hɛɹ brʌd̪əɹ',              variety:'IrE',   notes:'Rhotic [ɹ] both word-internally and finally; TH-stopping [d̪].' },
+    { phrase:'her brother',        ipa:'hɜː ˈbrʌðə',              variety:'RP',    notes:'Non-rhotic: /r/ deleted, vowel lengthened.' },
+    { phrase:'the store',          ipa:'ðə stɔːɹ',                variety:'IrE',   notes:'Rhotic: pre-consonantal /r/ preserved.' },
+    { phrase:'the store',          ipa:'ðə stoː',                 variety:'GAusE', notes:'Non-rhotic + NORTH raising to [oː].' },
+
+    // — ScotE diagnostic phrases (Bauer, Stuart-Smith) —
+    { phrase:'which witch',        ipa:'ʍɪtʃ wɪtʃ',               variety:'ScotE', notes:'The wh/w distinction: [ʍ] vs [w]. Preserved in conservative ScotE.' },
+    { phrase:'greed agreed',       ipa:'ɡrid əˈɡriːd',            variety:'ScotE', notes:'SVLR: short [i] in greed, long [iː] in agreed (morpheme boundary).' },
+    { phrase:'bath trap',          ipa:'baθ træp',                variety:'ScotE', notes:'No BATH-split: bath uses same short [a] area; TRAP [æ] or [a].' },
+    { phrase:'bath trap',          ipa:'bɑːθ træp',               variety:'RP',    notes:'BATH-split: long [ɑː] in bath vs short [æ] in trap.' },
+    { phrase:'day name',           ipa:'de nem',                  variety:'ScotE', notes:'FACE monophthong [e] — no diphthong.' },
+    { phrase:'go snow',            ipa:'ɡo sno',                  variety:'ScotE', notes:'GOAT monophthong [o] — no diphthong.' },
+
+    // — SAE classics —
+    { phrase:'butter water',       ipa:'ˈbʌɾɚ ˈwɔɾɚ',             variety:'SAE',   notes:'T-flapping intervocalically; rhotic [ɚ] in both lettER syllables.' },
+    { phrase:'cot caught',         ipa:'kʰɑt kʰɑt',               variety:'SAE',   notes:'The cot–caught merger: both [kʰɑt] in much of SAE.' },
+    { phrase:'cot caught',         ipa:'kʰɒt kʰɔːt',              variety:'RP',    notes:'Distinct in RP: LOT [ɒ] vs THOUGHT [ɔː].' },
+  ],
+
+
+  // word → lexical set
+  lexset: [
+    { w:'bid', set:'KIT' },
+    { w:'bed', set:'DRESS' },
+    { w:'bat', set:'TRAP' },
+    { w:'cot', set:'LOT' },
+    { w:'cup', set:'STRUT' },
+    { w:'put', set:'FOOT' },
+    { w:'bath', set:'BATH' },
+    { w:'cloth', set:'CLOTH' },
+    { w:'bird', set:'NURSE' },
+    { w:'see', set:'FLEECE' },
+    { w:'day', set:'FACE' },
+    { w:'palm', set:'PALM' },
+    { w:'thought', set:'THOUGHT' },
+    { w:'go', set:'GOAT' },
+    { w:'boot', set:'GOOSE' },
+    { w:'my', set:'PRICE' },
+    { w:'boy', set:'CHOICE' },
+    { w:'now', set:'MOUTH' },
+    { w:'near', set:'NEAR' },
+    { w:'square', set:'SQUARE' },
+    { w:'start', set:'START' },
+    { w:'north', set:'NORTH' },
+    { w:'four', set:'FORCE' },
+    { w:'poor', set:'CURE' },
+    { w:'happy', set:'happY' },
+    { w:'letter', set:'lettER' },
+    { w:'sofa', set:'commA' },
+  ],
+  // diacritic identification
+  diacritic: [
+    { sym:'ː', ans:'Length' },
+    { sym:'ˈ', ans:'Primary stress' },
+    { sym:'ʰ', ans:'Aspiration' },
+    { sym:'ˠ', ans:'Velarisation (dark l)' },
+    { sym:'̃',  ans:'Nasalisation' },
+    { sym:'˞', ans:'R-colouring' },
+    { sym:'̩',  ans:'Syllabic consonant' },
+    { sym:'̥',  ans:'Voicelessness' },
+    { sym:'̪',  ans:'Dental' },
+    { sym:'̚',  ans:'Unreleased' },
+    { sym:'ʲ', ans:'Palatalisation' },
+    { sym:'ʷ', ans:'Labialisation' },
+    { sym:'̯',  ans:'Non-syllabic (glide)' },
+  ],
+};
+
+const ALL_LEX_NAMES = [...new Set([...LEXSETS.checked, ...LEXSETS.free, ...LEXSETS.rhotic, ...LEXSETS.weak].map(s => s.name))];
+const ALL_DIA_ANS = QUIZ_POOL.diacritic.map(d => d.ans);
+
+let quizMode = 'ipa2word';
+let quizScore = 0;
+let quizTotal = 0;
+let quizStreak = 0;
+let quizAnswered = false;
+let quizCurrent = null;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickDistractors(correct, pool, n=3) {
+  const others = pool.filter(x => x !== correct);
+  return shuffle(others).slice(0, n);
+}
+
+function renderQuizQuestion() {
+  const promptEl = document.getElementById('quiz-prompt');
+  const optsEl = document.getElementById('quiz-options');
+  const fbEl = document.getElementById('quiz-feedback');
+  fbEl.textContent = '';
+  fbEl.className = 'quiz-feedback';
+  optsEl.innerHTML = '';
+  quizAnswered = false;
+
+  const varietyChip = (v) => v ? `<span class="variety-chip variety-${v}">${v}</span>` : '';
+
+  if (quizMode === 'ipa2word') {
+    const q = shuffle(QUIZ_POOL.pairs)[0];
+    quizCurrent = q;
+    promptEl.innerHTML = `Which word is this? ${varietyChip(q.variety)}<div class="big-ipa">[${q.ipa}]</div>`;
+    // distractors: pick other pairs with different base words
+    const baseOthers = QUIZ_POOL.pairs.filter(x => x.w.toLowerCase() !== q.w.toLowerCase());
+    const distractors = shuffle(baseOthers).slice(0, 3).map(x => x.w);
+    const options = shuffle([q.w, ...distractors]);
+    options.forEach(o => {
+      const b = document.createElement('button');
+      b.textContent = o;
+      b.addEventListener('click', () => handleAnswer(b, o.toLowerCase() === q.w.toLowerCase(), q.w));
+      optsEl.appendChild(b);
+    });
+  } else if (quizMode === 'ipa2word_type') {
+    const q = shuffle(QUIZ_POOL.pairs)[0];
+    quizCurrent = q;
+    promptEl.innerHTML = `Type the word. ${varietyChip(q.variety)}<div class="big-ipa">[${q.ipa}]</div>`;
+    renderTypingInput(q.w, false);
+  } else if (quizMode === 'phrase') {
+    const q = shuffle(QUIZ_POOL.phrases)[0];
+    quizCurrent = q;
+    promptEl.innerHTML = `Type the phrase. ${varietyChip(q.variety)}<div class="big-ipa">[${q.ipa}]</div>${q.notes ? `<div class="phrase-note">${q.notes}</div>` : ''}`;
+    renderTypingInput(q.phrase, true);
+  } else if (quizMode === 'word2ipa') {
+    const q = shuffle(QUIZ_POOL.pairs)[0];
+    quizCurrent = q;
+    promptEl.innerHTML = `Which transcription matches? ${varietyChip(q.variety)}<div style="font-size:26px; margin-top:10px;">“<em>${q.w}</em>”</div>`;
+    const distractors = pickDistractors(q, QUIZ_POOL.pairs, 3).map(x => x.ipa);
+    const options = shuffle([q.ipa, ...distractors]);
+    options.forEach(o => {
+      const b = document.createElement('button');
+      b.innerHTML = `<span class="ipa">[${o}]</span>`;
+      b.addEventListener('click', () => handleAnswer(b, o === q.ipa, q.ipa));
+      optsEl.appendChild(b);
+    });
+  } else if (quizMode === 'lexset') {
+    const q = shuffle(QUIZ_POOL.lexset)[0];
+    quizCurrent = q;
+    promptEl.innerHTML = `Which lexical set does this word belong to? <div style="font-size:26px; margin-top:10px;">“<em>${q.w}</em>” <button class="speaker" onclick="speak('${q.w.replace(/'/g,"\\'")}')">▸</button></div>`;
+    const distractors = pickDistractors(q.set, ALL_LEX_NAMES, 3);
+    const options = shuffle([q.set, ...distractors]);
+    options.forEach(o => {
+      const b = document.createElement('button');
+      b.textContent = o;
+      b.style.fontVariant = 'small-caps';
+      b.style.letterSpacing = '0.08em';
+      b.addEventListener('click', () => handleAnswer(b, o === q.set, q.set));
+      optsEl.appendChild(b);
+    });
+  } else if (quizMode === 'diacritic') {
+    const q = shuffle(QUIZ_POOL.diacritic)[0];
+    quizCurrent = q;
+    const displaySym = COMBINING_MARKS.has(q.sym) ? `◌${q.sym}` : q.sym;
+    promptEl.innerHTML = `What does this diacritic mark? <div class="big-ipa">${displaySym}</div>`;
+    const distractors = pickDistractors(q.ans, ALL_DIA_ANS, 3);
+    const options = shuffle([q.ans, ...distractors]);
+    options.forEach(o => {
+      const b = document.createElement('button');
+      b.textContent = o;
+      b.addEventListener('click', () => handleAnswer(b, o === q.ans, q.ans));
+      optsEl.appendChild(b);
+    });
+  }
+}
+
+// Build the typing-input UI for Level 2 and phrase mode
+function renderTypingInput(correctAnswer, isPhrase) {
+  const optsEl = document.getElementById('quiz-options');
+  optsEl.className = 'quiz-typing';
+  optsEl.innerHTML = `
+    <input type="text" id="quiz-input" class="quiz-input" placeholder="${isPhrase ? 'Type the phrase…' : 'Type the word…'}" autocomplete="off" autocorrect="off" spellcheck="false" />
+    <div class="quiz-typing-buttons">
+      <button class="btn" id="quiz-submit">Check</button>
+      <button class="btn secondary" id="quiz-hint">Hint</button>
+      <button class="btn secondary" id="quiz-reveal">Give up</button>
+    </div>
+  `;
+  const input = document.getElementById('quiz-input');
+  input.focus();
+  const submit = () => {
+    if (quizAnswered) return;
+    const user = input.value;
+    const ok = normaliseAnswer(user) === normaliseAnswer(correctAnswer);
+    handleAnswer(input, ok, correctAnswer);
+  };
+  document.getElementById('quiz-submit').addEventListener('click', submit);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') submit();
+  });
+  document.getElementById('quiz-hint').addEventListener('click', () => {
+    // reveal first letter of each word
+    const hinted = correctAnswer.split(/\s+/).map(w => w[0] + '_'.repeat(Math.max(0, w.length-1))).join(' ');
+    document.getElementById('quiz-feedback').innerHTML = `<span class="hint">Hint: ${hinted}</span>`;
+    document.getElementById('quiz-feedback').className = 'quiz-feedback hint';
+  });
+  document.getElementById('quiz-reveal').addEventListener('click', () => {
+    if (quizAnswered) return;
+    quizAnswered = true;
+    quizTotal++;
+    quizStreak = 0;
+    const fb = document.getElementById('quiz-feedback');
+    fb.innerHTML = `The answer is <strong>${correctAnswer}</strong>.`;
+    fb.className = 'quiz-feedback wrong';
+    input.value = correctAnswer;
+    input.disabled = true;
+    updateScore();
+  });
+}
+
+function normaliseAnswer(s) {
+  if (!s) return '';
+  return s.toLowerCase()
+    .replace(/[.,;:!?"’‘“”]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function handleAnswer(btnOrInput, correct, correctVal) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  quizTotal++;
+  const fbEl = document.getElementById('quiz-feedback');
+  const isTyping = quizMode === 'ipa2word_type' || quizMode === 'phrase';
+  if (correct) {
+    if (btnOrInput && btnOrInput.classList) btnOrInput.classList.add('correct');
+    quizScore++;
+    quizStreak++;
+    fbEl.textContent = 'Correct.';
+    fbEl.className = 'quiz-feedback correct';
+    if (quizMode === 'ipa2word' || quizMode === 'word2ipa' || quizMode === 'ipa2word_type') {
+      const w = (quizCurrent.w || '').replace(/ \([^)]+\)/,'');
+      if (w) speak(w);
+    } else if (quizMode === 'phrase') {
+      speak(quizCurrent.phrase);
+    } else if (quizMode === 'lexset') {
+      speak(quizCurrent.w);
+    }
+    if (isTyping) {
+      btnOrInput.disabled = true;
+    }
+  } else {
+    if (btnOrInput && btnOrInput.classList) btnOrInput.classList.add('wrong');
+    quizStreak = 0;
+    fbEl.innerHTML = `Not quite — the answer is <strong>${correctVal}</strong>.`;
+    fbEl.className = 'quiz-feedback wrong';
+    if (!isTyping) {
+      document.querySelectorAll('#quiz-options button').forEach(b => {
+        if (b.textContent === correctVal || b.innerHTML.includes(`[${correctVal}]`)) {
+          b.classList.add('reveal');
+        }
+      });
+    } else {
+      btnOrInput.disabled = true;
+    }
+  }
+  updateScore();
+}
+
+function updateScore() {
+  document.getElementById('quiz-score').textContent = `Score: ${quizScore} / ${quizTotal}`;
+  const streakEl = document.getElementById('quiz-streak');
+  if (quizStreak >= 3) {
+    streakEl.textContent = `🔥 ${quizStreak} in a row`;
+  } else {
+    streakEl.textContent = '';
+  }
+}
+
+document.getElementById('quiz-next').addEventListener('click', renderQuizQuestion);
+document.getElementById('quiz-reset').addEventListener('click', () => {
+  quizScore = 0; quizTotal = 0; quizStreak = 0;
+  updateScore();
+  renderQuizQuestion();
+});
+document.querySelectorAll('#quiz-mode-select button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#quiz-mode-select button').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    quizMode = btn.dataset.mode;
+    renderQuizQuestion();
+  });
+});
+
+/* =====================================================================
+   INIT
+   ===================================================================== */
+initVoicePicker();
+buildConsonantChart();
+buildVowelChart();
+buildLexicalSets();
+buildDiacritics();
+buildVarieties();
+renderQuizQuestion();
+updateScore();
+
+// Open the first consonant as a sensible starting detail
+setTimeout(() => {
+  showConsonantDetail('p');
+  showVowelDetail('i');
+}, 50);
+
+</script>
+
+</body>
+</html>

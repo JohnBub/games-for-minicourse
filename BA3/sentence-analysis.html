@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Varieties of English — Sentence Analysis One-Pager</title>
+<style>
+  @page { size: A4 landscape; margin: 8mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 7.5pt;
+    line-height: 1.25;
+    color: #1a1a1a;
+    width: 297mm;
+    height: 210mm;
+    padding: 6mm;
+    background: white;
+  }
+
+  h1 { font-size: 11pt; text-align: center; margin-bottom: 3px; letter-spacing: 1px; }
+  h1 span { color: #666; font-weight: normal; font-size: 8pt; }
+
+  .container { display: grid; grid-template-columns: 200px 1fr 1fr; grid-template-rows: auto 1fr; gap: 5px; height: 100%; }
+
+  /* LEFT COLUMN: Decision flowchart */
+  .flowchart {
+    grid-row: 1 / 3;
+    background: #f0f4ff;
+    border: 1.5px solid #4a6fa5;
+    border-radius: 6px;
+    padding: 5px;
+  }
+  .flow-title {
+    font-size: 8.5pt;
+    font-weight: bold;
+    text-align: center;
+    color: #2c4a7c;
+    border-bottom: 1px solid #4a6fa5;
+    padding-bottom: 2px;
+    margin-bottom: 4px;
+  }
+  .step {
+    background: white;
+    border: 1px solid #4a6fa5;
+    border-radius: 4px;
+    padding: 3px 4px;
+    margin-bottom: 3px;
+    position: relative;
+  }
+  .step-num {
+    display: inline-block;
+    background: #4a6fa5;
+    color: white;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    text-align: center;
+    font-size: 7pt;
+    line-height: 14px;
+    font-weight: bold;
+    margin-right: 3px;
+  }
+  .step-title { font-weight: bold; font-size: 7.5pt; }
+  .step-detail { font-size: 6.8pt; color: #444; margin-top: 1px; }
+  .arrow { text-align: center; color: #4a6fa5; font-size: 10pt; line-height: 10px; margin: 1px 0; }
+  .decision {
+    background: #fff3cd;
+    border: 1px solid #d4a017;
+    border-radius: 4px;
+    padding: 3px 4px;
+    margin-bottom: 3px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 7pt;
+  }
+  .decision-q { color: #8a6d00; }
+
+  /* MIDDLE & RIGHT: Feature grids */
+  .section-title {
+    font-size: 8pt;
+    font-weight: bold;
+    color: white;
+    padding: 2px 5px;
+    border-radius: 3px;
+    margin-bottom: 3px;
+  }
+  .phon-title { background: #c0392b; }
+  .morph-title { background: #2980b9; }
+  .lex-title { background: #27ae60; }
+  .prosody-title { background: #8e44ad; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 6.8pt;
+    margin-bottom: 4px;
+  }
+  th {
+    background: #f5f5f5;
+    font-size: 6.5pt;
+    padding: 1.5px 2px;
+    border: 0.5px solid #ccc;
+    text-align: center;
+    font-weight: bold;
+  }
+  td {
+    padding: 1.5px 2px;
+    border: 0.5px solid #ddd;
+    text-align: center;
+  }
+  td:first-child { text-align: left; font-weight: bold; }
+  .yes { background: #d4edda; color: #155724; font-weight: bold; }
+  .no { background: #f8f9fa; color: #999; }
+  .special { background: #fff3cd; color: #856404; font-weight: bold; }
+  .key-marker { background: #ffd6d6; color: #9b1c1c; font-weight: bold; }
+
+  .mid-section { display: flex; flex-direction: column; gap: 3px; }
+  .right-section { display: flex; flex-direction: column; gap: 3px; }
+
+  /* Bottom quick-ID strip */
+  .quickid {
+    grid-column: 2 / 4;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3px;
+  }
+  .id-card {
+    border-radius: 4px;
+    padding: 3px 4px;
+    font-size: 6.5pt;
+  }
+  .inner-card { background: #e8f4e8; border: 1px solid #27ae60; }
+  .outer-card { background: #e8ecf4; border: 1px solid #2980b9; }
+  .aave-card { background: #fde8e8; border: 1px solid #c0392b; }
+  .creole-card { background: #f4e8f4; border: 1px solid #8e44ad; }
+  .id-card strong { font-size: 7pt; }
+  .id-card .killer { color: #c0392b; font-weight: bold; }
+
+  .footer {
+    grid-column: 1 / 4;
+    text-align: center;
+    font-size: 6pt;
+    color: #999;
+    border-top: 0.5px solid #ddd;
+    padding-top: 1px;
+  }
+
+  /* Schwa test box */
+  .test-box {
+    background: #fff8e1;
+    border: 1.5px dashed #f9a825;
+    border-radius: 4px;
+    padding: 3px 5px;
+    margin-bottom: 3px;
+    font-size: 6.8pt;
+  }
+  .test-box strong { color: #e65100; }
+
+  /* Wells reference mini */
+  .wells-mini { font-size: 6.3pt; }
+  .wells-mini td { padding: 1px 2px; }
+</style>
+</head>
+<body>
+
+<h1>SENTENCE ANALYSIS — ONE-PAGER <span>| Varieties of English · BA3 · Puskás 2026</span></h1>
+
+<div class="container">
+
+<!-- ════════════ LEFT: DECISION FLOWCHART ════════════ -->
+<div class="flowchart">
+  <div class="flow-title">🔍 ANALYSIS METHOD</div>
+
+  <div class="step">
+    <span class="step-num">1</span><span class="step-title">READ the IPA</span>
+    <div class="step-detail">Read literally. No letters! Each symbol = that sound. Scan L→R, note anything ≠ RP.</div>
+  </div>
+  <div class="arrow">▼</div>
+
+  <div class="step">
+    <span class="step-num">2</span><span class="step-title">CHECK RHYTHM</span>
+    <div class="step-detail"><b>Schwa [ə] present?</b><br>
+      YES → stress-timed (Inner Circle / AAVE)<br>
+      NO → syllable-timed (NigE / IndE / SingE)</div>
+  </div>
+  <div class="arrow">▼</div>
+
+  <div class="step">
+    <span class="step-num">3</span><span class="step-title">CHECK RHOTICITY</span>
+    <div class="step-detail"><b>Post-vocalic /r/ pronounced?</b><br>
+      YES → IrE, ScotE, SAE, IndE<br>
+      NO → RP, GAusE, AAVE, NigE, SingE</div>
+  </div>
+  <div class="arrow">▼</div>
+
+  <div class="step">
+    <span class="step-num">4</span><span class="step-title">CHECK CONSONANTS</span>
+    <div class="step-detail">
+      TH → [t̪ d̪] = <b>IrE</b><br>
+      TH → [f v] = <b>ScotE</b> / Broad AusE<br>
+      TH → [t d] = <b>NigE / SingE / AAVE</b><br>
+      TH → [tʰ] = <b>IndE</b><br>
+      [ʈ ɖ] retroflex = <b>IndE</b><br>
+      [ʔ] final = <b>SingE</b> / urban BrE
+    </div>
+  </div>
+  <div class="arrow">▼</div>
+
+  <div class="step">
+    <span class="step-num">5</span><span class="step-title">CHECK VOWELS</span>
+    <div class="step-detail">
+      Use Wells' Sets (right →)<br>
+      Mergers = key diagnostic<br>
+      KIT=FLEECE? → NigE/SingE<br>
+      Wide diphthongs? → GAusE<br>
+      PRICE → [aː]? → AAVE
+    </div>
+  </div>
+  <div class="arrow">▼</div>
+
+  <div class="step">
+    <span class="step-num">6</span><span class="step-title">CHECK SYNTAX</span>
+    <div class="step-detail">
+      If morphosyntax visible:<br>
+      <i>be</i> habitual → AAVE<br>
+      <i>do be</i> → IrE<br>
+      particles (<i>lah</i>) → SingE<br>
+      reduplication → NigE
+    </div>
+  </div>
+  <div class="arrow">▼</div>
+
+  <div class="decision">
+    <div class="decision-q">PREDICTABLE or NOT?</div>
+    Matches theory → expected<br>
+    Contradicts → hypothesis WHY
+  </div>
+
+  <div style="margin-top: 4px; background: #e8f0fe; border-radius: 3px; padding: 3px; font-size: 6.5pt;">
+    <b>TEMPLATE per feature:</b><br>
+    ① Observe [IPA] in word X<br>
+    ② Name the phenomenon<br>
+    ③ Cite: Puskás Ch.X:Y<br>
+    ④ Predictable? → because...<br>
+    ⑤ If not → hypothesis
+  </div>
+</div>
+
+<!-- ════════════ MIDDLE: PHONOLOGY + PROSODY ════════════ -->
+<div class="mid-section">
+
+  <div class="section-title phon-title">CONSONANTS — Key Diagnostics</div>
+  <table>
+    <tr>
+      <th>Feature</th><th>RP</th><th>IrE</th><th>ScotE</th><th>SAE</th><th>GAusE</th><th>AAVE</th><th>NigE</th><th>IndE</th><th>SingE</th>
+    </tr>
+    <tr>
+      <td>Rhotic</td>
+      <td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="no">—</td>
+    </tr>
+    <tr>
+      <td>/θ ð/ →</td>
+      <td>[θð]</td><td class="key-marker">[t̪d̪]</td><td class="special">[fv]</td><td>[θð]</td><td>[fv]</td><td>[td]</td><td>[td]</td><td class="key-marker">[tʰ]</td><td>[td]</td>
+    </tr>
+    <tr>
+      <td>Aspiration</td>
+      <td class="yes">✓</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="key-marker">—</td><td class="no">—</td><td class="no">—</td>
+    </tr>
+    <tr>
+      <td>/t/ interV</td>
+      <td>[t]</td><td>[t]</td><td>[t]</td><td class="special">[ɾ]</td><td class="special">[ɾ]</td><td>[ɾ/d]</td><td>[t]</td><td>[ʈ]</td><td>[t/ʔ]</td>
+    </tr>
+    <tr>
+      <td>/l/ type</td>
+      <td>clear/dark</td><td class="key-marker">clear all</td><td class="key-marker">dark all</td><td>clear/dark</td><td>clear/dark</td><td class="special">vocalized</td><td>—</td><td>—</td><td>—</td>
+    </tr>
+    <tr>
+      <td>Cluster simp.</td>
+      <td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="key-marker">✓✓</td><td class="no">—</td><td class="yes">✓</td>
+    </tr>
+    <tr>
+      <td>H-dropping</td>
+      <td class="no">—</td><td>rare</td><td class="no">—</td><td class="no">—</td><td class="key-marker">always</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td>
+    </tr>
+  </table>
+
+  <div class="section-title phon-title">VOWELS — Wells' Lexical Sets (Key Contrasts)</div>
+  <table class="wells-mini">
+    <tr>
+      <th>Set</th><th>RP</th><th>IrE</th><th>ScotE</th><th>SAE</th><th>GAusE</th><th>AAVE</th><th>NigE</th><th>SingE</th>
+    </tr>
+    <tr><td>KIT</td><td>ɪ</td><td>ɪ</td><td>ɪ</td><td>ɪ</td><td>ɪː</td><td>ɪ</td><td class="key-marker">=FLEECE</td><td class="key-marker">=FLEECE</td></tr>
+    <tr><td>DRESS</td><td>e</td><td>ɛ</td><td>ɛ</td><td>ɛ</td><td>e</td><td>ɛ</td><td class="special">=FACE</td><td>e</td></tr>
+    <tr><td>TRAP</td><td>æ</td><td>a</td><td>a</td><td>æ</td><td>æ</td><td>æ</td><td class="special">=BATH</td><td>æ</td></tr>
+    <tr><td>BATH</td><td>ɑː</td><td>ɑː</td><td>a</td><td class="special">æ</td><td>æ</td><td>ɑː</td><td>a</td><td>ɑ</td></tr>
+    <tr><td>FACE</td><td>eɪ</td><td class="special">eː</td><td class="special">eː</td><td>eɪ</td><td class="key-marker">æɪ</td><td>eɪ</td><td class="special">eː</td><td>e</td></tr>
+    <tr><td>GOAT</td><td>əʊ</td><td class="special">oː</td><td class="special">oː</td><td>oʊ</td><td>ɐʊ</td><td>oʊ</td><td class="special">oː</td><td>o</td></tr>
+    <tr><td>PRICE</td><td>aɪ</td><td>aɪ</td><td>ʌɪ</td><td>aɪ</td><td>ɑɪ</td><td class="key-marker">aː</td><td>aɪ</td><td>aɪ</td></tr>
+    <tr><td>MOUTH</td><td>aʊ</td><td>aʊ</td><td>ʌu</td><td>aʊ</td><td class="key-marker">æʊ</td><td>aʊ</td><td>aʊ</td><td>aʊ</td></tr>
+    <tr><td>FOOT=GOOSE?</td><td class="no">no</td><td class="no">no</td><td class="no">no</td><td class="no">no</td><td class="no">no</td><td class="no">no</td><td class="key-marker">YES</td><td class="key-marker">YES</td></tr>
+  </table>
+
+  <div class="test-box">
+    <strong>⚡ THE SCHWA TEST:</strong> No schwa [ə] in weak syllables = syllable-timed → <b>NigE, IndE, SingE</b> (Outer Circle)<br>
+    <strong>⚡ MERGER TEST:</strong> KIT=FLEECE & FOOT=GOOSE → <b>NigE or SingE</b> (then check: particles? → SingE / reduplication? → NigE)
+  </div>
+</div>
+
+<!-- ════════════ RIGHT: MORPHOSYNTAX + QUICK-ID ════════════ -->
+<div class="right-section">
+
+  <div class="section-title morph-title">MORPHOSYNTAX — Diagnostic Features</div>
+  <table>
+    <tr><th>Feature</th><th>IrE</th><th>ScotE</th><th>AAVE</th><th>NigE</th><th>IndE</th><th>SingE</th></tr>
+    <tr><td>Neg. concord</td><td class="yes">✓</td><td class="yes">✓</td><td class="key-marker">✓+subj</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td></tr>
+    <tr><td>Copula Ø</td><td class="no">—</td><td class="no">—</td><td class="key-marker">✓</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td></tr>
+    <tr><td>Habitual mkr</td><td class="key-marker">do be</td><td class="no">—</td><td class="key-marker">be V-ing</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+    <tr><td>Multiple mod.</td><td class="no">—</td><td class="key-marker">✓</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td></tr>
+    <tr><td>Resumptive pr.</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="yes">✓</td><td class="no">—</td><td class="no">—</td></tr>
+    <tr><td>Invariant tag</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="special">isn't it</td><td class="special">isn't it</td><td class="no">—</td></tr>
+    <tr><td>Null subject</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+    <tr><td>Embed. invers.</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td><td class="yes">✓</td><td class="no">—</td></tr>
+    <tr><td>Reduplication</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="key-marker">✓✓</td><td class="no">—</td><td class="no">—</td></tr>
+    <tr><td>Disc. particles</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="key-marker">lah/mah/lor</td></tr>
+  </table>
+
+  <div class="section-title prosody-title">PROSODY & RHYTHM</div>
+  <table>
+    <tr><th>Feature</th><th>Inner Circle</th><th>AAVE</th><th>NigE</th><th>IndE</th><th>SingE</th></tr>
+    <tr><td>Rhythm</td><td>stress-timed</td><td>stress-timed</td><td class="key-marker">syllable</td><td class="key-marker">syllable</td><td class="key-marker">syllable</td></tr>
+    <tr><td>Intonation</td><td>RP pattern</td><td>—</td><td class="special">downdrift</td><td>—</td><td>—</td></tr>
+  </table>
+
+  <div class="section-title lex-title">KILLER FEATURES — Instant ID</div>
+  <div class="quickid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 3px;">
+    <div class="id-card inner-card">
+      <strong>IrE:</strong> <span class="killer">dental [t̪d̪]</span> + clear /l/ + rhotic + <i>do be</i>
+    </div>
+    <div class="id-card inner-card">
+      <strong>ScotE:</strong> <span class="killer">dark /l/ everywhere</span> + rhotic + <i>might could</i>
+    </div>
+    <div class="id-card inner-card">
+      <strong>SAE:</strong> <span class="killer">BATH=[æ]</span> + rhotic + flap [ɾ] + no mergers
+    </div>
+    <div class="id-card inner-card">
+      <strong>GAusE:</strong> <span class="killer">wide FACE [æɪ]</span> + MOUTH [æʊ] + h-drop + non-rhotic
+    </div>
+    <div class="id-card aave-card">
+      <strong>AAVE:</strong> <span class="killer">PRICE→[aː]</span> + copula Ø + <i>be</i> habitual + <i>done/béen/finna</i>
+    </div>
+    <div class="id-card outer-card">
+      <strong>NigE:</strong> <span class="killer">no schwa + KIT=FLEECE</span> + downdrift + reduplication
+    </div>
+    <div class="id-card outer-card">
+      <strong>IndE:</strong> <span class="killer">retroflex [ʈɖ]</span> + no schwa + rhotic + <i>isn't it</i>
+    </div>
+    <div class="id-card outer-card">
+      <strong>SingE:</strong> <span class="killer">particles lah/mah</span> + glottal [ʔ] + no schwa + A-not-A
+    </div>
+  </div>
+
+  <div style="background: #f0f0f0; border-radius: 3px; padding: 3px 5px; font-size: 6.5pt; margin-top: 2px;">
+    <b>SUBSTRATE PATTERNS:</b>
+    Celtic (IrE/ScotE) → resumptive pronouns, habitual markers |
+    W. African (AAVE/NigE) → aspect system, syllable-timing, resumptive pr. |
+    Chinese (SingE) → discourse particles, topic-comment
+  </div>
+</div>
+
+<div class="footer">
+  BA3 Varieties of English · Prof. G. Puskás · University of Geneva · Spring 2026 · v1 — to be updated as course progresses
+</div>
+
+</div>
+</body>
+</html>

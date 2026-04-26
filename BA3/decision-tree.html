@@ -1,0 +1,996 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Variety Identification — BA3 Decision Tree</title>
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --paper: #fafaf7;
+    --accent: #7a1f1f;       /* oxblood */
+    --accent-soft: #efe6e6;
+    --rule: #2a2a2a;
+    --muted: #6b6b6b;
+    --yes: #1f5128;
+    --no:  #7a1f1f;
+    --var: #8a6d00;
+    --card: #ffffff;
+    --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.05);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); }
+  body {
+    font-family: "EB Garamond", "Iowan Old Style", Garamond, Georgia, "Times New Roman", serif;
+    font-size: 17px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 28px 24px 80px; }
+  header { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--rule); padding-bottom: 12px; margin-bottom: 20px; }
+  header h1 { margin: 0; font-size: 28px; letter-spacing: .01em; }
+  header .sub { color: var(--muted); font-style: italic; font-size: 15px; }
+  nav.tabs { display: flex; gap: 0; margin: 10px 0 24px; border-bottom: 1px solid #ddd; }
+  nav.tabs button {
+    background: transparent; border: 0; border-bottom: 3px solid transparent;
+    padding: 10px 16px; font: inherit; color: var(--muted); cursor: pointer;
+    font-size: 15px;
+  }
+  nav.tabs button.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  nav.tabs button:hover { color: var(--ink); }
+
+  /* Walker */
+  .walker { background: var(--card); border: 1px solid #e5e2dc; border-radius: 10px; padding: 24px; box-shadow: var(--shadow); }
+  .breadcrumb { font-size: 14px; color: var(--muted); margin-bottom: 14px; min-height: 20px; }
+  .breadcrumb span.crumb { display: inline-block; background: var(--accent-soft); color: var(--accent); padding: 2px 10px; border-radius: 999px; margin-right: 6px; }
+  .breadcrumb span.crumb + span.crumb::before { content: "→ "; color: var(--muted); }
+  .q-label { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .q-text { font-size: 22px; font-weight: 600; line-height: 1.3; margin: 0 0 10px; }
+  .q-hint { color: var(--muted); font-size: 15px; font-style: italic; margin: 0 0 18px; }
+  .options { display: grid; gap: 10px; margin-top: 8px; }
+  .options button.opt {
+    text-align: left; font: inherit; cursor: pointer;
+    background: #fff; border: 1.5px solid #d7d2c8; border-radius: 8px;
+    padding: 14px 16px; font-size: 16px; transition: all .15s;
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  }
+  .options button.opt:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .options button.opt .chev { color: var(--muted); font-size: 18px; }
+  .options button.opt.yes-accent { border-color: #cfe1cf; }
+  .options button.opt.no-accent  { border-color: #e8cfcf; }
+  .options button.opt.var-accent { border-color: #e8dfb3; }
+  .controls { margin-top: 18px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .controls button {
+    font: inherit; border: 1px solid #c8c2b7; background: #fff; padding: 7px 14px;
+    border-radius: 6px; cursor: pointer; font-size: 14px; color: var(--ink);
+  }
+  .controls button:hover { background: #f3efe7; }
+
+  /* Leaf card */
+  .leaf { background: var(--card); border: 1px solid #e5e2dc; border-radius: 10px; padding: 26px; box-shadow: var(--shadow); margin-top: 18px; }
+  .leaf h2 { margin: 0 0 4px; font-size: 30px; color: var(--accent); }
+  .leaf .scope { color: var(--muted); font-style: italic; margin-bottom: 18px; font-size: 15px; }
+  .leaf h3 { margin: 16px 0 6px; font-size: 15px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink); border-bottom: 1px solid #e5e2dc; padding-bottom: 4px; }
+  .leaf ul { margin: 0 0 8px; padding-left: 22px; }
+  .leaf li { margin-bottom: 5px; font-size: 16px; }
+  .leaf .giveaway {
+    background: #fff8e8; border-left: 4px solid #d9b100; padding: 12px 14px; border-radius: 4px;
+    margin: 14px 0; font-size: 15px;
+  }
+  .leaf .giveaway strong { color: #8a6d00; text-transform: uppercase; letter-spacing: .1em; font-size: 12px; display: block; margin-bottom: 4px; }
+  .leaf .trap {
+    background: #fff0ec; border-left: 4px solid var(--accent); padding: 12px 14px; border-radius: 4px;
+    margin: 14px 0; font-size: 15px;
+  }
+  .leaf .trap strong { color: var(--accent); text-transform: uppercase; letter-spacing: .1em; font-size: 12px; display: block; margin-bottom: 4px; }
+  .leaf .genealogy { color: var(--muted); font-size: 14px; margin-top: 16px; font-style: italic; padding-top: 12px; border-top: 1px dashed #d7d2c8; }
+  .leaf .signature {
+    display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 18px;
+  }
+  .sig-chip {
+    background: var(--accent-soft); color: var(--accent); padding: 4px 12px;
+    border-radius: 999px; font-size: 13px; font-weight: 600;
+  }
+
+  /* Overview */
+  .overview { background: var(--card); border: 1px solid #e5e2dc; border-radius: 10px; padding: 22px; box-shadow: var(--shadow); }
+  .flow {
+    font-family: "IBM Plex Mono", "Menlo", Consolas, monospace;
+    font-size: 13.5px; line-height: 1.55; background: #fafaf4;
+    border: 1px solid #e5e2dc; padding: 18px; border-radius: 6px;
+    overflow-x: auto; white-space: pre;
+  }
+  table.grid { width: 100%; border-collapse: collapse; margin-top: 18px; font-size: 14px; }
+  table.grid th, table.grid td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e5e2dc; vertical-align: top; }
+  table.grid th { background: #f3efe7; font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+  table.grid tr:nth-child(even) td { background: #fcfbf7; }
+  table.grid td.var { font-weight: 600; color: var(--accent); white-space: nowrap; }
+
+  /* Flashcards */
+  .card-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .card {
+    background: var(--card); border: 1px solid #e5e2dc; border-radius: 10px; padding: 34px 28px;
+    min-height: 260px; width: 100%; max-width: 640px; box-shadow: var(--shadow);
+    display: flex; flex-direction: column; justify-content: center; text-align: center;
+    cursor: pointer; transition: transform .2s;
+  }
+  .card:hover { transform: translateY(-2px); }
+  .card .prompt { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+  .card .sub { color: var(--muted); font-size: 14px; font-style: italic; }
+  .card .answer-panel { display: none; margin-top: 14px; text-align: left; }
+  .card.flipped .answer-panel { display: block; }
+  .card.flipped .prompt { color: var(--accent); }
+  .card .answer-panel h4 { margin: 10px 0 4px; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .card .answer-panel p { margin: 0 0 10px; font-size: 15px; line-height: 1.5; }
+
+  /* Lookup */
+  .lookup-wrap { display: grid; gap: 18px; }
+  .lookup-wrap input {
+    font: inherit; font-size: 16px; padding: 12px 14px;
+    border: 1.5px solid #d7d2c8; border-radius: 8px; width: 100%;
+    background: #fff;
+  }
+  .lookup-wrap input:focus { border-color: var(--accent); outline: none; }
+  .lookup-results { background: var(--card); border: 1px solid #e5e2dc; border-radius: 10px; padding: 18px; box-shadow: var(--shadow); }
+  .lookup-results .match {
+    padding: 10px 12px; border-bottom: 1px solid #eee7da; display: flex; justify-content: space-between; gap: 12px;
+  }
+  .lookup-results .match:last-child { border-bottom: 0; }
+  .lookup-results .match .feat { flex: 1; font-size: 15px; }
+  .lookup-results .match .lock { font-weight: 600; color: var(--accent); white-space: nowrap; }
+  .lookup-results .empty { color: var(--muted); font-style: italic; padding: 12px; }
+
+  /* Path viz */
+  .path-viz { margin-top: 12px; font-size: 13px; color: var(--muted); }
+
+  .foot {
+    color: var(--muted); font-size: 13px; margin-top: 26px; padding-top: 12px;
+    border-top: 1px solid #e5e2dc; font-style: italic;
+  }
+  @media print {
+    nav.tabs, .controls, .lookup-wrap input, .card-wrap { display: none !important; }
+    body { font-size: 11pt; }
+    .wrap { max-width: 100%; padding: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>Variety Identification — Decision Tree</h1>
+    <div class="sub">BA3 Varieties of English · Ihsane 2026 · final exam companion</div>
+  </div>
+  <div class="sub">built from Derivative-A + per-week enhanced lessons</div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="walker" class="active">Walk the tree</button>
+  <button data-tab="overview">Full-tree overview</button>
+  <button data-tab="cards">Flashcard drill</button>
+  <button data-tab="lookup">One-giveaway lookup</button>
+  <button data-tab="signatures">Signature grid</button>
+</nav>
+
+<!-- ============ WALKER TAB ============ -->
+<section id="tab-walker">
+  <div class="walker">
+    <div class="breadcrumb" id="breadcrumb">Start at root · 16 candidate varieties</div>
+    <div id="node-box"></div>
+    <div class="controls">
+      <button id="btn-back">← Back one step</button>
+      <button id="btn-reset">↺ Reset to root</button>
+      <button id="btn-overview">See full tree</button>
+    </div>
+  </div>
+  <div id="leaf-container"></div>
+</section>
+
+<!-- ============ OVERVIEW TAB ============ -->
+<section id="tab-overview" style="display:none">
+  <div class="overview">
+    <h2 style="margin-top:0;color:var(--accent);">The five-branch tree at a glance</h2>
+    <p style="color:var(--muted);font-style:italic;font-size:15px;margin:0 0 14px">
+      Rhoticity → timing → diagnostic cascade. Memorise the skeleton; the leaves will follow.
+    </p>
+    <pre class="flow" id="flow-diagram"></pre>
+    <h3 style="margin-top:26px;font-size:15px;letter-spacing:.12em;text-transform:uppercase;">The 21 "one-giveaway" features</h3>
+    <p style="color:var(--muted);font-size:14px;margin:4px 0 10px;">If you hear any of these, the variety is essentially locked.</p>
+    <table class="grid" id="giveaway-table"></table>
+  </div>
+</section>
+
+<!-- ============ FLASHCARD TAB ============ -->
+<section id="tab-cards" style="display:none">
+  <div class="card-wrap">
+    <div style="color:var(--muted);font-size:14px;">
+      Click the card to flip · <button id="btn-next-card" style="font:inherit;border:0;background:none;color:var(--accent);cursor:pointer;text-decoration:underline;">next card →</button>
+      · <button id="btn-drill-mode" style="font:inherit;border:0;background:none;color:var(--accent);cursor:pointer;text-decoration:underline;">mode: <span id="drill-mode-label">feature → variety</span></button>
+    </div>
+    <div class="card" id="flash-card" onclick="flipCard()">
+      <div class="prompt" id="card-prompt">Loading…</div>
+      <div class="sub" id="card-sub">Click to reveal</div>
+      <div class="answer-panel" id="card-answer"></div>
+    </div>
+    <div style="color:var(--muted);font-size:13px;" id="card-counter"></div>
+  </div>
+</section>
+
+<!-- ============ LOOKUP TAB ============ -->
+<section id="tab-lookup" style="display:none">
+  <div class="lookup-wrap">
+    <input type="text" id="lookup-input" placeholder="Type a feature: e.g. ‘SVLR’, ‘lah’, ‘habitual be’, ‘retroflex’, ‘innit’…" autocomplete="off" />
+    <div class="lookup-results" id="lookup-results"></div>
+  </div>
+</section>
+
+<!-- ============ SIGNATURES TAB ============ -->
+<section id="tab-signatures" style="display:none">
+  <div class="overview">
+    <h2 style="margin-top:0;color:var(--accent);">Variety signature grid</h2>
+    <p style="color:var(--muted);font-style:italic;font-size:15px;margin:0 0 14px">
+      Each row = four-feature signature · phonology · morphosyntax · lexicon · genealogy (Temporal / Spatial / Contact). Same shape as Derivative-A §A.1.
+    </p>
+    <table class="grid" id="signature-grid"></table>
+  </div>
+</section>
+
+<p class="foot">
+  This tool implements human-defined diagnostic rules from the Derivative-A cheat-sheet and per-week enhanced lessons. It does not autonomously re-weight evidence — it walks a tree you can memorise. For any ambiguous sample, fall back to the signature grid and apply Rule 7.5 (levels principle: phonology + morphosyntax + lexicon before committing).
+</p>
+
+</div>
+
+<script>
+// ============================================================
+// DATA: decision tree + variety signatures
+// ============================================================
+
+const VARIETIES = {
+  RP: {
+    name: "RP (Received Pronunciation)",
+    scope: "BrEng reference · Southern English upper-middle register · codified c.1920",
+    signature: ["non-rhotic", "intrusive-r", "linking-r", "BATH = /ɑː/"],
+    phonology: [
+      "TRAP /æ/ vs BATH /ɑː/ split (class → /æ/; dance → /ɑː/)",
+      "NURSE /ɜː/ non-rhotic (bird = /bɜːd/)",
+      "No H-dropping, no T-glottalling",
+      "Intrusive /r/: idea-r-of; linking /r/: car alarm"
+    ],
+    morphosyntax: ["Standard Southern English morphosyntax", "Present-perfect contrast preserved (I have just eaten, not SAE I just ate)"],
+    lexicon: ["Core BrEng lexicon: lift, lorry, pavement, biscuit"],
+    giveaway: "TRAP-BATH split without rhoticity, without H-dropping, without glottalling, and without GOOSE-fronting.",
+    trap: "Trap 1 (RP-as-default): don't pick RP just because the speaker is non-rhotic. Check morphosyntax and lexicon first.",
+    genealogy: "T + S: 20c. Southern English upper-middle class; codified by BBC and public-school speech."
+  },
+  Cockney: {
+    name: "Cockney (London non-standard)",
+    scope: "BrEng non-standard · London working-class · preserves pre-prescription features",
+    signature: ["non-rhotic", "H-dropping", "T-glottalling", "TH-fronting"],
+    phonology: [
+      "H-dropping in lexical items: house → [aʊs]",
+      "TH-fronting: /θ/→[f], /ð/→[v] medially (three → free; brother → bruvver)",
+      "T-glottalling: butter → [bʌʔə]",
+      "FACE diphthong opened: [æɪ]→[aɪ]",
+      "L-vocalisation: milk → [mɪʊk]"
+    ],
+    morphosyntax: ["Multiple negation: I ain't got nothing", "ain't as general negator", "innit invariant tag", "relative what: the bloke what I saw", "Zero past on some strong verbs"],
+    lexicon: ["Rhyming slang: dog and bone = phone; plates of meat = feet", "Address terms: bruv, guv, mate"],
+    giveaway: "innit as invariant tag OR multiple negation in a London speaker.",
+    trap: "Trap 13: don't confuse L-vocalisation (milk→[mɪʊk]) with T-glottalling (butter→[bʌʔə]). Different segments.",
+    genealogy: "T + social: London working-class since 17c.; retains features pre-dating 18-19c. prescriptive standardisation."
+  },
+  Scouse: {
+    name: "Scouse (Liverpool)",
+    scope: "BrEng non-standard · Liverpool · Irish + Welsh + Lancashire substrate",
+    signature: ["non-rhotic", "/k/-affrication", "no NG-coalescence", "H-retention"],
+    phonology: [
+      "/k/-affrication word-finally: back → [bakx]",
+      "-ing realised with explicit [ɪŋɡ], not [ɪŋ] (singing → [sɪŋɡɪŋɡ])",
+      "NURSE fronted; some velar /r/",
+      "H-retained (unlike Cockney)"
+    ],
+    morphosyntax: ["Invariant like tag at turn-end: you know, like?"],
+    lexicon: ["boss = excellent", "la / lad address forms"],
+    giveaway: "/k/-affrication word-finally: if back sounds like [bakx], it's Scouse.",
+    trap: "Don't mistake Scouse for Cockney — Scouse retains /h/ and lacks TH-fronting.",
+    genealogy: "T + C: 19c. Irish immigration + Welsh + Lancashire substrate → distinctive urban vernacular."
+  },
+  Geordie: {
+    name: "Geordie (Newcastle / Tyneside)",
+    scope: "BrEng non-standard · Northern · Anglo-Saxon + Viking substrate; Southern isolation",
+    signature: ["non-rhotic", "H-retention", "NSR (they works)", "monophthong FACE [eː]"],
+    phonology: [
+      "H-retained (contrast Cockney)",
+      "PRICE monophthong [aː] in some contexts",
+      "FACE/GOAT monophthongs [eː] / [oː]",
+      "Velarised coda /l/",
+      "NURSE realisation approaching [ɔː] for some speakers"
+    ],
+    morphosyntax: ["Northern Subject Rule (NSR): they works, the birds sings", "divven't / divvin't = don't", "youse/yous plural you"],
+    lexicon: ["pet as address term", "hinny = honey/dear", "bairn = child", "canny = good/nice"],
+    giveaway: "NSR: they works (not they work) — or H retained with monophthongal FACE/GOAT.",
+    trap: "Trap 12: don't invert the TRAP-BATH geography — Geordie (North) uses short /a/ in BATH words, not the long /ɑː/ of RP.",
+    genealogy: "T + S: Anglo-Saxon base + Old Norse substrate; geographic isolation from Southern prescriptive norms."
+  },
+  WestCountry: {
+    name: "West Country (Bristol / SW England)",
+    scope: "BrEng non-standard · South-West · retention of Early Modern rhoticity",
+    signature: ["RHOTIC (unusual for BrEng)", "voiced initial fricatives (historic)", "pronoun exchange", "flapped intervocalic /r/"],
+    phonology: [
+      "Rhotic in post-vocalic position (distinctive for England)",
+      "Voiced initial fricatives historically: farm → [varm], sister → [zɪstər] (recessive)",
+      "BATH typically /aː/ or /æː/",
+      "Flapped or tapped intervocalic /r/"
+    ],
+    morphosyntax: ["Pronoun exchange: her went to market (= she went)", "be-generalisation: we be going; I be working", "Periphrastic do: I do go there"],
+    lexicon: ["Alright my lover (greeting, non-sexual)", "Cider and farming lexicon; regional address forms"],
+    giveaway: "Pronoun exchange (her went) in a rhotic English-English speaker.",
+    trap: "Don't mistake West Country rhoticity for SAE — check for pronoun exchange and British lexicon.",
+    genealogy: "T: Retention of Early Modern English rhoticity; Anglo-Saxon dialect substrate."
+  },
+  ScotE: {
+    name: "Scottish English (Standard Scottish English)",
+    scope: "Inner-Circle L1 · Scotland · Middle Scots + Gaelic substrate",
+    signature: ["RHOTIC (tapped /r/)", "SVLR", "monophthongs FACE & GOAT", "dark /l/ in all positions"],
+    phonology: [
+      "Scottish Vowel Length Rule (SVLR): vowels long before /r/, voiced fricatives (/v ð z/), or morpheme boundary; short elsewhere (Stuart-Smith 57)",
+      "Rhotic; /r/ often tapped [ɾ] or alveolar approximant",
+      "Monophthongal FACE [eː] and GOAT [oː]",
+      "Dark /l/ in all positions (Bauer 28)",
+      "NURSE typically [ɛr] or [ʌr] (rhotic)",
+      "/x/ preserved in loch, dreich"
+    ],
+    morphosyntax: ["need to for deduction: he needs to be home by now (= must be)", "double modals in some registers: he might could do it", "wee as neutral diminutive"],
+    lexicon: ["loch, wee, aye, ken (= know), bairn (shared with Geordie), bonnie"],
+    giveaway: "SVLR — if vowel length depends systematically on the following segment (long before /r v z ð #/, short elsewhere), it's ScotE.",
+    trap: "Trap 14: DON'T say 'SVLR predicts X is short'. Quote the rule verbatim: 'short UNLESS followed by /r/, voiced fricative, or morpheme boundary'. The rule specifies lengthening contexts only.",
+    genealogy: "T + C: Middle Scots + English standardisation (18c. Acts of Union); Scottish Gaelic substrate in Highland register."
+  },
+  IrE: {
+    name: "Irish English (IrE)",
+    scope: "Inner-Circle L1 · Ireland · Middle English + Irish Gaelic substrate",
+    signature: ["RHOTIC", "dental stops [t̪ d̪] for /θ ð/", "clear /l/ in all positions", "after-perfect"],
+    phonology: [
+      "/θ/ → [t̪] (dental stop, not [f] as in Cockney): three → [t̪riː]",
+      "/ð/ → [d̪] (dental): this → [d̪ɪs]",
+      "Clear /l/ in all positions (contrast ScotE dark)",
+      "PRICE diphthong [əɪ] or [aɪ]",
+      "happy-tensing: [i] word-finally"
+    ],
+    morphosyntax: ["After-perfect (hot-news): I'm after seeing her = 'I have just seen her'", "yous/yiz = plural you", "Habitual does be: he does be working on Tuesdays", "Reduced progressive with stative verbs in older varieties"],
+    lexicon: ["craic (fun/news), grand (fine), eejit (idiot), yer man (that guy), gobshite"],
+    giveaway: "After + V-ing with hot-news meaning: I'm after seeing her = recent past perfect. This alone = IrE.",
+    trap: "Trap 8: never parse I'm after seeing her as intention ('I want to see her'). It is a HOT-NEWS PERFECT calquing Irish Gaelic tar éis + verbal noun.",
+    genealogy: "T + C: Middle English planter English + Irish Gaelic substrate; Great Famine diaspora carried features to Liverpool/US."
+  },
+  SAE: {
+    name: "SAE / General American",
+    scope: "Inner-Circle L1 · USA · 17c. colonial English + post-independence innovation",
+    signature: ["RHOTIC", "T-flapping", "BATH = /æ/", "Mary-merry-marry merger"],
+    phonology: [
+      "Rhotic; coda /r/ fully realised",
+      "T-flapping: intervocalic /t/ → [ɾ] — ladder / latter homophonous, butter → [bʌɾɚ]",
+      "NURSE = r-coloured [ɝ] (bird → [bɝd])",
+      "BATH stays /æ/ (no TRAP-BATH split): dance → [dæns]",
+      "Mary-merry-marry merger: /ɛə/ = /ɛ/ = /æ/ before /r/ all collapse",
+      "COT-CAUGHT merger in many regions"
+    ],
+    morphosyntax: ["gotten as past participle (contrast BrEng got)", "Present-perfect often reduced to simple past: I already ate vs BrEng I've already eaten", "do you have…? vs BrEng have you got…?", "Subjunctive retained: I suggest that he go (not goes)"],
+    lexicon: ["elevator (lift), sidewalk (pavement), cookie (biscuit), truck (lorry), gas (petrol), hood (bonnet)"],
+    giveaway: "T-flapping + Mary-merry-marry merger in a rhotic speaker. Full combination = GA.",
+    trap: "Trap 9: don't mark SAE will in 1st person as 'wrong' — the shall/will distinction is a prescriptive BrEng tradition, not a pan-variety norm.",
+    genealogy: "T + S: 17c. colonial English (mostly East Anglian / Northern + Scots-Irish) + post-independence innovation + post-WWII media spread."
+  },
+  GAusE: {
+    name: "General Australian English (GAusE)",
+    scope: "Inner-Circle L1 · Australia · 1788 Southern BrEng settler base + Aboriginal loans + independent drift",
+    signature: ["non-rhotic", "fronted GOOSE [ʉː]", "PRICE [ɑe]", "MOUTH [æɔ]"],
+    phonology: [
+      "Non-rhotic (contrast SAE)",
+      "GOOSE fronting: [uː] → [ʉː] (most distinctive feature)",
+      "PRICE diphthong: [ɑe] (start low back, end mid front)",
+      "MOUTH diphthong: [æɔ]",
+      "T-flapping in some contexts (contra RP, despite non-rhoticity)",
+      "HRT (High-Rising Terminal) — declaratives rise like questions",
+      "Weak-vowel merger: /ɪ/ vs /ə/ neutralised in unstressed syllables"
+    ],
+    morphosyntax: ["-o / -ie diminutive productivity: arvo (afternoon), servo (service station), brekkie (breakfast), mozzie (mosquito)", "Mostly standard English morphosyntax otherwise"],
+    lexicon: ["ute (utility vehicle), thongs (flip-flops), bogan (uncultured person), daggy (unfashionable), fair dinkum, no worries", "Aboriginal loans: kangaroo, koala, boomerang, billabong"],
+    giveaway: "Fronted GOOSE [ʉː] + -o/-ie diminutives (arvo, servo, brekkie). Lock.",
+    trap: "Trap 11: remember /ʉː/ is a phonemic description in a specific variety — use [brackets] for the phonetic realisation you actually hear.",
+    genealogy: "T + S + C: 1788 First Fleet Southern BrEng + Aboriginal languages + independent drift; egalitarian-register bias in diminutives."
+  },
+  AAVE: {
+    name: "AAVE (African American Vernacular English)",
+    scope: "US ethnic variety · African substrate + 17-19c. Southern American English; post-Great-Migration urban innovation",
+    signature: ["variable rhoticity", "habitual be", "zero copula", "stressed BEEN"],
+    phonology: [
+      "Consonant cluster reduction: test → [tɛs], hand → [hæn]",
+      "/ð/ → [d] initially, [v] medially: this → [dɪs]; mother → [mʌvɚ]",
+      "PIN-PEN merger",
+      "R-lessness variable; rhotic in some urban varieties",
+      "Stress sometimes on initial syllable (POlice, DEtroit)"
+    ],
+    morphosyntax: [
+      "Habitual be: he be working = 'he works regularly/habitually' (NOT progressive)",
+      "Zero copula: she Ø working (progressive); he Ø tall (equative)",
+      "Stressed BEEN: she BEEN knew = 'she has known for a long time' (remote perfect)",
+      "Completive done: he done gone",
+      "Invariant be done (resultative): by 5pm we be done eaten",
+      "ain't as general negator across tenses",
+      "Multiple negation: he don't know nothing"
+    ],
+    lexicon: ["finna (= 'fixing to', immediate future), bout to, word (agreement), tea (gossip)", "Rhetorical call-response traditions"],
+    giveaway: "Habitual be (he be working) OR stressed BEEN (she BEEN knew). Either locks AAVE.",
+    trap: "Trap 15: habitual be ≠ progressive. He be working = 'he works regularly'. The progressive is he Ø working / he's working. Trap 5: AAVE is NOT 'Southern US + extras' — it has independent TAM innovations.",
+    genealogy: "T + C: African substrate (debated: Niger-Congo aspect systems) + 17-19c. Southern American English; consolidation through Great Migration (Chicago, Detroit, NYC)."
+  },
+  NigE: {
+    name: "Nigerian English (NigE)",
+    scope: "Outer-Circle L2 · Nigeria · Yoruba/Igbo/Hausa substrate + 19c. colonial English + Pidgin adstrate",
+    signature: ["syllable-timed", "tone-marking in questions", "reduplication", "-o emphatic particle"],
+    phonology: [
+      "Syllable-timing (NOT stress-timing): each syllable equal weight",
+      "Full vowels in unstressed syllables: no schwa reduction (photography = [pʰo.to.gra.fi], not [fəˈtɑɡrəfi])",
+      "Tone patterns from Yoruba/Igbo substrate",
+      "Variable rhoticity",
+      "Monophthongisation of diphthongs: FACE → [e], GOAT → [o]",
+      "No aspiration of /p t k/"
+    ],
+    morphosyntax: ["Variable zero-3sg agreement: he go (for he goes)", "Resumptive pronouns in relatives: the man that I saw him", "is it? invariant tag", "-o emphatic particle clause-finally: come here-o", "abi? tag (= 'right?')"],
+    lexicon: [
+      "Reduplication: now-now (immediately), small-small (gradually)",
+      "chop (eat), wahala (trouble), oga (boss), pikin (child)",
+      "-o particle: sorry-o!, I'm tired-o"
+    ],
+    giveaway: "-o emphatic particle clause-finally (come-o! sorry-o!) OR reduplication patterns like now-now, small-small.",
+    trap: "Trap 4: full vowels in every syllable = SYLLABLE-timed, not stress-timed. Trap 7: invoke Yoruba/Igbo substrate specifically, not 'contact' as a blanket term.",
+    genealogy: "T + C: Yoruba / Igbo / Hausa substrate + 19c. missionary-and-colonial English + Nigerian Pidgin adstrate; post-1960 independent codification."
+  },
+  IndE: {
+    name: "Indian English (IndE)",
+    scope: "Outer-Circle L2 · South Asia · Hindi/Tamil/Bengali/Bengali substrate + 17c. EIC English + post-1947 codification",
+    signature: ["syllable-timed", "retroflex stops [ʈ ɖ] for /t d/", "TRAP-DRESS raising", "only as focus particle"],
+    phonology: [
+      "Retroflex stops: /t d/ → [ʈ ɖ] (tongue curled back)",
+      "Syllable-timing (like NigE)",
+      "Dental stops for TH: /θ/ → [t̪], /ð/ → [d̪] (similar to IrE)",
+      "No aspiration of /p t k/",
+      "TRAP-DRESS raising in some speakers",
+      "Variable rhoticity (often rhotic in some regions)",
+      "Stress often on penultimate or final syllables contrary to RP"
+    ],
+    morphosyntax: ["isn't it? invariant tag regardless of matrix clause: you're coming, isn't it?", "Progressive with stative verbs: I am knowing the answer", "only as focus/emphatic particle (clause-final): I live in Mumbai only", "itself as emphatic: today itself = 'today specifically'"],
+    lexicon: ["prepone (= bring forward; productive antonym of postpone)", "mugging up (studying hard)", "timepass (killing time)", "Indian-English-specific compounds: cousin-brother, cousin-sister"],
+    giveaway: "Retroflex [ʈ ɖ] + isn't it? tag, OR prepone, OR only as clause-final focus particle.",
+    trap: "Trap 10: prepone is NOT a typo for postpone — it is a productive IndE coinage (in OED). Trap 16: IndE tag is isn't it?, not is it? (that's NigE). Trap 17: IndE only is a FOCUS particle, not restrictive.",
+    genealogy: "T + C: 17c. East India Company English + Hindi/Tamil/Bengali/Urdu substrate + post-1947 independent codification; now the world's largest English-using population."
+  },
+  SinE: {
+    name: "Singapore English / Singlish (SinE)",
+    scope: "Outer-Circle L2 · Singapore · British Crown Colony English + Hokkien/Malay/Tamil substrate; post-1965 consolidation",
+    signature: ["syllable-timed", "final-stop deletion", "lah/leh/lor discourse particles", "zero copula"],
+    phonology: [
+      "Syllable-timing",
+      "Final-stop deletion or unrelease: /t d k p/ lost or unreleased word-finally (cat → [kæʔ] or [kæ])",
+      "No aspiration",
+      "Monophthongal FACE / GOAT: [e] / [o]",
+      "Consonant cluster simplification",
+      "Categorical non-rhoticity"
+    ],
+    morphosyntax: [
+      "Zero copula with adjectives: she Ø very smart",
+      "Zero past-tense marking: yesterday I go there",
+      "Topic-prominence: This one, I don't like",
+      "can / cannot as polar responses: Can you help? — Can / Cannot",
+      "Discourse particles with specific pragmatic values:",
+      "  · lah = assertion / solidarity",
+      "  · leh = softener / suggestion",
+      "  · lor = resignation / obviousness",
+      "  · meh = incredulous question",
+      "  · hor = seeking agreement"
+    ],
+    lexicon: ["lah, leh, lor, meh, hor (discourse particles)", "kiasu (fear of losing out), shiok (pleasurable), sabo (sabotage), chope (reserve)", "Hokkien loans: ang moh (foreigner/white person), makan (eat, from Malay)"],
+    giveaway: "lah / leh / lor / meh discourse particles. If you see any, it's SinE.",
+    trap: "Trap 6: Singlish is NOT 'bad' SinE. Standard SinE and Singlish are different varieties on a diglossic continuum. Trap 18: lah is not just 'emphasis' — each particle has a distinct pragmatic function.",
+    genealogy: "T + C: British Crown Colony English (1819 founding) + Hokkien/Malay/Tamil substrate + post-1965 nation-building with English-medium schooling; Speak Good English Movement 2000."
+  },
+  JC: {
+    name: "Jamaican Creole (JC / Patois)",
+    scope: "Atlantic creole · Jamaica · West African substrate + 17-18c. English lexifier",
+    signature: ["pre-verbal TAM particles", "fi polyfunctional morpheme", "dem post-nominal plural", "copula absence"],
+    phonology: [
+      "TH-stopping: /θ/ → [t], /ð/ → [d]",
+      "Consonant cluster simplification",
+      "Loss of initial /h/ in some items",
+      "Monophthongal vowels in many items",
+      "Tonal residue in some speakers"
+    ],
+    morphosyntax: [
+      "TAM grid, pre-verbal:",
+      "  · mi ron = I run / I ran (unmarked, habitual or simple past)",
+      "  · mi a ron = I am running (progressive)",
+      "  · mi did ron = I ran (past)",
+      "  · mi a go ron = I will run (future)",
+      "  · mi don ron = I have run (completive)",
+      "dem post-nominal plural: di buk-dem = the books",
+      "fi polyfunctional: preposition ('for'), modal ('to / should'), complementiser",
+      "Zero copula with adjectives",
+      "say complementiser: dem know say…"
+    ],
+    lexicon: ["wah gwaan (what's going on), irie (all right / good), bredren / sistren (brother/sister), big up (respect)", "Rasta register: Babylon, I-and-I, reason", "Africanisms: pickney (child, also JC), nyam (eat)"],
+    giveaway: "mi a ron-style TAM grid OR fi as polyfunctional morpheme (preposition / modal / complementiser).",
+    trap: "Trap 3: don't describe JC as 'lacking tense inflection' — it has a COMPLETE TAM system realised through particles. Trap 19: JC did is a past-tense particle, NOT the English emphatic auxiliary (mi did ron = I ran, not emphatic).",
+    genealogy: "T + C: 17-18c. English lexifier (mostly Southern / South-West) + West African substrate (Akan, Igbo, Kwa) + relexification; plantation-society emergence."
+  },
+  Gullah: {
+    name: "Gullah (Geechee)",
+    scope: "Atlantic creole · Sea Islands (SC/GA coast) · West African substrate + 18c. Plantation English; isolation-preserved",
+    signature: ["pre-verbal TAM (bin, gunne, duh, binnuh)", "say-complementiser", "dem post-nominal plural", "Africanisms preserved"],
+    phonology: [
+      "Preserved tonal / pitch-accent residues (Africanist scholars argue)",
+      "Some consonant features atypical of surrounding AmE",
+      "Conservative vowel system relative to inland AmE"
+    ],
+    morphosyntax: [
+      "TAM particles: bin (past), gunne (future), go (prospective), done (completive), duh (progressive), binnuh (past progressive)",
+      "say as complementiser introducing clausal complements: dey know say she comin",
+      "dem post-nominal plural (shared with JC)",
+      "Zero copula; copula absence with adjectives"
+    ],
+    lexicon: ["Africanisms preserved: buckra (white person), goober (peanut, from Kikongo nguba)", "tief (thief, also JC), fuh (for / to)"],
+    giveaway: "say as complementiser (dey know say she comin) — the single most distinctive Gullah feature. Also buckra / goober Africanisms.",
+    trap: "Trap 20: Gullah say is a COMPLEMENTISER, not a verb. Don't read dey know say… as 'they know say…' (redundant) — parse say as 'that'. Calque on Niger-Congo (Yoruba pé, Akan sɛ).",
+    genealogy: "T + C: West African substrate (Mende, Vai, Kikongo, Wolof) + 18c. Plantation English; Sea Islands geographic isolation preserved creole features."
+  },
+  HCE: {
+    name: "Hawai'ian Creole English (HCE / Pidgin)",
+    scope: "Pacific creole · Hawai'i · Plantation contact (Hawaiian/Chinese/Japanese/Portuguese/Filipino) + English lexifier",
+    signature: ["pre-verbal TAM (wen, goin, neva)", "yeah? focus tag", "no copula with adjectives", "reduced vowel inventory"],
+    phonology: [
+      "Reduced vowel inventory (simpler than GAm)",
+      "Intonation patterns distinct from mainland AmE — falling at turn-final",
+      "Consonant cluster simplification",
+      "Variable realisation of TH"
+    ],
+    morphosyntax: [
+      "TAM particles, pre-verbal:",
+      "  · wen = past marker (wen go = went)",
+      "  · goin = future",
+      "  · neva = negative past / negative perfect",
+      "  · stay = progressive / locative copula (he stay working)",
+      "yeah? invariant focus / confirmation tag",
+      "Zero copula with adjectives: da food Ø ono"
+    ],
+    lexicon: ["brah (address), da kine (general filler, 'you know the thing'), grinds (food), ono (delicious)", "Hawaiian loans: pau (finished), keiki (child); Japanese loans: bocha (bath)"],
+    giveaway: "wen for past (wen go = went), OR da kine as filler, OR stay as progressive copula.",
+    trap: "Trap 3: don't call HCE 'broken English' — it has a complete TAM system (wen / goin / neva / stay).",
+    genealogy: "T + C: Sugar-plantation contact situation (Hawaiian + Cantonese + Japanese + Portuguese + Filipino + Korean workers) + English lexifier; stabilised early 20c."
+  }
+};
+
+// ==============================
+// Decision tree definition
+// ==============================
+// Each node: { q: question text, hint: optional tip, options: [{label, answer, next|leaf}] }
+// next → another node id. leaf → a variety id.
+
+const NODES = {
+  root: {
+    q: "Is the sample RHOTIC?",
+    hint: "Listen to post-vocalic /r/ in words like car, park, far, water. Clear /r/ at the end = rhotic. This single feature splits 16 varieties into two halves.",
+    options: [
+      { label: "Rhotic (post-vocalic /r/ pronounced)", answer: "Rhotic", next: "A_timing", style: "yes-accent" },
+      { label: "Non-rhotic (coda /r/ absent)", answer: "Non-rhotic", next: "B_timing", style: "no-accent" },
+      { label: "Variable / uncertain — can't tell", answer: "Variable", next: "C_substrate", style: "var-accent" }
+    ]
+  },
+
+  A_timing: {
+    q: "Rhythm: stress-timed or syllable-timed?",
+    hint: "Stress-timed varieties compress unstressed syllables to schwa (pho-TOG-ra-phy → [fəˈtɑɡrəfi]). Syllable-timed varieties give each syllable equal weight with full vowels.",
+    options: [
+      { label: "Stress-timed (schwa reduction; uneven syllables)", answer: "Stress-timed", next: "A_stress" },
+      { label: "Syllable-timed (equal syllables; no schwa reduction)", answer: "Syllable-timed", next: "A_syll" }
+    ]
+  },
+
+  A_stress: {
+    q: "Which single diagnostic feature is present?",
+    hint: "4 candidates left: ScotE, IrE, SAE, West Country. Each has ONE lock-in feature.",
+    options: [
+      { label: "Scottish Vowel Length Rule (length conditioned by /r v z ð #/)", answer: "SVLR", leaf: "ScotE" },
+      { label: "‘I'm after seeing her’ (hot-news perfect, after + V-ing)", answer: "After-perfect", leaf: "IrE" },
+      { label: "T-flapping (ladder = latter) + Mary-merry-marry merger + gotten", answer: "T-flap + MMM merger", leaf: "SAE" },
+      { label: "Pronoun exchange (‘her went’) + voiced initial fricatives historically", answer: "Pronoun exchange", leaf: "WestCountry" }
+    ]
+  },
+
+  A_syll: {
+    q: "Which substrate signals are present?",
+    hint: "2 candidates: IndE and NigE. Both L2 Outer-Circle varieties with syllable-timing.",
+    options: [
+      { label: "Retroflex [ʈ ɖ] for /t d/ + isn't it? tag + only as focus particle", answer: "Retroflex + isn't-it tag", leaf: "IndE" },
+      { label: "-o emphatic particle (come-o!) + reduplication (now-now, small-small) + Yoruba tone", answer: "-o + reduplication", leaf: "NigE" }
+    ]
+  },
+
+  B_timing: {
+    q: "Rhythm: stress-timed or syllable-timed?",
+    hint: "In the non-rhotic half, timing splits Inner-Circle varieties (stress-timed) from Outer-Circle L2 & creoles (syllable-timed).",
+    options: [
+      { label: "Stress-timed", answer: "Stress-timed", next: "B_stress" },
+      { label: "Syllable-timed", answer: "Syllable-timed", next: "B_syll" }
+    ]
+  },
+
+  B_stress: {
+    q: "Any AAVE-specific TAM features (habitual be, stressed BEEN, zero copula)?",
+    hint: "AAVE's TAM innovations (habitual be, stressed BEEN) are diagnostic and override everything else.",
+    options: [
+      { label: "Yes — habitual be (he be working) or stressed BEEN", answer: "AAVE-TAM", leaf: "AAVE" },
+      { label: "No — proceed to BrEng / AusE cascade", answer: "no-AAVE-TAM", next: "B_stress_next" }
+    ]
+  },
+
+  B_stress_next: {
+    q: "Which phonological / lexical cluster matches best?",
+    hint: "5 candidates: RP, Cockney, Scouse, Geordie, GAusE. Use the clearest diagnostic.",
+    options: [
+      { label: "Fronted GOOSE [ʉː] + -o/-ie diminutives (arvo, servo, brekkie)", answer: "GOOSE-fronting", leaf: "GAusE" },
+      { label: "H-dropping + T-glottalling + TH-fronting + innit tag", answer: "H-drop + glottalling", leaf: "Cockney" },
+      { label: "/k/-affrication word-finally ([bakx]); no H-dropping", answer: "k-affrication", leaf: "Scouse" },
+      { label: "Northern Subject Rule (they works) + H-retained + monoph. FACE/GOAT", answer: "NSR", leaf: "Geordie" },
+      { label: "None of the above — TRAP-BATH split, no H-drop/glottalling, Mary-merry-marry distinct", answer: "no-non-std", leaf: "RP" }
+    ]
+  },
+
+  B_syll: {
+    q: "What creole / substrate signal is present?",
+    hint: "4 candidates: SinE, JC, Gullah, HCE. Each locked by a distinctive TAM or particle.",
+    options: [
+      { label: "lah / leh / lor / meh discourse particles", answer: "lah-particles", leaf: "SinE" },
+      { label: "mi ron / mi a ron / mi did ron TAM grid + fi polyfunctional morpheme", answer: "mi-ron-grid", leaf: "JC" },
+      { label: "say-complementiser (‘dey know say…’) + buckra / goober Africanisms", answer: "say-complementiser", leaf: "Gullah" },
+      { label: "wen / goin / neva TAM + da kine / brah / grinds", answer: "wen-TAM", leaf: "HCE" }
+    ]
+  },
+
+  C_substrate: {
+    q: "With variable rhoticity, which substrate or diagnostic fits?",
+    hint: "Variable rhoticity is typical of L2 varieties and some creoles. Look for substrate loans and signature morphosyntax.",
+    options: [
+      { label: "Retroflex [ʈ ɖ] + isn't it? + only as focus particle", answer: "Retroflex", leaf: "IndE" },
+      { label: "-o particle + reduplication + syllable-timing", answer: "NigE-substrate", leaf: "NigE" },
+      { label: "Habitual be + zero copula + stressed BEEN", answer: "AAVE-TAM", leaf: "AAVE" },
+      { label: "Pronoun exchange + West of England phonology", answer: "WC", leaf: "WestCountry" },
+      { label: "Can't tell — go back and test rhoticity again", answer: "retry", next: "root" }
+    ]
+  }
+};
+
+// ==============================
+// Giveaway table (one-feature locks)
+// ==============================
+
+const GIVEAWAYS = [
+  ["/k/-affrication word-finally", "Scouse"],
+  ["After + V-ing ‘I'm after seeing'", "IrE"],
+  ["Scottish Vowel Length Rule (SVLR)", "ScotE"],
+  ["Voiced initial fricatives ([v] for f)", "West Country (historic)"],
+  ["Habitual be (‘he be working')", "AAVE"],
+  ["Stressed BEEN (‘she BEEN knew')", "AAVE"],
+  ["Isn't it? invariant tag", "IndE"],
+  ["lah / leh / lor / meh", "SinE / Singlish"],
+  ["mi a ron TAM grid", "JC"],
+  ["say-complementiser (‘dey know say…')", "Gullah"],
+  ["wen for past, da kine filler", "HCE (Hawai'ian Pidgin)"],
+  ["fi polyfunctional (prep / modal / comp)", "JC"],
+  ["prepone (= bring forward)", "IndE"],
+  ["arvo / servo / brekkie diminutives", "GAusE"],
+  ["Pronoun exchange (‘her went')", "West Country"],
+  ["Northern Subject Rule (‘they works')", "Geordie"],
+  ["innit as invariant tag", "Cockney"],
+  ["Multiple negation in an educated speaker", "Cockney / AAVE / Southern US"],
+  ["Rhotic + T-flap + Mary-merry-marry merger", "SAE (General American)"],
+  ["GOOSE fronted to [ʉː] in a non-rhotic system", "GAusE"],
+  ["Retroflex [ʈ ɖ] for /t d/", "IndE"],
+  ["-o emphatic particle (sorry-o!)", "NigE"],
+  ["Reduplication (now-now, small-small)", "NigE"]
+];
+
+// ==============================
+// State + rendering
+// ==============================
+
+let currentNode = "root";
+let path = []; // array of {answer, nodeId}
+
+function renderNode() {
+  const nb = document.getElementById("node-box");
+  const node = NODES[currentNode];
+  if (!node) { nb.innerHTML = ""; return; }
+  nb.innerHTML = `
+    <div class="q-label">Decision point</div>
+    <h2 class="q-text">${node.q}</h2>
+    <p class="q-hint">${node.hint || ""}</p>
+    <div class="options">
+      ${node.options.map((o, i) => `
+        <button class="opt ${o.style || ""}" data-idx="${i}">
+          <span>${o.label}</span>
+          <span class="chev">${o.leaf ? "▸ diagnose" : "→"}</span>
+        </button>`).join("")}
+    </div>
+  `;
+  nb.querySelectorAll("button.opt").forEach((btn, i) => {
+    btn.addEventListener("click", () => chooseOption(i));
+  });
+  renderBreadcrumb();
+  document.getElementById("leaf-container").innerHTML = "";
+}
+
+function chooseOption(i) {
+  const node = NODES[currentNode];
+  const opt = node.options[i];
+  path.push({ answer: opt.answer, from: currentNode });
+  if (opt.leaf) {
+    renderLeaf(opt.leaf);
+    document.getElementById("node-box").innerHTML = `<div class="q-label">Diagnosis reached — reset to try another sample</div>`;
+    renderBreadcrumb();
+    return;
+  }
+  currentNode = opt.next;
+  renderNode();
+}
+
+function renderBreadcrumb() {
+  const bc = document.getElementById("breadcrumb");
+  if (path.length === 0) {
+    bc.innerHTML = `<em>Start at root · 16 candidate varieties</em>`;
+    return;
+  }
+  bc.innerHTML = path.map(p => `<span class="crumb">${p.answer}</span>`).join("");
+}
+
+function renderLeaf(vid) {
+  const v = VARIETIES[vid];
+  if (!v) return;
+  const container = document.getElementById("leaf-container");
+  container.innerHTML = `
+    <div class="leaf">
+      <h2>${v.name}</h2>
+      <div class="scope">${v.scope}</div>
+      <div class="signature">
+        ${v.signature.map(s => `<span class="sig-chip">${s}</span>`).join("")}
+      </div>
+      <div class="giveaway">
+        <strong>Single-feature giveaway</strong>
+        ${v.giveaway}
+      </div>
+      <h3>Phonology</h3>
+      <ul>${v.phonology.map(x => `<li>${x}</li>`).join("")}</ul>
+      <h3>Morphosyntax</h3>
+      <ul>${v.morphosyntax.map(x => `<li>${x}</li>`).join("")}</ul>
+      <h3>Lexicon</h3>
+      <ul>${v.lexicon.map(x => `<li>${x}</li>`).join("")}</ul>
+      <div class="trap">
+        <strong>Canonical trap to avoid</strong>
+        ${v.trap}
+      </div>
+      <div class="genealogy">Genealogy (Temporal / Spatial / Contact): ${v.genealogy}</div>
+    </div>
+  `;
+  container.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+document.getElementById("btn-reset").addEventListener("click", () => {
+  currentNode = "root"; path = []; renderNode();
+});
+document.getElementById("btn-back").addEventListener("click", () => {
+  if (path.length === 0) return;
+  const last = path.pop();
+  currentNode = last.from;
+  renderNode();
+});
+document.getElementById("btn-overview").addEventListener("click", () => switchTab("overview"));
+
+// ==============================
+// Overview tab rendering
+// ==============================
+
+const FLOW_ASCII = `
+                          ┌───────────────────────────────┐
+                          │  Q1. RHOTICITY?               │
+                          └──────────────┬────────────────┘
+                 ┌─────────────────────┬─┴─┬─────────────────────┐
+              RHOTIC                   │   │                NON-RHOTIC
+                 │                     │   │                     │
+           Q2a. TIMING                 │   │               Q2b. TIMING
+        ┌────┴────┐                    │   │              ┌────┴────┐
+    stress       syllable              │   │          stress      syllable
+        │            │                 │   │              │           │
+    ┌───┴───┬───┬───┐│                 │   │   ┌─────────┤           ├──────────────┐
+    │       │   │   │                  │   │   │       habitual be? │              │
+  SVLR   after T-flap pron.           │   │   yes                  no             │
+    │     -perf  +MMM exchg           │   │   │                     │              │
+  ScotE   IrE  SAE WestCnt         │   │ AAVE         ┌────────────┤           │
+                                   │   │              │            │           │
+                             retroflex Yoruba       GOOSE     H-drop+  /k/-aff  NSR   RP
+                              +only   +-o/reduplic.   [ʉː]    glottal   Scouse  Geord dflt
+                               │        │             │         │                    │
+                             IndE     NigE          GAusE    Cockney                RP
+
+                          (syllable-timed non-rhotic → creoles)
+                             │     │       │         │
+                           lah/   mi a    say-       wen/goin/
+                           leh/   ron      compl     neva
+                           lor  + fi    + buckra   + da kine
+                             │     │       │         │
+                           SinE   JC    Gullah      HCE
+`;
+
+function renderOverview() {
+  document.getElementById("flow-diagram").textContent = FLOW_ASCII;
+  const gt = document.getElementById("giveaway-table");
+  gt.innerHTML = `
+    <thead><tr><th>Feature</th><th>Variety locked</th></tr></thead>
+    <tbody>
+      ${GIVEAWAYS.map(([f, v]) => `<tr><td>${f}</td><td class="var">${v}</td></tr>`).join("")}
+    </tbody>
+  `;
+}
+
+// ==============================
+// Signature grid
+// ==============================
+
+function renderSignatureGrid() {
+  const sg = document.getElementById("signature-grid");
+  const rows = Object.entries(VARIETIES).map(([vid, v]) => `
+    <tr>
+      <td class="var">${v.name}</td>
+      <td>${v.signature.join(" · ")}</td>
+      <td>${v.phonology[0]}</td>
+      <td>${v.morphosyntax[0]}</td>
+      <td>${v.lexicon[0]}</td>
+      <td>${v.genealogy}</td>
+    </tr>
+  `).join("");
+  sg.innerHTML = `
+    <thead><tr>
+      <th>Variety</th>
+      <th>4-feature signature</th>
+      <th>Phonology (primary)</th>
+      <th>Morphosyntax (primary)</th>
+      <th>Lexicon (primary)</th>
+      <th>Genealogy (T/S/C)</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  `;
+}
+
+// ==============================
+// Flashcards
+// ==============================
+
+let cardIndex = 0;
+let drillMode = "feat2var"; // or "var2feat"
+let cardsFeat2Var = GIVEAWAYS.slice().sort(() => Math.random() - 0.5);
+let cardsVar2Feat = Object.entries(VARIETIES).map(([vid, v]) => ({
+  prompt: v.name,
+  answer: v
+})).sort(() => Math.random() - 0.5);
+
+function renderCard() {
+  const cardEl = document.getElementById("flash-card");
+  cardEl.classList.remove("flipped");
+  const promptEl = document.getElementById("card-prompt");
+  const subEl = document.getElementById("card-sub");
+  const ansEl = document.getElementById("card-answer");
+  const counterEl = document.getElementById("card-counter");
+
+  if (drillMode === "feat2var") {
+    const [feat, vlabel] = cardsFeat2Var[cardIndex % cardsFeat2Var.length];
+    promptEl.textContent = feat;
+    subEl.textContent = "What variety does this feature lock?";
+    ansEl.innerHTML = `<h4>Variety locked</h4><p style="color:var(--accent);font-weight:600;font-size:18px;">${vlabel}</p>`;
+    counterEl.textContent = `Card ${(cardIndex % cardsFeat2Var.length) + 1} of ${cardsFeat2Var.length}`;
+    document.getElementById("drill-mode-label").textContent = "feature → variety";
+  } else {
+    const c = cardsVar2Feat[cardIndex % cardsVar2Feat.length];
+    promptEl.textContent = c.prompt;
+    subEl.textContent = "Recall the 4-feature signature + giveaway";
+    ansEl.innerHTML = `
+      <h4>Signature</h4>
+      <p>${c.answer.signature.join(" · ")}</p>
+      <h4>Single-feature giveaway</h4>
+      <p>${c.answer.giveaway}</p>
+      <h4>Canonical trap</h4>
+      <p style="font-size:14px;color:var(--muted);">${c.answer.trap}</p>
+    `;
+    counterEl.textContent = `Card ${(cardIndex % cardsVar2Feat.length) + 1} of ${cardsVar2Feat.length}`;
+    document.getElementById("drill-mode-label").textContent = "variety → features";
+  }
+}
+
+function flipCard() {
+  document.getElementById("flash-card").classList.toggle("flipped");
+}
+window.flipCard = flipCard;
+
+document.getElementById("btn-next-card").addEventListener("click", (e) => {
+  e.stopPropagation();
+  cardIndex++;
+  renderCard();
+});
+document.getElementById("btn-drill-mode").addEventListener("click", (e) => {
+  e.stopPropagation();
+  drillMode = (drillMode === "feat2var") ? "var2feat" : "feat2var";
+  cardIndex = 0;
+  renderCard();
+});
+
+// ==============================
+// Lookup
+// ==============================
+
+function renderLookup(query) {
+  const q = (query || "").trim().toLowerCase();
+  const results = document.getElementById("lookup-results");
+  if (q.length === 0) {
+    results.innerHTML = GIVEAWAYS.map(([f, v]) =>
+      `<div class="match"><span class="feat">${f}</span><span class="lock">${v}</span></div>`
+    ).join("");
+    return;
+  }
+  const matches = [];
+  for (const [f, v] of GIVEAWAYS) {
+    if (f.toLowerCase().includes(q) || v.toLowerCase().includes(q)) matches.push([f, v]);
+  }
+  // also search within variety signatures/phonology/morphosyntax/lexicon
+  for (const [vid, va] of Object.entries(VARIETIES)) {
+    const allText = [va.name, va.scope, ...va.signature, ...va.phonology, ...va.morphosyntax, ...va.lexicon, va.giveaway, va.trap, va.genealogy].join(" ").toLowerCase();
+    if (allText.includes(q)) {
+      const context = [va.name];
+      for (const list of [va.phonology, va.morphosyntax, va.lexicon]) {
+        for (const item of list) if (item.toLowerCase().includes(q)) context.push(`…${item}`);
+      }
+      matches.push([context.slice(1).join(" · ") || va.scope, va.name]);
+    }
+  }
+  if (matches.length === 0) {
+    results.innerHTML = `<div class="empty">No matches for “${query}”. Try: SVLR, lah, retroflex, innit, habitual, fronted, dental, creole, tag, reduplication…</div>`;
+    return;
+  }
+  results.innerHTML = matches.map(([f, v]) =>
+    `<div class="match"><span class="feat">${f}</span><span class="lock">${v}</span></div>`
+  ).join("");
+}
+
+document.getElementById("lookup-input").addEventListener("input", (e) => renderLookup(e.target.value));
+
+// ==============================
+// Tabs
+// ==============================
+
+function switchTab(tabId) {
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("active", b.dataset.tab === tabId));
+  for (const id of ["walker", "overview", "cards", "lookup", "signatures"]) {
+    document.getElementById("tab-" + id).style.display = (id === tabId) ? "" : "none";
+  }
+  if (tabId === "overview") renderOverview();
+  if (tabId === "signatures") renderSignatureGrid();
+  if (tabId === "cards") renderCard();
+  if (tabId === "lookup") renderLookup("");
+}
+document.querySelectorAll("#tabs button").forEach(b => {
+  b.addEventListener("click", () => switchTab(b.dataset.tab));
+});
+
+// Initial render
+renderNode();
+</script>
+</body>
+</html>

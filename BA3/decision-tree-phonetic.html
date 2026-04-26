@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Variety-ID Decision Tree v2 — Phonology Only</title>
+<style>
+  :root{
+    --ox:#7a1f1f;     --ox2:#9a2d2d;
+    --ink:#1b1b1b;    --mute:#5a5a5a;
+    --paper:#fbf7ee;  --card:#fffdf7;
+    --rule:#d8cfbd;   --hit:#f3e7c9;
+    --blue:#2b4b6f;   --grn:#3a5a3a;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"EB Garamond","Iowan Old Style","Apple Garamond",Georgia,serif;
+    background:var(--paper);color:var(--ink);line-height:1.5;
+    font-size:17px;
+  }
+  header{
+    background:var(--ox);color:#f7ead1;padding:18px 26px;
+    border-bottom:4px double #f7ead1;
+  }
+  header h1{margin:0;font-size:24px;font-weight:600;letter-spacing:.5px}
+  header .sub{font-size:14px;opacity:.88;margin-top:4px;font-style:italic}
+  nav{background:#2c1212;display:flex;gap:0;padding:0 18px}
+  nav button{
+    background:none;border:none;color:#e6d9b9;font:inherit;
+    padding:10px 18px;cursor:pointer;font-size:15px;
+    border-bottom:3px solid transparent;
+  }
+  nav button.active{color:#fff7d9;border-bottom-color:#f7ead1;background:#3e1818}
+  nav button:hover{color:#fff}
+  main{max-width:1080px;margin:0 auto;padding:22px 26px 60px}
+  section{display:none}
+  section.active{display:block}
+  h2{color:var(--ox);border-bottom:1px solid var(--rule);padding-bottom:6px;font-weight:600;font-size:22px;margin-top:0}
+  h3{color:var(--ox2);font-size:18px;margin-bottom:6px}
+  .card{
+    background:var(--card);border:1px solid var(--rule);
+    border-radius:4px;padding:18px 22px;margin:14px 0;
+    box-shadow:0 1px 2px rgba(0,0,0,.04);
+  }
+  code,.ipa{font-family:"Doulos SIL","Charis SIL","Gentium","DejaVu Sans",monospace;
+    background:#f3eddc;padding:1px 4px;border-radius:3px;font-size:15px}
+  .ipa{color:#2b1010;font-weight:500}
+  .example{
+    margin:6px 0 4px 8px;padding:6px 10px;
+    background:#fdf8e6;border-left:3px solid var(--ox);
+    font-size:14.5px;line-height:1.45;
+  }
+  .example b{color:var(--ox);font-variant:small-caps;letter-spacing:.4px}
+  .q{font-size:19px;font-weight:600;color:var(--ink);margin-bottom:4px}
+  .hint{color:var(--mute);font-style:italic;font-size:14px;margin-bottom:10px}
+  .opts{display:flex;flex-direction:column;gap:10px}
+  .opt{
+    background:#fdf8e6;border:1px solid var(--rule);
+    border-left:4px solid var(--ox);padding:12px 14px;
+    cursor:pointer;text-align:left;font:inherit;font-size:16px;
+    border-radius:3px;transition:all .15s;
+  }
+  .opt:hover{background:var(--hit);border-left-color:var(--ox2);transform:translateX(3px)}
+  .opt .lbl{font-weight:600;color:var(--ox);display:block;margin-bottom:4px}
+  .opt .desc{font-size:14.5px;color:#333;margin-bottom:4px}
+  .opt .ex{font-size:13.5px;color:#4a3b2a;font-style:italic}
+  .opt .ex .ipa{font-style:normal}
+  .leaf{
+    background:#fff;border:2px solid var(--ox);border-radius:4px;
+    padding:18px 22px;margin-top:14px;
+  }
+  .leaf h3{margin-top:0;font-size:22px;border-bottom:1px solid var(--rule);padding-bottom:6px}
+  .leaf .sig{font-size:15px;color:var(--blue);margin-bottom:8px;font-style:italic}
+  .leaf dl{display:grid;grid-template-columns:130px 1fr;gap:6px 12px;margin:8px 0}
+  .leaf dt{font-weight:600;color:var(--ox);font-variant:small-caps;letter-spacing:.4px}
+  .leaf dd{margin:0}
+  .breadcrumbs{font-size:13.5px;color:var(--mute);margin-bottom:10px}
+  .breadcrumbs span{background:#e8dfc8;padding:2px 8px;border-radius:3px;margin-right:4px}
+  .actions{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap}
+  .btn{
+    background:var(--ox);color:#f7ead1;border:none;padding:8px 14px;
+    cursor:pointer;font:inherit;font-size:14px;border-radius:3px;
+  }
+  .btn.sec{background:#6a6a6a}
+  .btn:hover{background:var(--ox2)}
+  .btn.sec:hover{background:#4a4a4a}
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:14.5px}
+  th,td{border:1px solid var(--rule);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:#efe6cc;color:var(--ox);font-weight:600}
+  tr:nth-child(even){background:#fdf8e6}
+  .trap{background:#fff3f0;border-left:4px solid #c33;padding:10px 14px;margin:10px 0;border-radius:3px}
+  .trap b{color:#c33}
+  .feature-card{
+    background:#fff;border:1px solid var(--rule);
+    padding:12px 15px;margin:10px 0;border-radius:3px;
+  }
+  .feature-card .name{font-weight:600;color:var(--ox);font-size:16px}
+  .feature-card .ex{margin-top:6px;font-size:14px}
+  .varlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+  .varchip{
+    background:var(--card);border:1px solid var(--rule);
+    padding:10px 12px;cursor:pointer;border-radius:3px;
+  }
+  .varchip:hover{background:var(--hit);border-color:var(--ox)}
+  .varchip .vn{font-weight:600;color:var(--ox)}
+  .varchip .vs{font-size:13px;color:var(--mute)}
+  .warning{
+    background:#fff8e0;border-left:4px solid #c90;padding:10px 14px;
+    margin:10px 0;border-radius:3px;font-size:14.5px;
+  }
+  .fc{
+    background:#fff;border:2px solid var(--rule);border-radius:6px;
+    padding:30px 24px;min-height:200px;text-align:center;
+    margin:20px 0;cursor:pointer;
+  }
+  .fc .front{font-size:22px;color:var(--ox);font-weight:600}
+  .fc .back{font-size:16px;margin-top:10px;display:none}
+  .fc.flipped .back{display:block}
+  .fc.flipped .front{opacity:.5;font-size:16px}
+  .fc-nav{display:flex;justify-content:space-between;align-items:center;margin:10px 0}
+  .kicker{font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+  .foot{text-align:center;color:var(--mute);font-size:12px;margin-top:30px;font-style:italic}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Variety-ID Decision Tree — v2 Phonology Only</h1>
+  <div class="sub">Every decision branches on something you can see in an IPA transcription or hear in a short clip · BA3 Varieties of English · Ihsane 2026</div>
+</header>
+
+<nav>
+  <button class="tab active" data-tab="walker">Walker</button>
+  <button class="tab" data-tab="overview">Overview</button>
+  <button class="tab" data-tab="features">Feature Glossary</button>
+  <button class="tab" data-tab="flashcards">Flashcards</button>
+  <button class="tab" data-tab="lookup">Lookup</button>
+  <button class="tab" data-tab="signatures">Signatures</button>
+</nav>
+
+<main>
+
+<section id="walker" class="active">
+  <h2>Walk the Tree</h2>
+  <div class="breadcrumbs" id="crumbs"><span>start</span></div>
+  <div id="node-render"></div>
+  <div class="actions">
+    <button class="btn" onclick="goBack()">← Back</button>
+    <button class="btn sec" onclick="resetWalk()">Reset</button>
+  </div>
+  <div class="warning" style="margin-top:20px">
+    <b>v2 change:</b> this tree branches <i>only</i> on phonological features audible in the clip or visible in IPA — no grammar, no lexicon, no discourse particles. Each option shows a concrete example word with its transcription so you know exactly what the feature sounds like.
+  </div>
+</section>
+
+<section id="overview">
+  <h2>How the Tree is Organised</h2>
+  <div class="card">
+    <p>Four rhythm-and-rhoticity zones. Within each zone, a single phonological feature triggers a variety ID. Every feature has at least one example word with its IPA — if you can't hear or see that contrast, mark the variety ambiguous and fall back to the neighbour-disambiguation table.</p>
+    <table>
+      <tr><th>Zone</th><th>Rhoticity + Timing</th><th>Candidates</th></tr>
+      <tr><td>A-stress</td><td>Rhotic + stress-timed</td><td>ScotE · IrE · SAE · West Country · GAmE</td></tr>
+      <tr><td>A-syll</td><td>Rhotic + syllable-timed</td><td>IndE · NigE</td></tr>
+      <tr><td>B-stress</td><td>Non-rhotic + stress-timed</td><td>RP · Cockney · Scouse · Geordie · GAusE · AAVE</td></tr>
+      <tr><td>B-syll</td><td>Non-rhotic + syllable-timed</td><td>SinE · JC · Gullah · HCE</td></tr>
+      <tr><td>C</td><td>Variable / mixed</td><td>AAVE (some speakers) · Dublin IrE</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Exam-Room Protocol (90 s per ID)</h3>
+    <ol>
+      <li><b>Rhoticity</b> (15 s). Scan for post-vocalic /r/ in <span class="ipa">car, farm, heart</span>. Rhotic → A, non-rhotic → B, inconsistent → C.</li>
+      <li><b>Timing</b> (10 s). Listen for schwa reduction in unstressed syllables. If every syllable is clearly articulated and unreduced, it's syllable-timed.</li>
+      <li><b>Zone diagnostic</b> (45 s). Apply the zone's signature feature — SVLR, retroflex stops, /k/-affrication, final-stop deletion, etc.</li>
+      <li><b>Commit</b> (20 s). Write the variety name and one clinching IPA example from the clip.</li>
+    </ol>
+  </div>
+
+  <div class="trap"><b>Fatal Trap 14 (SVLR).</b> The rule specifies <i>where vowels are long</i> — before /r v ð z/ and morpheme boundaries. It does <i>not</i> say vowels are short elsewhere by rule. Never write "the rule predicts X is short"; say "X appears short in an environment not listed among the lengthening contexts."</div>
+
+  <div class="trap"><b>Fatal Trap: rhotic ≠ GAmE.</b> Rhoticity alone does not identify General American. ScotE, IrE, SAE, West Country, IndE, NigE are all rhotic. Always combine rhoticity with a second diagnostic (SVLR · dental stops · diphthong shift · retroflex · voiced fricatives).</div>
+</section>
+
+<section id="features">
+  <h2>Feature Glossary — with IPA Examples</h2>
+  <p>Every feature used as a branch in the walker is defined here with one or two example words. Read this once end-to-end before your first mock run.</p>
+
+  <div class="feature-card">
+    <div class="name">Rhoticity</div>
+    <div class="ex">Post-vocalic /r/ pronounced.
+      <div class="example"><b>rhotic</b> — car <span class="ipa">[kɑːr]</span> · farm <span class="ipa">[fɑːrm]</span> · heart <span class="ipa">[hɑːrt]</span></div>
+      <div class="example"><b>non-rhotic</b> — car <span class="ipa">[kɑː]</span> · farm <span class="ipa">[fɑːm]</span> · heart <span class="ipa">[hɑːt]</span></div>
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <div class="name">Stress-timed vs syllable-timed</div>
+    <div class="ex">Stress-timed English reduces unstressed vowels to schwa <span class="ipa">[ə]</span>; syllable-timed varieties preserve full vowel quality in every syllable.
+      <div class="example"><b>stress-timed</b> — photograph <span class="ipa">[ˈfəʊtəɡrɑːf]</span> (three schwas)</div>
+      <div class="example"><b>syllable-timed</b> — photograph <span class="ipa">[ˈfotoɡraf]</span> (no schwa; full [o a])</div>
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <div class="name">SVLR (Scottish Vowel Length Rule)</div>
+    <div class="ex">Vowels are long before /r v ð z/ or a morpheme boundary; short elsewhere. Diagnostic pairs differ only by the morpheme boundary.
+      <div class="example"><b>brewed</b> <span class="ipa">[bruːd]</span> (brew+ed, morpheme boundary → long) vs <b>brood</b> <span class="ipa">[brʌd]</span> (monomorphemic → short)</div>
+      <div class="example"><b>greed</b> <span class="ipa">[ɡriːd]</span> vs <b>agreed</b> <span class="ipa">[əˈɡriːd]</span> — both long for different reasons</div>
+      <div class="example"><b>bee</b> <span class="ipa">[biː]</span> (utterance-final → long) vs <b>beat</b> <span class="ipa">[bɪt]</span> (short elsewhere)</div>
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <div class="name">Dental stops for TH</div>
+    <div class="ex">/θ/ and /ð/ realised as dental <span class="ipa">[t̪ d̪]</span> (IrE) rather than interdental fricatives.
+      <div class="example">think <span class="ipa">[t̪ɪŋk]</span> · this <span class="ipa">[d̪ɪs]</span> · three <span class="ipa">[t̪ɹiː]</span></div>
+      <div class="example">Contrast: Cockney TH-fronting → think <span class="ipa">[fɪŋk]</span>, this <span class="ipa">[dɪs]</span> (initial only)</div>
+      <div class="example">Contrast: AAVE/JC TH-stopping → alveolar <span class="ipa">[t d]</span>, not dental</div>
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <div class="name">Kit-raising / SAE diphthong shift</div>
+    <div class="ex">KIT vowel <span class="ipa">[ɪ]</span> centralises to <span class="ipa">[ə]</span> in open syllables; PRICE, MOUTH, FACE diphthongs chain-shift.
+      <div class="example">kit <span class="ipa">[kət]</span> (vs GAmE <span class="ipa">[kɪt]</span>)</div>
+      <div class="example">price <span class="ipa">[prʌɪs]</span> (shifted onset) · mouth <span class="ipa">[məʊθ]</span> / <span class="ipa">[mɛʊθ]</span></div>
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <div class="name">West Country voiced initial fricatives</div>
+    <div class="ex">Initial /f s/ voice to <span class="ipa">[v z]</span>; retroflex or bunched /r/.
+      <div class="example">farmer <span class="ipa">[ˈvɑːmə(ɻ)]</span> · Somerset <span class="ipa">[ˈzʌməɻsɛt]</span> · seven <span class="ipa">[ˈzɛvən]</span></div>
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <div class="name">T-flapping + Mary-merry-marry merger (GAmE)</div>
+    <div class="ex">Intervocalic /t/ → alveolar flap <span class="ipa">[ɾ]</span>; /æ ɛ ɛ/ before /r/ all merge.
+      <div class="example">butter <span class="ipa">[ˈbʌɾɚ]</span> · latter = ladder <span class="ipa">[ˈlæɾɚ]</span></div>
+      <div class="example">Mary / merry / marry all <span class="ipa">[ˈmɛri]</span></div>
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <div class="name">Retroflex stops (IndE)</div>
+    <div class="ex">/t d/ realised as retroflex <span class="ipa">[ʈ ɖ]</span>; stops unaspirated; /v/ and /w/ both <span class="ipa">[ʋ]</span>.
+      <div class="example">time <span class="ipa">[ʈaɪm]</span> · dog <span class="ipa">[ɖɔɡ]</span> · tin <span class="ipa">[ʈɪn]</span></div>
+      <div class="example">pin <span class="ipa">[pɪn]</span> (no aspiration — contrast RP <span class="ipa">[pʰɪn]</span>)</div>
+      <div class="example">very <span class="ipa">[ˈʋɛɾi]</span> · wine = vine <span class="ipa">[ʋaɪn]</span></div>
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <div class="name">NigE monophthongisation + full unstressed vowels</div>
+    <div class="ex">FACE <span class="ipa">[e]</span> and GOAT <span class="ipa">[o]</span> are pure monophthongs; unstressed vowels keep full quality (no schwa).
+      <div class="example">day <span class="ipa">[de]</span> (not <span class="ipa">[deɪ]</span>) · go <span class="ipa">[ɡo]</span> (not <span class="ipa">[ɡoʊ]</span>)</div>
+      <div class="example">father <span class="ipa">[ˈfada]</span> (no schwa in final syllable)</div>
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <div class="name">/k/-affrication (Scouse)</div>
+    <div class="ex">Word-final /k/ and sometimes /t/ affricate to <span class="ipa">[kx]</span> or <span class="ipa">[ts]</span>.
+      <div class="example">back <span class="ipa">[bakx]</span> · clock <span class="ipa">[klɒkx]</span> · book <span class="ipa">[bʊkx]</span></div>
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <div class="name">Monophthongal FACE / GOAT (Geordie)</div>
+    <div class="ex">FACE and GOAT remain long monophthongs; NURSE is <span class="ipa">[ɔː]</span>.
+      <div class="example">face <span class="ipa">[feːs]</span> · goat <span class="ipa">[ɡoːt]</span> · boat <span class="ipa">[boːt]</span></div>
+      <div class="example">work <span class="ipa">[wɔːk]</span> (walk = work homophones in broad Geordie)</div>
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <div class="name">Cockney cluster: H-drop + L-vocal + TH-front + glottal /t/</div>
+    <div class="ex">Four features nearly always co-occur.
+      <div class="example"><b>H-dropping</b> — house <span class="ipa">[aʊs]</span> · hand <span class="ipa">[ænd]</span></div>
+      <div class="example"><b>L-vocalisation</b> — milk <span class="ipa">[mɪʊk]</span> · tell <span class="ipa">[teʊ]</span></div>
+      <div class="example"><b>TH-fronting</b> — three <span class="ipa">[friː]</span> · brother <span class="ipa">[ˈbrʌvə]</span></div>
+      <div class="example"><b>Glottal /t/</b> — butter <span class="ipa">[ˈbʌʔə]</span> · water <span class="ipa">[ˈwɔːʔə]</span></div>
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <div class="name">GOOSE-fronting (GAusE, also NZE, young RP)</div>
+    <div class="ex">/uː/ fronts to <span class="ipa">[ʉː]</span>; HAPPY tenses to <span class="ipa">[iː]</span>; HRT (high-rising terminal) on statements.
+      <div class="example">goose <span class="ipa">[ɡʉːs]</span> · food <span class="ipa">[fʉːd]</span> · too <span class="ipa">[tʉː]</span></div>
+      <div class="example">city <span class="ipa">[ˈsɪtiː]</span> · happy <span class="ipa">[ˈhæpiː]</span></div>
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <div class="name">AAVE cluster: TH-stop + CC-reduction + PIN-PEN</div>
+    <div class="ex">Three co-occurring features; non-rhoticity variable.
+      <div class="example"><b>TH-stopping</b> — this <span class="ipa">[dɪs]</span> · three <span class="ipa">[triː]</span> / <span class="ipa">[friː]</span></div>
+      <div class="example"><b>Cluster reduction</b> — cold <span class="ipa">[koʊl]</span> · desk <span class="ipa">[dɛs]</span> · missed <span class="ipa">[mɪs]</span></div>
+      <div class="example"><b>PIN-PEN merger</b> — pin = pen <span class="ipa">[pɪn]</span> · ten = tin</div>
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <div class="name">RP — conservative reference</div>
+    <div class="ex">Non-rhotic, stress-timed, TRAP-BATH split, no H-drop, no TH-front, unfronted GOOSE.
+      <div class="example">bath <span class="ipa">[bɑːθ]</span> vs trap <span class="ipa">[træp]</span></div>
+      <div class="example">class <span class="ipa">[klɑːs]</span> · father <span class="ipa">[ˈfɑːðə]</span></div>
+      <div class="example">goose <span class="ipa">[ɡuːs]</span> (back, not fronted) · three <span class="ipa">[θriː]</span> (interdental, not fronted)</div>
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <div class="name">SinE final-stop deletion / glottal</div>
+    <div class="ex">Word-final stops deleted or glottalised; no aspiration; monophthongal FACE/GOAT; final-particle-style intonation.
+      <div class="example">cat <span class="ipa">[kæʔ]</span> or <span class="ipa">[kæ]</span> · stop <span class="ipa">[stɒʔ]</span> · pick <span class="ipa">[pɪʔ]</span></div>
+      <div class="example">face <span class="ipa">[feːs]</span> · go <span class="ipa">[ɡoː]</span></div>
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <div class="name">JC (Jamaican Creole) phonological cluster</div>
+    <div class="ex">TH-stopping universal; H dropped (or hypercorrected); consonant clusters simplified; characteristic PRICE-MOUTH diphthongs.
+      <div class="example">this <span class="ipa">[dɪs]</span> · three <span class="ipa">[triː]</span> · thing <span class="ipa">[tɪŋ]</span></div>
+      <div class="example">hand <span class="ipa">[an]</span> · house <span class="ipa">[aʊs]</span> / <span class="ipa">[aus]</span></div>
+      <div class="example">time <span class="ipa">[taɪm]</span> · town <span class="ipa">[tɔŋ]</span></div>
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <div class="name">Gullah phonological cluster</div>
+    <div class="ex">TH-stopping, cluster simplification (as JC), plus residual tonal patterning and more archaic/conservative vowels rooted in 18c Plantation English + West African substrate.
+      <div class="example">this <span class="ipa">[dɪs]</span> · three <span class="ipa">[tri]</span> · brother <span class="ipa">[ˈbrʌda]</span></div>
+      <div class="example">Retention of archaic <span class="ipa">[ʊ]</span> in some lexical sets; tonal accent on stressed syllables</div>
+    </div>
+  </div>
+
+  <div class="feature-card">
+    <div class="name">HCE (Hawaiʻi Creole) phonological cluster</div>
+    <div class="ex">Reduced vowel inventory (5–7 vowels), glottalisation of final stops, rising-falling intonation contours from Pacific substrate.
+      <div class="example">like <span class="ipa">[laɪʔ]</span> · what <span class="ipa">[wɐʔ]</span> · eat <span class="ipa">[iːʔ]</span></div>
+      <div class="example">Tendency toward <span class="ipa">[d]</span> for /ð/ and <span class="ipa">[t]</span> for /θ/, as in JC/AAVE</div>
+    </div>
+  </div>
+</section>
+
+<section id="flashcards">
+  <h2>Flashcards — Feature ⇄ Variety</h2>
+  <div class="actions">
+    <button class="btn" onclick="fcMode='f2v';fcShuffle()">Feature → Variety</button>
+    <button class="btn" onclick="fcMode='v2f';fcShuffle()">Variety → Features</button>
+    <button class="btn sec" onclick="fcShuffle()">Shuffle</button>
+  </div>
+  <div class="fc-nav">
+    <button class="btn sec" onclick="fcPrev()">← Prev</button>
+    <span id="fc-counter"></span>
+    <button class="btn sec" onclick="fcNext()">Next →</button>
+  </div>
+  <div class="fc" id="fc-card" onclick="fcFlip()">
+    <div class="kicker" id="fc-kicker">Click to flip</div>
+    <div class="front" id="fc-front">…</div>
+    <div class="back" id="fc-back">…</div>
+  </div>
+</section>
+
+<section id="lookup">
+  <h2>Variety Lookup</h2>
+  <p>Click any variety to see its phonological signature, example words, and nearest neighbours.</p>
+  <div class="varlist" id="varlist"></div>
+  <div id="lookup-detail"></div>
+</section>
+
+<section id="signatures">
+  <h2>One-Feature Signatures (memorise these first)</h2>
+  <p>If the exam clip has <i>one</i> of these features, the variety is decided — everything else is confirmation.</p>
+  <table>
+    <tr><th>Feature</th><th>Example</th><th>→ Variety</th></tr>
+    <tr><td>SVLR contrast pair</td><td>brewed <span class="ipa">[bruːd]</span> ≠ brood <span class="ipa">[brʌd]</span></td><td><b>ScotE</b></td></tr>
+    <tr><td>Dental stops for TH + clear /l/</td><td>think <span class="ipa">[t̪ɪŋk]</span> · this <span class="ipa">[d̪ɪs]</span></td><td><b>IrE</b></td></tr>
+    <tr><td>Kit-raising in open syllable</td><td>kit <span class="ipa">[kət]</span> · sit <span class="ipa">[sət]</span></td><td><b>SAE</b></td></tr>
+    <tr><td>Voiced initial fricative</td><td>farmer <span class="ipa">[ˈvɑːmə]</span> · Somerset <span class="ipa">[ˈzʌmə]</span></td><td><b>West Country</b></td></tr>
+    <tr><td>T-flap + MMM merger</td><td>butter <span class="ipa">[ˈbʌɾɚ]</span>; Mary = merry</td><td><b>GAmE</b></td></tr>
+    <tr><td>Retroflex stops</td><td>time <span class="ipa">[ʈaɪm]</span> · dog <span class="ipa">[ɖɔɡ]</span></td><td><b>IndE</b></td></tr>
+    <tr><td>Monophthongal FACE/GOAT + full unstressed</td><td>day <span class="ipa">[de]</span> · father <span class="ipa">[ˈfada]</span></td><td><b>NigE</b></td></tr>
+    <tr><td>/k/-affrication</td><td>back <span class="ipa">[bakx]</span> · clock <span class="ipa">[klɒkx]</span></td><td><b>Scouse</b></td></tr>
+    <tr><td>Monophthongal FACE/GOAT (non-rhotic, stress-timed)</td><td>face <span class="ipa">[feːs]</span> · goat <span class="ipa">[ɡoːt]</span></td><td><b>Geordie</b></td></tr>
+    <tr><td>H-drop + L-vocal + TH-front + glottal /t/</td><td>house <span class="ipa">[aʊs]</span> · milk <span class="ipa">[mɪʊk]</span> · three <span class="ipa">[friː]</span> · butter <span class="ipa">[ˈbʌʔə]</span></td><td><b>Cockney</b></td></tr>
+    <tr><td>GOOSE-fronting + HAPPY-tensing + HRT</td><td>goose <span class="ipa">[ɡʉːs]</span> · city <span class="ipa">[ˈsɪtiː]</span></td><td><b>GAusE</b></td></tr>
+    <tr><td>TH-stop + CC-reduction + PIN-PEN</td><td>this <span class="ipa">[dɪs]</span> · cold <span class="ipa">[koʊl]</span> · pin=pen</td><td><b>AAVE</b></td></tr>
+    <tr><td>Conservative non-rhotic, no H-drop, no fronting</td><td>bath <span class="ipa">[bɑːθ]</span> · goose <span class="ipa">[ɡuːs]</span></td><td><b>RP</b></td></tr>
+    <tr><td>Final-stop deletion/glottal + monophthongs + no asp.</td><td>cat <span class="ipa">[kæʔ]</span> · face <span class="ipa">[feːs]</span></td><td><b>SinE</b></td></tr>
+    <tr><td>TH-stop + H-loss + CC-simp + Caribbean vowels</td><td>this <span class="ipa">[dɪs]</span> · hand <span class="ipa">[an]</span> · town <span class="ipa">[tɔŋ]</span></td><td><b>JC</b></td></tr>
+    <tr><td>TH-stop + tonal residue + archaic vowels</td><td>brother <span class="ipa">[ˈbrʌda]</span> + tonal prominence</td><td><b>Gullah</b></td></tr>
+    <tr><td>Reduced vowel inventory + Pacific intonation</td><td>like <span class="ipa">[laɪʔ]</span> · what <span class="ipa">[wɐʔ]</span></td><td><b>HCE</b></td></tr>
+  </table>
+</section>
+
+</main>
+
+<p class="foot">v2 — phonology-only branching · every option annotated with IPA · BA3 Final Exam prep</p>
+
+<script>
+/* ---------- DATA ---------- */
+
+const VARIETIES = {
+  RP: {
+    name: "RP (Received Pronunciation)",
+    scope: "British, non-regional prestige",
+    signature: "Non-rhotic · stress-timed · TRAP-BATH split · no H-drop, no TH-front, unfronted GOOSE",
+    phonology: [
+      "Non-rhotic: car [kɑː], father [ˈfɑːðə]",
+      "TRAP-BATH split: trap [træp] vs bath [bɑːθ], class [klɑːs]",
+      "Interdental TH retained: three [θriː], this [ðɪs]",
+      "Unfronted GOOSE: goose [ɡuːs] (not [ɡʉːs])",
+      "No H-dropping: house [haʊs]",
+      "No L-vocalisation: milk [mɪlk]",
+      "Linking and intrusive /r/: law(r)and order"
+    ],
+    giveaway: "Non-rhotic, conservative TRAP-BATH, absence of the fronting/dropping features that signal Cockney/Estuary.",
+    neighbours: "Cockney (adds H-drop/L-vocal/TH-front/glottal) · GAusE (adds GOOSE-fronting + HRT) · Geordie (monophthong FACE/GOAT)"
+  },
+  Cockney: {
+    name: "Cockney / Estuary",
+    scope: "London working-class and south-east English",
+    signature: "Non-rhotic · stress-timed · H-drop + L-vocal + TH-front + glottal /t/ cluster",
+    phonology: [
+      "H-dropping: house [aʊs], hand [ænd]",
+      "L-vocalisation: milk [mɪʊk], tell [teʊ]",
+      "TH-fronting (initial): three [friː], brother [ˈbrʌvə]",
+      "Glottal /t/ intervocalic: butter [ˈbʌʔə], water [ˈwɔːʔə]",
+      "MOUTH diphthong shift: mouth [mæʊθ]",
+      "PRICE shift: price [prɑɪs]"
+    ],
+    giveaway: "All four features co-occur in the same utterance — the stack is diagnostic.",
+    neighbours: "RP (lose all four features) · Geordie (monophthong FACE/GOAT replaces glottal /t/ as signature)"
+  },
+  Scouse: {
+    name: "Scouse (Liverpool)",
+    scope: "Merseyside urban",
+    signature: "Non-rhotic · /k/-affrication word-finally + variable /t/-affrication",
+    phonology: [
+      "/k/ → [kx] word-finally: back [bakx], clock [klɒkx], book [bʊkx]",
+      "Variable /t/ → [ts]: it [ɪts], cat [kats]",
+      "NURSE = SQUARE merger: fur = fair [fɛː]",
+      "Velarised /r/",
+      "Clear /l/ in all positions (unlike most English)"
+    ],
+    giveaway: "Fricative release on final /k/ is unique among the canonical British varieties.",
+    neighbours: "Cockney (no affrication — TH-front instead) · Geordie (monophthongs replace affrication)"
+  },
+  Geordie: {
+    name: "Geordie (Newcastle / NE England)",
+    scope: "Tyneside urban",
+    signature: "Non-rhotic · stress-timed · monophthongal FACE [eː] + GOAT [oː]",
+    phonology: [
+      "FACE [eː]: face [feːs], day [deː]",
+      "GOAT [oː]: goat [ɡoːt], boat [boːt]",
+      "NURSE [ɔː]: work [wɔːk] (walk = work)",
+      "Glottal /t/ but less pervasive than Cockney",
+      "H-dropping variable"
+    ],
+    giveaway: "Pure long monophthongs where RP has diphthongs — clip will sound notably 'rounded'.",
+    neighbours: "RP (diphthongal FACE/GOAT) · Scouse (affrication replaces monophthongs as signature)"
+  },
+  WestCountry: {
+    name: "West Country",
+    scope: "SW England (Somerset, Devon, Cornwall)",
+    signature: "Rhotic · stress-timed · voiced initial fricatives",
+    phonology: [
+      "/f/ → [v] initially: farmer [ˈvɑːmə(ɻ)]",
+      "/s/ → [z] initially: Somerset [ˈzʌməɻsɛt], seven [ˈzɛvən]",
+      "Retroflex or bunched /r/: bar [bɑɻ]",
+      "L-retention clear: mill [mɪl]",
+      "I = me/he first-person pattern only in very broad varieties"
+    ],
+    giveaway: "A single instance of [v] for initial /f/ or [z] for initial /s/ clinches it.",
+    neighbours: "GAmE (T-flap + MMM, no voicing) · IrE (dental TH, no voicing)"
+  },
+  ScotE: {
+    name: "Scottish English",
+    scope: "Scotland, Lowlands + Central Belt",
+    signature: "Rhotic · stress-timed · Scottish Vowel Length Rule (SVLR)",
+    phonology: [
+      "SVLR: vowels long before /r v ð z/ or morpheme boundary, short elsewhere",
+      "SVLR pair: brewed [bruːd] (morpheme boundary) vs brood [brʌd]",
+      "SVLR pair: greed [ɡriːd] vs beat [bɪt]",
+      "Retention of /ʍ/ (whine ≠ wine): whine [ʍaɪn], wine [waɪn]",
+      "Retention of /x/ in loch [lɔx]",
+      "Monophthongal FACE [e] and GOAT [o] in Scottish Standard English",
+      "Rhoticity variable: urban Glasgow can be non-rhotic"
+    ],
+    giveaway: "Any minimal pair exhibiting SVLR (morpheme-boundary length) is decisive.",
+    neighbours: "IrE (dental TH, no SVLR) · SAE (kit-raising, no SVLR) · GAmE (T-flap, no SVLR)"
+  },
+  IrE: {
+    name: "Irish English",
+    scope: "Republic of Ireland + Northern Ireland",
+    signature: "Rhotic (mostly) · stress-timed · dental stops for TH + clear /l/",
+    phonology: [
+      "TH → dental stop: think [t̪ɪŋk], this [d̪ɪs], three [t̪ɹiː]",
+      "Clear /l/ in all positions: milk [mɪlk], tell [tɛl]",
+      "/t/ → slit fricative [t̞] or [θ̠] finally: but [bʌt̞]",
+      "Retention of /ʍ/ in older speakers",
+      "Dublin variety may be non-rhotic: car [kɑː]"
+    ],
+    giveaway: "Alveolo-dental [t̪ d̪] for TH — not interdental fricatives, not [f v], not [t d] alveolar.",
+    neighbours: "ScotE (SVLR, no dental stops) · Cockney (TH → [f v], non-rhotic)"
+  },
+  SAE: {
+    name: "South African English",
+    scope: "RSA, white L1 varieties",
+    signature: "Rhotic or semi-rhotic · stress-timed · kit-split + diphthong shift",
+    phonology: [
+      "Kit-raising / KIT-split: kit [kət], pin [pən] in open syllable",
+      "PRICE shift: price [prʌɪs] / [pʌɪs]",
+      "MOUTH shift: mouth [məʊθ] / [mɛʊθ]",
+      "FACE [ɛɪ]: face [fɛɪs]",
+      "GOOSE partially fronted",
+      "Variable rhoticity"
+    ],
+    giveaway: "KIT centralising in an open syllable + MOUTH raised → SAE.",
+    neighbours: "GAusE (GOOSE-fronting + HRT, no KIT-split) · NZE (central KIT but different shift pattern)"
+  },
+  GAusE: {
+    name: "General Australian English",
+    scope: "Australia mainstream",
+    signature: "Non-rhotic · stress-timed · GOOSE-fronting + HAPPY-tensing + HRT intonation",
+    phonology: [
+      "GOOSE [ʉː]: goose [ɡʉːs], food [fʉːd], too [tʉː]",
+      "HAPPY-tensing: city [ˈsɪtiː], happy [ˈhæpiː]",
+      "High-rising terminal on declaratives",
+      "TRAP raised: trap [trɛp]",
+      "FACE [æɪ]: face [fæɪs]",
+      "PRICE [ɑɪ]"
+    ],
+    giveaway: "Fronted GOOSE + statement-final HRT together.",
+    neighbours: "NZE (KIT centralised to [ɘ]) · SAE (KIT-split without GOOSE-fronting)"
+  },
+  AAVE: {
+    name: "African American Vernacular English",
+    scope: "US, widespread",
+    signature: "Variable rhoticity · stress-timed · TH-stop + CC-reduction + PIN-PEN cluster",
+    phonology: [
+      "TH-stopping: this [dɪs], that [dæt], three [triː] / [friː]",
+      "Consonant cluster reduction: cold [koʊl], desk [dɛs], missed [mɪs]",
+      "PIN-PEN merger: pin = pen [pɪn], ten = tin",
+      "Non-rhotic in final position: car [kɑː] for many speakers",
+      "/ɪŋ/ → [ɪn]: running [ˈrʌnɪn]",
+      "Glide reduction: ride [raːd], tide [taːd]"
+    ],
+    giveaway: "TH-stopping + cluster reduction appearing together in the same utterance.",
+    neighbours: "JC (also TH-stop + CC-simp but syllable-timed) · Cockney (TH-fronting with [f v], not stopping)"
+  },
+  NigE: {
+    name: "Nigerian English",
+    scope: "Nigeria, West Africa",
+    signature: "Rhotic · syllable-timed · full unstressed vowels + monophthongal FACE/GOAT + tonal prominence",
+    phonology: [
+      "FACE [e]: day [de], face [fes]",
+      "GOAT [o]: go [ɡo], coat [kot]",
+      "No schwa reduction: father [ˈfada], about [aˈbaut]",
+      "Substrate tonal influence on stressed syllables",
+      "TRAP [a]: cat [kat]",
+      "Consonant clusters may simplify: extra [ˈɛkstra] but 'text' → [tɛks]"
+    ],
+    giveaway: "A clip with zero schwa reduction and monophthongal FACE/GOAT.",
+    neighbours: "IndE (retroflex stops instead of monophthongs) · JC (non-rhotic + TH-stop)"
+  },
+  IndE: {
+    name: "Indian English",
+    scope: "India, South Asian English L2/L1",
+    signature: "Rhotic · syllable-timed · retroflex /t d/ + no aspiration + v/w merger",
+    phonology: [
+      "Retroflex stops: time [ʈaɪm], dog [ɖɔɡ], tin [ʈɪn]",
+      "No aspiration: pin [pɪn] (cf RP [pʰɪn]), tea [ti]",
+      "TH → dental stops: think [t̪ɪŋk], this [d̪ɪs]",
+      "/v/ and /w/ both [ʋ]: wine = vine [ʋaɪn]",
+      "Syllable-timing: photograph [ˈfoʈoɡraf]",
+      "Full unstressed vowels"
+    ],
+    giveaway: "Retroflex [ʈ ɖ] in an otherwise English clip is unique to South Asian varieties.",
+    neighbours: "NigE (monophthongs instead of retroflex) · SinE (final-stop deletion instead of retroflex)"
+  },
+  SinE: {
+    name: "Singapore English / Singlish",
+    scope: "Singapore, ethnic-Chinese-dominant",
+    signature: "Non-rhotic · syllable-timed · final-stop deletion/glottal + no aspiration + monophthongs",
+    phonology: [
+      "Final-stop deletion or glottalisation: cat [kæʔ] / [kæ], stop [stɒʔ]",
+      "No aspiration: pin [pɪn], team [tiːm]",
+      "FACE [eː], GOAT [oː] monophthongs: face [feːs], go [ɡoː]",
+      "TH → [t d] or [f v]: three [triː] / [friː], this [dɪs]",
+      "Syllable-timing",
+      "No schwa reduction",
+      "Final-particle intonation (but particles are lexical, not phonological)"
+    ],
+    giveaway: "Final-stop deletion + no aspiration in a non-rhotic syllable-timed clip.",
+    neighbours: "JC (TH-stop universal, more Caribbean vowels) · HCE (more reduced vowel inventory)"
+  },
+  JC: {
+    name: "Jamaican Creole (Patwa)",
+    scope: "Jamaica, along post-creole continuum",
+    signature: "Non-rhotic · syllable-timed · TH-stopping + H-loss + cluster simplification",
+    phonology: [
+      "TH-stopping universal: this [dɪs], three [triː], thing [tɪŋ]",
+      "H-dropping / hypercorrection: hand [an], apple [hapl]",
+      "Consonant cluster simplification: desk [dɛs], hand [an], cold [koːl]",
+      "PRICE [aɪ], MOUTH [aʊ] / [ou]: time [taɪm], town [tɔŋ]",
+      "Non-rhotic: car [kɑː]",
+      "Tonal-accent residue on some lexical items"
+    ],
+    giveaway: "TH-stopping + H-loss + CC-simp in a non-rhotic syllable-timed clip with Caribbean vowel qualities.",
+    neighbours: "AAVE (stress-timed; PIN-PEN instead of H-loss) · Gullah (tonal residue stronger + archaic vowels)"
+  },
+  Gullah: {
+    name: "Gullah (Geechee)",
+    scope: "Sea Islands, South Carolina / Georgia",
+    signature: "Non-rhotic · syllable-timed · TH-stop + residual tonal prominence + archaic vowel qualities",
+    phonology: [
+      "TH-stopping: this [dɪs], three [tri]",
+      "Cluster simplification as JC",
+      "Archaic vowel retentions (closer to 18c Plantation English)",
+      "Substrate tonal/pitch-accent residue on stressed syllables",
+      "Some unusual consonants (kp, gb) in older speakers with West African substrate",
+      "/r/ typically absent: brother [ˈbrʌda]"
+    ],
+    giveaway: "TH-stop cluster + audible pitch-accent patterning / tonal residue not found in JC.",
+    neighbours: "JC (weaker tonal residue; Caribbean rather than Plantation vowels) · AAVE (stress-timed + PIN-PEN)"
+  },
+  HCE: {
+    name: "Hawaiʻi Creole English (Pidgin)",
+    scope: "Hawaiʻi Islands",
+    signature: "Non-rhotic · syllable-timed · reduced vowel inventory + Pacific substrate intonation",
+    phonology: [
+      "Reduced vowel inventory (5–7 vowels rather than RP's 20+)",
+      "Glottalisation of final stops: like [laɪʔ], what [wɐʔ], eat [iːʔ]",
+      "TH-stopping tendency: this [dɪs], three [tri]",
+      "Rising-falling intonation contour from Pacific substrate",
+      "Non-rhotic",
+      "/æ/ → [ɛ] or [a]: bat [bɛʔ] / [baʔ]"
+    ],
+    giveaway: "Pacific-substrate intonation contour + dramatically reduced vowel system in an otherwise English clip.",
+    neighbours: "SinE (similar reductions but Chinese-substrate intonation) · JC (Caribbean vowel set, less reduced)"
+  }
+};
+
+/* ---------- DECISION TREE ---------- */
+
+const NODES = {
+  root: {
+    q: "Is post-vocalic /r/ pronounced?",
+    hint: "Listen for /r/ in 'car', 'farm', 'heart', 'mother'. If you hear [r] or [ɻ] after the vowel, it's rhotic.",
+    options: [
+      { label: "Rhotic — /r/ pronounced",
+        desc: "Audible /r/ in syllable codas.",
+        ex: "car [kɑːr] · farm [fɑːrm] · heart [hɑːrt]",
+        next: "A_timing" },
+      { label: "Non-rhotic — /r/ silent after vowels",
+        desc: "No /r/ in codas; linking /r/ only before a vowel.",
+        ex: "car [kɑː] · farm [fɑːm] · mother [ˈmʌðə]",
+        next: "B_timing" },
+      { label: "Variable / inconsistent",
+        desc: "Speaker drops /r/ in some codas but not others within the same clip.",
+        ex: "father [ˈfɑːðə] but harder [ˈhɑːrdɚ]",
+        next: "C_variable" }
+    ]
+  },
+
+  A_timing: {
+    q: "Rhotic: is the rhythm stress-timed or syllable-timed?",
+    hint: "In stress-timed, unstressed syllables reduce to schwa [ə]. In syllable-timed, every syllable keeps its full vowel quality.",
+    options: [
+      { label: "Stress-timed (schwa reduction present)",
+        desc: "Photograph → three schwas; unstressed vowels visibly weakened.",
+        ex: "photograph [ˈfəʊtəɡrɑːf] · about [əˈbaʊt] · father [ˈfɑːðə(r)]",
+        next: "A_stress" },
+      { label: "Syllable-timed (no schwa)",
+        desc: "Each syllable clearly articulated; unstressed vowels keep [a e i o u] quality.",
+        ex: "photograph [ˈfotoɡraf] · father [ˈfada] · about [aˈbaʊt]",
+        next: "A_syll" }
+    ]
+  },
+
+  A_stress: {
+    q: "Rhotic + stress-timed: which diagnostic feature is audible?",
+    hint: "Test SVLR first (decisive if present), then dental TH (IrE), kit-raising (SAE), voiced initial fricatives (West Country), and default to GAmE.",
+    options: [
+      { label: "SVLR minimal-pair length contrast",
+        desc: "Vowels long before /r v ð z/ or morpheme boundary; short elsewhere.",
+        ex: "brewed [bruːd] vs brood [brʌd] · greed [ɡriːd] vs beat [bɪt]",
+        leaf: "ScotE" },
+      { label: "Dental stops for TH + clear /l/",
+        desc: "/θ ð/ realised as dental [t̪ d̪], not fricative; /l/ clear in all positions.",
+        ex: "think [t̪ɪŋk] · this [d̪ɪs] · milk [mɪlk]",
+        leaf: "IrE" },
+      { label: "Kit-raising + PRICE/MOUTH shift",
+        desc: "KIT centralises to [ə] in open syllables; PRICE, MOUTH diphthongs chain-shift.",
+        ex: "kit [kət] · sit [sət] · price [prʌɪs] · mouth [mɛʊθ]",
+        leaf: "SAE" },
+      { label: "Voiced initial fricatives (/f/→[v], /s/→[z])",
+        desc: "Initial fricatives voice; retroflex or bunched /r/.",
+        ex: "farmer [ˈvɑːmə(ɻ)] · Somerset [ˈzʌməɻsɛt] · seven [ˈzɛvən]",
+        leaf: "WestCountry" },
+      { label: "None of the above — T-flapping + MMM merger",
+        desc: "Intervocalic /t/ flapping; Mary/merry/marry all identical. Default rhotic-stress.",
+        ex: "butter [ˈbʌɾɚ] · latter = ladder [ˈlæɾɚ] · Mary = merry = marry [ˈmɛri]",
+        leaf: "GAmE" }
+    ]
+  },
+
+  A_syll: {
+    q: "Rhotic + syllable-timed: retroflex or monophthongal?",
+    hint: "Two South-Asian-vs-West-African branches. Retroflex [ʈ ɖ] is unique to IndE; monophthongal FACE/GOAT with tonal residue is NigE.",
+    options: [
+      { label: "Retroflex /t d/ + no aspiration + v/w merger",
+        desc: "Stops retroflex; no aspiration on initial /p t k/; /v/ and /w/ both [ʋ].",
+        ex: "time [ʈaɪm] · dog [ɖɔɡ] · pin [pɪn] (no aspiration) · wine = vine [ʋaɪn]",
+        leaf: "IndE" },
+      { label: "Monophthongal FACE/GOAT + full unstressed + tonal residue",
+        desc: "FACE [e] and GOAT [o] pure monophthongs; no schwa; substrate tonal prominence.",
+        ex: "day [de] · go [ɡo] · father [ˈfada]",
+        leaf: "NigE" }
+    ]
+  },
+
+  B_timing: {
+    q: "Non-rhotic: is the rhythm stress-timed or syllable-timed?",
+    hint: "Stress-timed non-rhotic = British-family + AAVE; syllable-timed non-rhotic = creole/contact varieties.",
+    options: [
+      { label: "Stress-timed (schwa reduction present)",
+        desc: "Unstressed vowels weaken; rhythm follows English-family pattern.",
+        ex: "about [əˈbaʊt] · father [ˈfɑːðə] · photograph [ˈfəʊtəɡrɑːf]",
+        next: "B_stress" },
+      { label: "Syllable-timed (no schwa)",
+        desc: "Each syllable keeps full vowel quality; creole/contact timing.",
+        ex: "about [aˈbaʊt] · father [ˈfada] · photograph [ˈfotoɡraf]",
+        next: "B_syll" }
+    ]
+  },
+
+  B_stress: {
+    q: "Non-rhotic + stress-timed: which feature cluster is present?",
+    hint: "Test in order — affrication (Scouse) and monophthongs (Geordie) are the most visible single-feature signatures; Cockney and AAVE have co-occurring clusters; GAusE has GOOSE-fronting + HRT; default to RP.",
+    options: [
+      { label: "/k/-affrication word-finally",
+        desc: "Final /k/ realised as [kx] or similar fricative release.",
+        ex: "back [bakx] · clock [klɒkx] · book [bʊkx]",
+        leaf: "Scouse" },
+      { label: "Monophthongal FACE [eː] + GOAT [oː]",
+        desc: "FACE and GOAT are long monophthongs, not diphthongs.",
+        ex: "face [feːs] · goat [ɡoːt] · boat [boːt]",
+        leaf: "Geordie" },
+      { label: "H-drop + L-vocal + TH-front + glottal /t/ (all four)",
+        desc: "Cockney cluster — the four features co-occur in the same utterance.",
+        ex: "house [aʊs] · milk [mɪʊk] · three [friː] · butter [ˈbʌʔə]",
+        leaf: "Cockney" },
+      { label: "GOOSE-fronting + HAPPY-tensing + HRT",
+        desc: "/uː/ fronted to [ʉː]; HAPPY tense; rising intonation on declaratives.",
+        ex: "goose [ɡʉːs] · food [fʉːd] · city [ˈsɪtiː] · happy [ˈhæpiː]",
+        leaf: "GAusE" },
+      { label: "TH-stop + CC-reduction + PIN-PEN merger",
+        desc: "AAVE cluster — TH to [t d], final clusters simplified, short front vowels merged before nasals.",
+        ex: "this [dɪs] · cold [koʊl] · pin = pen [pɪn]",
+        leaf: "AAVE" },
+      { label: "None of the above — TRAP-BATH split, no dropping/fronting",
+        desc: "Conservative non-rhotic with interdental TH and unfronted GOOSE → RP default.",
+        ex: "bath [bɑːθ] · class [klɑːs] · three [θriː] · goose [ɡuːs]",
+        leaf: "RP" }
+    ]
+  },
+
+  B_syll: {
+    q: "Non-rhotic + syllable-timed: which creole-contact signature is present?",
+    hint: "Final-stop deletion → SinE; TH-stop + H-loss + CC-simp → JC or Gullah (tonal residue disambiguates); reduced vowel inventory → HCE.",
+    options: [
+      { label: "Final-stop deletion/glottal + no aspiration + monophthongs",
+        desc: "Word-final stops deleted or glottalised; no aspiration; FACE/GOAT monophthongal.",
+        ex: "cat [kæʔ] / [kæ] · stop [stɒʔ] · face [feːs] · go [ɡoː]",
+        leaf: "SinE" },
+      { label: "TH-stop + H-loss + CC-simp + Caribbean vowels",
+        desc: "Jamaican cluster — TH universal stopping, H variable, clusters simplified, PRICE/MOUTH as Caribbean.",
+        ex: "this [dɪs] · hand [an] · house [aʊs] · town [tɔŋ]",
+        leaf: "JC" },
+      { label: "TH-stop + tonal residue + archaic vowels",
+        desc: "As JC but with audible pitch-accent patterning + older/conservative vowel qualities.",
+        ex: "brother [ˈbrʌda] · this [dɪs] + tonal prominence on stressed syllables",
+        leaf: "Gullah" },
+      { label: "Reduced vowel inventory + Pacific intonation + glottal stops",
+        desc: "Five-to-seven-vowel system; rising-falling substrate contours; final stops glottalised.",
+        ex: "like [laɪʔ] · what [wɐʔ] · eat [iːʔ]",
+        leaf: "HCE" }
+    ]
+  },
+
+  C_variable: {
+    q: "Variable rhoticity: what else is present?",
+    hint: "Two main variable-rhoticity candidates: AAVE (apply TH-stop/CC/PIN-PEN cluster) and Dublin IrE (dental TH + clear /l/).",
+    options: [
+      { label: "TH-stopping + CC-reduction + PIN-PEN merger",
+        desc: "Non-rhoticity is a minor feature; the phonological cluster identifies AAVE.",
+        ex: "this [dɪs] · cold [koʊl] · pin = pen [pɪn]",
+        leaf: "AAVE" },
+      { label: "Dental stops for TH + clear /l/ + Irish-vowel qualities",
+        desc: "Dublin IrE is variably non-rhotic but retains the IrE TH and /l/ patterns.",
+        ex: "think [t̪ɪŋk] · this [d̪ɪs] · milk [mɪlk] · car [kɑː]",
+        leaf: "IrE" }
+    ]
+  }
+};
+
+/* ---------- WALKER STATE ---------- */
+
+let path = ["root"];
+let crumbs = ["start"];
+
+function render() {
+  const nodeId = path[path.length - 1];
+  const container = document.getElementById("node-render");
+  const cb = document.getElementById("crumbs");
+  cb.innerHTML = crumbs.map(c => `<span>${c}</span>`).join(" → ");
+
+  if (VARIETIES[nodeId]) {
+    const v = VARIETIES[nodeId];
+    container.innerHTML = `
+      <div class="leaf">
+        <h3>→ ${v.name}</h3>
+        <div class="sig">${v.signature}</div>
+        <dl>
+          <dt>Scope</dt><dd>${v.scope}</dd>
+          <dt>Giveaway</dt><dd>${v.giveaway}</dd>
+          <dt>Neighbours</dt><dd>${v.neighbours}</dd>
+        </dl>
+        <h4 style="color:var(--ox);margin-bottom:4px;margin-top:14px">Phonological signature (with examples)</h4>
+        ${v.phonology.map(p => `<div class="example">${p}</div>`).join("")}
+      </div>`;
+    return;
+  }
+
+  const node = NODES[nodeId];
+  if (!node) { container.innerHTML = "<div class='card'>Node not found.</div>"; return; }
+  container.innerHTML = `
+    <div class="card">
+      <div class="q">${node.q}</div>
+      <div class="hint">${node.hint}</div>
+      <div class="opts">
+        ${node.options.map((o, i) => `
+          <button class="opt" data-i="${i}">
+            <span class="lbl">${o.label}</span>
+            <span class="desc">${o.desc}</span>
+            <span class="ex"><b>Example:</b> <span class="ipa">${o.ex}</span></span>
+          </button>`).join("")}
+      </div>
+    </div>`;
+  container.querySelectorAll(".opt").forEach(btn => {
+    btn.onclick = () => {
+      const i = +btn.dataset.i;
+      const opt = node.options[i];
+      if (opt.leaf) { path.push(opt.leaf); crumbs.push(opt.label.split(" —")[0].split(" (")[0]); }
+      else { path.push(opt.next); crumbs.push(opt.label.split(" —")[0].split(" (")[0]); }
+      render();
+    };
+  });
+}
+
+function goBack() {
+  if (path.length > 1) { path.pop(); crumbs.pop(); render(); }
+}
+function resetWalk() { path = ["root"]; crumbs = ["start"]; render(); }
+
+/* ---------- TABS ---------- */
+
+document.querySelectorAll("nav button.tab").forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll("nav button.tab").forEach(x => x.classList.remove("active"));
+    document.querySelectorAll("section").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    document.getElementById(b.dataset.tab).classList.add("active");
+    if (b.dataset.tab === "lookup") renderLookup();
+    if (b.dataset.tab === "flashcards") fcShuffle();
+  };
+});
+
+/* ---------- LOOKUP ---------- */
+
+function renderLookup() {
+  const list = document.getElementById("varlist");
+  list.innerHTML = Object.keys(VARIETIES).map(k => {
+    const v = VARIETIES[k];
+    return `<div class="varchip" data-k="${k}">
+      <div class="vn">${v.name}</div>
+      <div class="vs">${v.scope}</div>
+    </div>`;
+  }).join("");
+  list.querySelectorAll(".varchip").forEach(c => {
+    c.onclick = () => {
+      const v = VARIETIES[c.dataset.k];
+      document.getElementById("lookup-detail").innerHTML = `
+        <div class="leaf" style="margin-top:18px">
+          <h3>${v.name}</h3>
+          <div class="sig">${v.signature}</div>
+          <dl>
+            <dt>Scope</dt><dd>${v.scope}</dd>
+            <dt>Giveaway</dt><dd>${v.giveaway}</dd>
+            <dt>Neighbours</dt><dd>${v.neighbours}</dd>
+          </dl>
+          <h4 style="color:var(--ox);margin-bottom:4px;margin-top:14px">Phonological signature (with examples)</h4>
+          ${v.phonology.map(p => `<div class="example">${p}</div>`).join("")}
+        </div>`;
+    };
+  });
+}
+
+/* ---------- FLASHCARDS ---------- */
+
+let fcMode = "f2v";
+let fcOrder = [];
+let fcIdx = 0;
+let fcFlipped = false;
+
+function buildFC() {
+  if (fcMode === "f2v") {
+    // feature (with example) → variety
+    return [
+      { f: "SVLR pair: brewed [bruːd] vs brood [brʌd]", v: "ScotE" },
+      { f: "Dental TH stops: think [t̪ɪŋk], this [d̪ɪs]", v: "IrE" },
+      { f: "Kit-raising: kit [kət], sit [sət]", v: "SAE" },
+      { f: "Voiced initial fricative: farmer [ˈvɑːmə]", v: "West Country" },
+      { f: "T-flap + MMM: butter [ˈbʌɾɚ], Mary = merry", v: "GAmE" },
+      { f: "Retroflex stops: time [ʈaɪm], dog [ɖɔɡ]", v: "IndE" },
+      { f: "Monophthong FACE/GOAT + full vowels: day [de], father [ˈfada]", v: "NigE" },
+      { f: "/k/-affrication: back [bakx], clock [klɒkx]", v: "Scouse" },
+      { f: "Monophthongs (non-rhotic): face [feːs], goat [ɡoːt]", v: "Geordie" },
+      { f: "Cockney 4-cluster: house [aʊs], milk [mɪʊk], three [friː], butter [ˈbʌʔə]", v: "Cockney" },
+      { f: "GOOSE-fronting + HRT: goose [ɡʉːs], city [ˈsɪtiː]↗", v: "GAusE" },
+      { f: "TH-stop + CC-reduce + PIN-PEN: this [dɪs], cold [koʊl], pin=pen", v: "AAVE" },
+      { f: "Conservative non-rhotic: bath [bɑːθ], goose [ɡuːs]", v: "RP" },
+      { f: "Final-stop deletion + no asp: cat [kæʔ], face [feːs]", v: "SinE" },
+      { f: "TH-stop + H-loss + CC-simp: this [dɪs], hand [an], town [tɔŋ]", v: "JC" },
+      { f: "TH-stop + tonal residue: brother [ˈbrʌda] + pitch-accent", v: "Gullah" },
+      { f: "Reduced vowels + Pacific intonation: like [laɪʔ], what [wɐʔ]", v: "HCE" }
+    ];
+  } else {
+    return Object.values(VARIETIES).map(v => ({
+      f: v.name,
+      v: v.signature + " — " + v.giveaway
+    }));
+  }
+}
+
+function fcShuffle() {
+  fcOrder = buildFC().sort(() => Math.random() - 0.5);
+  fcIdx = 0; fcFlipped = false;
+  fcRender();
+}
+
+function fcRender() {
+  const c = fcOrder[fcIdx];
+  if (!c) return;
+  document.getElementById("fc-front").innerHTML = c.f;
+  document.getElementById("fc-back").innerHTML = "→ <b>" + c.v + "</b>";
+  document.getElementById("fc-kicker").textContent = fcMode === "f2v" ? "Feature → Variety" : "Variety → Features";
+  document.getElementById("fc-counter").textContent = (fcIdx + 1) + " / " + fcOrder.length;
+  const card = document.getElementById("fc-card");
+  card.classList.toggle("flipped", fcFlipped);
+}
+function fcFlip() { fcFlipped = !fcFlipped; fcRender(); }
+function fcNext() { fcIdx = (fcIdx + 1) % fcOrder.length; fcFlipped = false; fcRender(); }
+function fcPrev() { fcIdx = (fcIdx - 1 + fcOrder.length) % fcOrder.length; fcFlipped = false; fcRender(); }
+
+/* ---------- INIT ---------- */
+
+render();
+</script>
+</body>
+</html>

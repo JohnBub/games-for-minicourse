@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1b3a57">
+<title>BA3 — Varieties of English Exam Trainer</title>
+<style>
+  :root {
+    --bg: #0f1c2b;
+    --surface: #16263a;
+    --surface-2: #1f3450;
+    --ink: #f4f6fa;
+    --muted: #9fb1c8;
+    --accent: #e8a13a;
+    --accent-ink: #1a1208;
+    --border: rgba(255,255,255,0.08);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: linear-gradient(160deg, var(--bg) 0%, #1a2f47 100%);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    max-width: 720px;
+    margin: 24px auto 8px;
+    text-align: center;
+  }
+  h1 {
+    font-size: 1.5rem;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .sub {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin: 0;
+  }
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 16px 0 40px;
+  }
+  .section-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin: 24px 4px 8px;
+  }
+  a.card {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    color: var(--ink);
+    text-decoration: none;
+    min-height: 44px;
+    transition: transform 0.08s ease, background 0.15s ease;
+  }
+  a.card:active { transform: scale(0.98); background: var(--surface-2); }
+  a.card .title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 1.02rem;
+  }
+  a.card .desc {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-top: 4px;
+    line-height: 1.35;
+  }
+  a.hero {
+    background: linear-gradient(135deg, var(--accent) 0%, #c47a1f 100%);
+    color: var(--accent-ink);
+    border: none;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+  }
+  a.hero .title { font-size: 1.15rem; }
+  a.hero .desc { color: rgba(26,18,8,0.78); }
+  .emoji { font-size: 1.2em; line-height: 1; }
+  footer {
+    max-width: 720px;
+    margin: 24px auto 0;
+    padding: 16px 4px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    text-align: center;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>BA3 — Varieties of English</h1>
+    <p class="sub">Spring 2026 · Exam Trainer</p>
+  </header>
+
+  <main>
+    <a class="card hero" href="game-hub.html">
+      <div class="title"><span class="emoji">🎯</span>Game Hub</div>
+      <div class="desc">Variety Detective · Rule Duel · Two-Truths · Mastery Heatmap. Start here for daily training.</div>
+    </a>
+
+    <div class="section-label">Standalone games</div>
+    <a class="card" href="variety-id-game.html">
+      <div class="title"><span class="emoji">🕵️</span>Variety ID Game</div>
+      <div class="desc">Blind identification from IPA + features.</div>
+    </a>
+
+    <div class="section-label">Reference & decision tools</div>
+    <a class="card" href="decision-tree.html">
+      <div class="title"><span class="emoji">🌳</span>Variety ID — Decision Tree</div>
+      <div class="desc">Step-by-step variety classifier.</div>
+    </a>
+    <a class="card" href="decision-tree-phonetic.html">
+      <div class="title"><span class="emoji">🔊</span>Variety ID — Decision Tree (Phonetic)</div>
+      <div class="desc">Phonetic-cue version for IPA-led classification.</div>
+    </a>
+    <a class="card" href="ipa-tutor.html">
+      <div class="title"><span class="emoji">🗣️</span>IPA Interactive Tutor</div>
+      <div class="desc">Practice transcription & symbol recognition.</div>
+    </a>
+    <a class="card" href="stella-comparison.html">
+      <div class="title"><span class="emoji">📊</span>GMU Stella — Variety Comparison</div>
+      <div class="desc">Side-by-side comparison of accent samples.</div>
+    </a>
+    <a class="card" href="feature-cards.html">
+      <div class="title"><span class="emoji">🃏</span>Feature Cards — Analysis Guide</div>
+      <div class="desc">Diagnostic features per variety.</div>
+    </a>
+    <a class="card" href="sentence-analysis.html">
+      <div class="title"><span class="emoji">📝</span>Sentence Analysis One-Pager</div>
+      <div class="desc">Quick reference for sentence-level analysis.</div>
+    </a>
+  </main>
+
+  <footer>
+    Bookmark this page · Add to Home Screen (Share → Add to Home Screen) for full-screen training.
+  </footer>
+</body>
+</html>

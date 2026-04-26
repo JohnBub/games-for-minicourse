@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Feature Cards — Varieties of English Analysis Guide</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 8.5pt;
+    line-height: 1.3;
+    color: #1a1a1a;
+    background: #f5f5f5;
+    padding: 10px;
+  }
+
+  .page-break { page-break-after: always; }
+
+  .section-header {
+    text-align: center;
+    font-size: 14pt;
+    font-weight: bold;
+    padding: 8px 0 4px;
+    margin-bottom: 8px;
+    border-bottom: 3px solid;
+    color: white;
+    border-radius: 6px;
+    letter-spacing: 1px;
+  }
+  .consonant-header { background: #c0392b; border-color: #922b21; }
+  .vowel-header { background: #2980b9; border-color: #1f618d; }
+  .prosody-header { background: #8e44ad; border-color: #6c3483; }
+  .syntax-header { background: #27ae60; border-color: #1e8449; }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .card {
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: white;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .card-consonant { border-left: 5px solid #c0392b; }
+  .card-vowel { border-left: 5px solid #2980b9; }
+  .card-prosody { border-left: 5px solid #8e44ad; }
+  .card-syntax { border-left: 5px solid #27ae60; }
+
+  .card-title {
+    font-size: 10pt;
+    font-weight: bold;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card-consonant .card-title { color: #c0392b; }
+  .card-vowel .card-title { color: #2980b9; }
+  .card-prosody .card-title { color: #8e44ad; }
+  .card-syntax .card-title { color: #27ae60; }
+
+  .card-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    color: white;
+    font-size: 8pt;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+  .card-consonant .card-num { background: #c0392b; }
+  .card-vowel .card-num { background: #2980b9; }
+  .card-prosody .card-num { background: #8e44ad; }
+  .card-syntax .card-num { background: #27ae60; }
+
+  .spot {
+    background: #fff8e1;
+    border: 1px solid #f9a825;
+    border-radius: 4px;
+    padding: 4px 6px;
+    margin: 4px 0;
+    font-size: 8pt;
+  }
+  .spot-label {
+    font-weight: bold;
+    color: #e65100;
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .tree {
+    background: #f0f4ff;
+    border: 1px solid #90caf9;
+    border-radius: 4px;
+    padding: 4px 6px;
+    margin: 4px 0;
+    font-size: 7.8pt;
+  }
+  .tree-label {
+    font-weight: bold;
+    color: #1565c0;
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .tree-row { margin: 1px 0; padding-left: 8px; }
+  .tree-arrow { color: #1565c0; font-weight: bold; }
+  .variety-tag {
+    display: inline-block;
+    padding: 0 4px;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 7pt;
+  }
+  .v-ire { background: #c8e6c9; color: #2e7d32; }
+  .v-scote { background: #bbdefb; color: #1565c0; }
+  .v-sae { background: #fff9c4; color: #f57f17; }
+  .v-gause { background: #ffe0b2; color: #e65100; }
+  .v-aave { background: #ffcdd2; color: #c62828; }
+  .v-nige { background: #d1c4e9; color: #4527a0; }
+  .v-inde { background: #b2dfdb; color: #00695c; }
+  .v-singe { background: #f8bbd0; color: #880e4f; }
+  .v-rp { background: #e0e0e0; color: #424242; }
+
+  .examples {
+    background: #f1f8e9;
+    border: 1px solid #aed581;
+    border-radius: 4px;
+    padding: 4px 6px;
+    margin: 4px 0;
+    font-size: 7.8pt;
+  }
+  .ex-label {
+    font-weight: bold;
+    color: #33691e;
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .ipa { font-family: 'Lucida Sans Unicode', 'DejaVu Sans', sans-serif; color: #333; }
+  .ex-word { font-style: italic; }
+
+  .trap {
+    background: #fce4ec;
+    border: 1px solid #ef9a9a;
+    border-radius: 4px;
+    padding: 3px 6px;
+    margin: 4px 0;
+    font-size: 7.5pt;
+  }
+  .trap-label {
+    font-weight: bold;
+    color: #b71c1c;
+    font-size: 7pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .ref {
+    font-size: 6.5pt;
+    color: #888;
+    text-align: right;
+    margin-top: 2px;
+    font-style: italic;
+  }
+
+  .footer {
+    text-align: center;
+    font-size: 7pt;
+    color: #aaa;
+    padding: 6px 0;
+    border-top: 1px solid #ddd;
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║     SECTION 1: CONSONANT FEATURES       ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+
+<div class="section-header consonant-header">CONSONANT FEATURES</div>
+
+<div class="cards-grid">
+
+<!-- CARD C1: TH-REALISATION -->
+<div class="card card-consonant">
+  <div class="card-title"><span class="card-num">C1</span> TH-Realisation (/θ/ and /ð/)</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    Look at words with ⟨th⟩: <span class="ex-word">the, this, that, three, think, with</span>. In RP they are <span class="ipa">[θ]</span> (voiceless) or <span class="ipa">[ð]</span> (voiced). Any other realisation = diagnostic.
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> <span class="ipa">[t̪ d̪]</span> (dental stops, tongue ON teeth) <span class="tree-arrow">→</span> <span class="variety-tag v-ire">IrE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> <span class="ipa">[f v]</span> (labiodental fricatives) <span class="tree-arrow">→</span> <span class="variety-tag v-scote">ScotE</span> or <span class="variety-tag v-gause">Broad AusE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> <span class="ipa">[t d]</span> (alveolar stops, plain) <span class="tree-arrow">→</span> <span class="variety-tag v-nige">NigE</span> <span class="variety-tag v-singe">SingE</span> <span class="variety-tag v-aave">AAVE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> <span class="ipa">[tʰ]</span> (aspirated stop) <span class="tree-arrow">→</span> <span class="variety-tag v-inde">IndE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> <span class="ipa">[θ ð]</span> (standard) <span class="tree-arrow">→</span> <span class="variety-tag v-rp">RP</span> <span class="variety-tag v-sae">SAE</span></div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    <span class="ex-word">three</span>: RP <span class="ipa">[θɹiː]</span> → IrE <span class="ipa">[t̪ɹiː]</span> → NigE <span class="ipa">[tri]</span> → IndE <span class="ipa">[tʰri]</span><br>
+    <span class="ex-word">the</span>: RP <span class="ipa">[ðə]</span> → IrE <span class="ipa">[d̪ə]</span> → ScotE <span class="ipa">[və]</span>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> Don't confuse <span class="ipa">[t̪]</span> (dental = IrE) with <span class="ipa">[t]</span> (alveolar = NigE/AAVE). The subscript dental diacritic <span class="ipa">[  ̪]</span> under the symbol is the clue. Also: IrE dental <span class="ipa">[t̪]</span> is NOT aspirated; IndE <span class="ipa">[tʰ]</span> IS.
+  </div>
+  <div class="ref">Puskás Ch.3:3 (IrE/ScotE), Ch.6 (NigE), Ch.7 (IndE)</div>
+</div>
+
+<!-- CARD C2: RHOTICITY -->
+<div class="card card-consonant">
+  <div class="card-title"><span class="card-num">C2</span> Rhoticity (post-vocalic /r/)</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    Look at /r/ after vowels — words like <span class="ex-word">car, bird, letter, park, more</span>. Is /r/ pronounced or silent?
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> /r/ IS pronounced after vowels (RHOTIC):</div>
+    <div class="tree-row" style="padding-left:20px"><span class="variety-tag v-ire">IrE</span> <span class="variety-tag v-scote">ScotE</span> <span class="variety-tag v-sae">SAE</span> <span class="variety-tag v-inde">IndE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> /r/ is NOT pronounced (NON-RHOTIC):</div>
+    <div class="tree-row" style="padding-left:20px"><span class="variety-tag v-rp">RP</span> <span class="variety-tag v-gause">GAusE</span> <span class="variety-tag v-aave">AAVE</span> <span class="variety-tag v-nige">NigE</span> <span class="variety-tag v-singe">SingE</span></div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    <span class="ex-word">car</span>: SAE <span class="ipa">[kʰɑɹ]</span> vs RP <span class="ipa">[kʰɑː]</span> vs GAusE <span class="ipa">[kʰɑː]</span><br>
+    <span class="ex-word">letter</span>: IrE <span class="ipa">[lɛtɚ]</span> (rhotic) vs NigE <span class="ipa">[lɛta]</span> (no /r/, no schwa)<br>
+    <b>R-type also matters:</b> IrE <span class="ipa">[ɻ]</span> retroflex · ScotE <span class="ipa">[ɾ]</span> tap · SAE <span class="ipa">[ɹ]</span> approximant
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> Rhoticity alone doesn't ID the variety — 4 varieties are rhotic! Combine with other features. Also: AAVE is non-rhotic but can have /r/ in onset (<span class="ex-word">run</span> <span class="ipa">[ɹʌn]</span>) — only POST-VOCALIC /r/ counts.
+  </div>
+  <div class="ref">Puskás Ch.3:1 (IrE/ScotE), Ch.4 (SAE/GAusE)</div>
+</div>
+
+<!-- CARD C3: /l/ QUALITY -->
+<div class="card card-consonant">
+  <div class="card-title"><span class="card-num">C3</span> /l/ Quality (Clear vs Dark vs Vocalized)</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    Check all <span class="ipa">/l/</span> positions. Look for: <span class="ipa">[l]</span> (clear), <span class="ipa">[lˠ]</span> or <span class="ipa">[ɫ]</span> (dark/velarized), or vowel-like <span class="ipa">[ʊ]</span>/<span class="ipa">[o]</span> replacing /l/ (vocalized).
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Clear <span class="ipa">[l]</span> in ALL positions <span class="tree-arrow">→</span> <span class="variety-tag v-ire">IrE</span> (except Belfast)</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Dark <span class="ipa">[ɫ]</span> in ALL positions <span class="tree-arrow">→</span> <span class="variety-tag v-scote">ScotE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Clear onset / Dark coda <span class="tree-arrow">→</span> <span class="variety-tag v-rp">RP</span> <span class="variety-tag v-sae">SAE</span> <span class="variety-tag v-gause">GAusE</span> (standard split)</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> /l/ → vowel <span class="ipa">[ʊ]</span> (vocalized) <span class="tree-arrow">→</span> <span class="variety-tag v-aave">AAVE</span></div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    <span class="ex-word">also</span>: IrE <span class="ipa">[ɑlso]</span> (clear) vs ScotE <span class="ipa">[ɑɫso]</span> (dark) vs RP <span class="ipa">[ɔːɫsəʊ]</span> (dark in coda)<br>
+    <span class="ex-word">help</span>: AAVE <span class="ipa">[hɛʊp]</span> (vocalized) vs RP <span class="ipa">[hɛɫp]</span>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> The midterm model showed IrE speaker from <b>Strabane</b> (near Belfast) using dark /l/ before consonants — Northern Irish can break the rule! Always note if distribution is <b>conditioned</b> (before consonants only) vs <b>categorical</b> (everywhere).
+  </div>
+  <div class="ref">Puskás Ch.3:3 (IrE/ScotE), Ch.4:4 (GAusE); Midterm model §5</div>
+</div>
+
+<!-- CARD C4: H-DROPPING -->
+<div class="card card-consonant">
+  <div class="card-title"><span class="card-num">C4</span> H-Dropping</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    Words starting with ⟨h⟩: <span class="ex-word">her, him, house, have, happy</span>. Is <span class="ipa">[h]</span> present or absent in initial position?
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> <span class="ipa">[h]</span> ALWAYS dropped <span class="tree-arrow">→</span> <span class="variety-tag v-gause">GAusE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> <span class="ipa">[h]</span> sometimes dropped <span class="tree-arrow">→</span> <span class="variety-tag v-ire">IrE</span> (sporadic) · urban <span class="variety-tag v-rp">BrE</span> (non-RP)</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> <span class="ipa">[h]</span> always present <span class="tree-arrow">→</span> <span class="variety-tag v-rp">RP</span> <span class="variety-tag v-sae">SAE</span> <span class="variety-tag v-scote">ScotE</span> and most others</div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    <span class="ex-word">her</span>: GAusE <span class="ipa">[ɜ]</span> or <span class="ipa">[ɚ]</span> (always dropped) vs IrE <span class="ipa">[hɚ]</span> (mostly kept) vs RP <span class="ipa">[hɜː]</span><br>
+    <span class="ex-word">house</span>: GAusE <span class="ipa">[æʊs]</span> vs RP <span class="ipa">[haʊs]</span>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> In the midterm, the IrE speaker dropped /h/ once out of many tokens — this is <b>sporadic</b>, not regular. If /h/ is dropped <b>every time</b> = GAusE. Sporadic = possible IrE or ongoing change. Also: function words (<span class="ex-word">her, him, have</span>) drop /h/ more easily than content words.
+  </div>
+  <div class="ref">Puskás Ch.4:4 (GAusE); Trudgill 2019 (IrE/ScotE)</div>
+</div>
+
+<!-- CARD C5: ASPIRATION -->
+<div class="card card-consonant">
+  <div class="card-title"><span class="card-num">C5</span> Aspiration of Voiceless Plosives</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    Check voiceless plosives <span class="ipa">/p t k/</span> in onset. Is <span class="ipa">[ʰ]</span> (puff of air) present? Look for <span class="ipa">[pʰ tʰ kʰ]</span> vs <span class="ipa">[p t k]</span>.
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Aspirated <span class="ipa">[pʰ tʰ kʰ]</span> in onset <span class="tree-arrow">→</span> <span class="variety-tag v-rp">RP</span> <span class="variety-tag v-sae">SAE</span> <span class="variety-tag v-gause">GAusE</span> <span class="variety-tag v-aave">AAVE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> NO aspiration <span class="ipa">[p t k]</span> <span class="tree-arrow">→</span> <span class="variety-tag v-ire">IrE</span> <span class="variety-tag v-scote">ScotE</span> <span class="variety-tag v-nige">NigE</span> <span class="variety-tag v-inde">IndE</span> <span class="variety-tag v-singe">SingE</span></div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    <span class="ex-word">park</span>: RP <span class="ipa">[pʰɑːk]</span> vs NigE <span class="ipa">[pak]</span> (no aspiration, no length)<br>
+    <span class="ex-word">call</span>: SAE <span class="ipa">[kʰɑːl]</span> vs IrE <span class="ipa">[kɑl]</span>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> Lack of aspiration in NigE is due to <b>substrate influence</b> (West African languages don't aspirate). In IrE/ScotE it's a <b>Celtic feature</b>. Same surface feature, different cause — mention the substrate in your analysis!
+  </div>
+  <div class="ref">Puskás Ch.3 (IrE/ScotE), Ch.6 (NigE substrate)</div>
+</div>
+
+<!-- CARD C6: CLUSTER SIMPLIFICATION -->
+<div class="card card-consonant">
+  <div class="card-title"><span class="card-num">C6</span> Consonant Cluster Simplification</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    Final consonant clusters reduced: <span class="ex-word">post → pos, hand → han, cold → col</span>. Missing final consonants in clusters.
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Systematic/heavy cluster reduction <span class="tree-arrow">→</span> <span class="variety-tag v-nige">NigE</span> (substrate: W. African langs lack complex codas)</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Variable cluster reduction <span class="tree-arrow">→</span> <span class="variety-tag v-aave">AAVE</span> <span class="variety-tag v-singe">SingE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Clusters preserved <span class="tree-arrow">→</span> <span class="variety-tag v-rp">RP</span> <span class="variety-tag v-sae">SAE</span> and most Inner Circle</div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    NigE: <span class="ex-word">post</span> <span class="ipa">[pos]</span> · <span class="ex-word">hand</span> <span class="ipa">[han]</span> · <span class="ex-word">desk</span> <span class="ipa">[des]</span><br>
+    AAVE: <span class="ex-word">cold</span> <span class="ipa">[koʊl]</span> · <span class="ex-word">test</span> <span class="ipa">[tɛs]</span>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> All English speakers simplify clusters sometimes (fast speech). The diagnostic is whether it's <b>systematic</b> (NigE = almost always) vs <b>variable</b> (AAVE = context-dependent). In NigE, reason is substrate (West African phonotactics). In AAVE, also related to morpheme boundaries.
+  </div>
+  <div class="ref">Puskás Ch.5 (AAVE), Ch.6 (NigE)</div>
+</div>
+
+<!-- CARD C7: INTERVOCALIC /t/ -->
+<div class="card card-consonant">
+  <div class="card-title"><span class="card-num">C7</span> Intervocalic /t/ (Flapping)</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    /t/ between two vowels: <span class="ex-word">water, better, city, butter</span>. Does it stay as <span class="ipa">[t]</span>, become a flap <span class="ipa">[ɾ]</span>, or glottal stop <span class="ipa">[ʔ]</span>?
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Flap <span class="ipa">[ɾ]</span> <span class="tree-arrow">→</span> <span class="variety-tag v-sae">SAE</span> <span class="variety-tag v-gause">GAusE</span> (also AAVE)</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Retroflex <span class="ipa">[ʈ]</span> <span class="tree-arrow">→</span> <span class="variety-tag v-inde">IndE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Glottal <span class="ipa">[ʔ]</span> <span class="tree-arrow">→</span> <span class="variety-tag v-singe">SingE</span> / urban BrE</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Plain <span class="ipa">[t]</span> <span class="tree-arrow">→</span> <span class="variety-tag v-rp">RP</span> <span class="variety-tag v-ire">IrE</span> <span class="variety-tag v-scote">ScotE</span></div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    <span class="ex-word">water</span>: SAE <span class="ipa">[wɑɾɚ]</span> vs RP <span class="ipa">[wɔːtə]</span> vs IndE <span class="ipa">[wɔːʈɚ]</span><br>
+    <span class="ex-word">better</span>: GAusE <span class="ipa">[bɛɾə]</span> vs SingE <span class="ipa">[bɛʔə]</span>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> The flap <span class="ipa">[ɾ]</span> makes SAE <span class="ex-word">writer/rider</span> sound the same (neutralised). This is a <b>shared SAE + GAusE</b> feature — use other clues to distinguish (rhoticity, diphthongs).
+  </div>
+  <div class="ref">Puskás Ch.4</div>
+</div>
+
+<!-- CARD C8: RETROFLEX -->
+<div class="card card-consonant">
+  <div class="card-title"><span class="card-num">C8</span> Retroflex Consonants</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    <span class="ipa">[ʈ]</span> and <span class="ipa">[ɖ]</span> symbols — tongue curled back behind alveolar ridge. Instant identifier.
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> <span class="ipa">[ʈ ɖ]</span> for /t d/ <span class="tree-arrow">→</span> <span class="variety-tag v-inde">IndE</span> (almost unique marker)</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> <span class="ipa">[ɻ]</span> retroflex /r/ <span class="tree-arrow">→</span> <span class="variety-tag v-ire">IrE</span></div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    <span class="ex-word">today</span>: IndE <span class="ipa">[ʈuɖeː]</span> vs RP <span class="ipa">[tʰədeɪ]</span><br>
+    <span class="ex-word">doctor</span>: IndE <span class="ipa">[ɖɔkʈɚ]</span>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> Don't confuse retroflex <span class="ipa">[ʈ ɖ]</span> (IndE, for ALL /t d/) with dental <span class="ipa">[t̪ d̪]</span> (IrE, only for TH). Check: is it replacing /t d/ everywhere? → IndE. Only in TH-words? → IrE.
+  </div>
+  <div class="ref">Puskás Ch.7 (IndE)</div>
+</div>
+
+</div><!-- end consonant cards grid -->
+
+<div class="page-break"></div>
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║       SECTION 2: VOWEL FEATURES         ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+
+<div class="section-header vowel-header">VOWEL FEATURES</div>
+
+<div class="cards-grid">
+
+<!-- CARD V1: KIT-FLEECE MERGER -->
+<div class="card card-vowel">
+  <div class="card-title"><span class="card-num">V1</span> KIT-FLEECE Merger (no length contrast)</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    <span class="ex-word">sit</span> and <span class="ex-word">seat</span> pronounced the same. No <span class="ipa">[ɪ]</span> vs <span class="ipa">[iː]</span> distinction — both become <span class="ipa">[i]</span>.
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> KIT = FLEECE (merged) <span class="tree-arrow">→</span> <span class="variety-tag v-nige">NigE</span> <span class="variety-tag v-singe">SingE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> KIT ≠ FLEECE (distinct) <span class="tree-arrow">→</span> all Inner Circle varieties</div>
+    <div class="tree-row" style="padding-left: 14px; font-size: 7pt;">Then: downdrift + reduplication → NigE · particles → SingE</div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    NigE/SingE: <span class="ex-word">sit</span> = <span class="ex-word">seat</span> <span class="ipa">[sit]</span> · <span class="ex-word">ship</span> = <span class="ex-word">sheep</span> <span class="ipa">[ʃip]</span><br>
+    RP: <span class="ex-word">sit</span> <span class="ipa">[sɪt]</span> ≠ <span class="ex-word">seat</span> <span class="ipa">[siːt]</span>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> Absence of length contrast means NO <span class="ipa">[ː]</span> diacritic anywhere — check all vowels, not just this pair. If FOOT=GOOSE too, it confirms the pattern. Cause: substrate languages have no length distinction.
+  </div>
+  <div class="ref">Puskás Ch.6 (NigE), Ch.8 (SingE)</div>
+</div>
+
+<!-- CARD V2: FACE/GOAT MONO -->
+<div class="card card-vowel">
+  <div class="card-title"><span class="card-num">V2</span> FACE/GOAT Monophthongisation</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    FACE <span class="ipa">[eɪ]</span> → <span class="ipa">[eː]</span> and GOAT <span class="ipa">[əʊ]</span> → <span class="ipa">[oː]</span>. Diphthongs become long monophthongs.
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Both FACE and GOAT as monophthongs <span class="tree-arrow">→</span> <span class="variety-tag v-ire">IrE</span> <span class="variety-tag v-scote">ScotE</span> <span class="variety-tag v-nige">NigE</span></div>
+    <div class="tree-row" style="padding-left: 14px; font-size: 7pt;">Then: rhotic + dental TH → IrE · rhotic + dark /l/ → ScotE · no schwa → NigE</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Standard diphthongs <span class="tree-arrow">→</span> <span class="variety-tag v-rp">RP</span> <span class="variety-tag v-sae">SAE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> WIDE diphthongs (opener start) <span class="tree-arrow">→</span> <span class="variety-tag v-gause">GAusE</span> (see V5)</div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    <span class="ex-word">face</span>: RP <span class="ipa">[feɪs]</span> → IrE <span class="ipa">[feːs]</span> → GAusE <span class="ipa">[fæɪs]</span><br>
+    <span class="ex-word">goat</span>: RP <span class="ipa">[gəʊt]</span> → ScotE <span class="ipa">[goːt]</span> → NigE <span class="ipa">[got]</span> (short, no length)
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> NigE also monophthongises but the vowel is SHORT <span class="ipa">[e]</span> not long <span class="ipa">[eː]</span> — no length contrast in NigE! IrE/ScotE keep the length. Also: Northern BrE monophthongises too.
+  </div>
+  <div class="ref">Puskás Ch.3 (IrE/ScotE), Ch.6 (NigE)</div>
+</div>
+
+<!-- CARD V3: BATH VOWEL -->
+<div class="card card-vowel">
+  <div class="card-title"><span class="card-num">V3</span> BATH Vowel</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    Words: <span class="ex-word">bath, staff, ask, class, dance, path</span>. What vowel is used? This is the classic North/South and SAE/RP split.
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> <span class="ipa">[ɑː]</span> (long, back) <span class="tree-arrow">→</span> <span class="variety-tag v-rp">RP</span> (Southern BrE) <span class="variety-tag v-gause">GAusE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> <span class="ipa">[æ]</span> (short, front) <span class="tree-arrow">→</span> <span class="variety-tag v-sae">SAE</span> + Northern BrE</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> <span class="ipa">[a]</span> (open front) <span class="tree-arrow">→</span> <span class="variety-tag v-ire">IrE</span> <span class="variety-tag v-scote">ScotE</span> <span class="variety-tag v-nige">NigE</span></div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    <span class="ex-word">bath</span>: RP <span class="ipa">[bɑːθ]</span> vs SAE <span class="ipa">[bæθ]</span> vs NigE <span class="ipa">[bat]</span><br>
+    <span class="ex-word">ask</span>: RP <span class="ipa">[ɑːsk]</span> vs SAE <span class="ipa">[æsk]</span>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> BATH=TRAP in SAE and Northern BrE (both <span class="ipa">[æ]</span>). BATH=TRAP in NigE too but as <span class="ipa">[a]</span>. The BATH-TRAP split only exists in RP/Southern BrE. Don't assume <span class="ipa">[æ]</span> = American — Northern English speakers do it too.
+  </div>
+  <div class="ref">Puskás Ch.2 (BrE North/South), Ch.4 (SAE)</div>
+</div>
+
+<!-- CARD V4: PRICE MONOPHTHONG -->
+<div class="card card-vowel">
+  <div class="card-title"><span class="card-num">V4</span> PRICE Monophthongisation</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    PRICE <span class="ipa">[aɪ]</span> → <span class="ipa">[aː]</span>. The diphthong becomes a long monophthong. <span class="ex-word">mine</span> sounds like <span class="ex-word">maan</span>.
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> PRICE = <span class="ipa">[aː]</span> monophthong <span class="tree-arrow">→</span> <span class="variety-tag v-aave">AAVE</span> <b>(UNIQUE — no other variety does this!)</b></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> PRICE = <span class="ipa">[aɪ]</span> diphthong <span class="tree-arrow">→</span> all other varieties</div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    AAVE: <span class="ex-word">mine</span> <span class="ipa">[maːn]</span> · <span class="ex-word">time</span> <span class="ipa">[taːm]</span> · <span class="ex-word">ride</span> <span class="ipa">[ɹaːd]</span><br>
+    RP: <span class="ex-word">mine</span> <span class="ipa">[maɪn]</span> · <span class="ex-word">time</span> <span class="ipa">[taɪm]</span>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> This is a <b>killer feature</b> — if you see PRICE as <span class="ipa">[aː]</span>, it's AAVE, full stop. Prof. Puskás: "AAVE is the only variety we encountered which has an A instead of an I in PRICE." Instant identification.
+  </div>
+  <div class="ref">Puskás Ch.5 (AAVE)</div>
+</div>
+
+<!-- CARD V5: WIDE DIPHTHONGS -->
+<div class="card card-vowel">
+  <div class="card-title"><span class="card-num">V5</span> Wide Diphthongs (Australian Shift)</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    Diphthongs with a more OPEN starting point than RP. FACE <span class="ipa">[æɪ]</span> instead of <span class="ipa">[eɪ]</span>. MOUTH <span class="ipa">[æʊ]</span> instead of <span class="ipa">[aʊ]</span>.
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> FACE = <span class="ipa">[æɪ]</span> (wider start) <span class="tree-arrow">→</span> <span class="variety-tag v-gause">GAusE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> MOUTH = <span class="ipa">[æʊ]</span> (fronted start) <span class="tree-arrow">→</span> <span class="variety-tag v-gause">GAusE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Also: BE long vowels → diphthongs (<span class="ipa">[iː]→[ɘɪ], [uː]→[ʉu]</span>)</div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    <span class="ex-word">face/mate</span>: GAusE <span class="ipa">[fæɪs]</span> · <span class="ipa">[mæɪt]</span> (the iconic "Australian" sound)<br>
+    <span class="ex-word">please</span>: GAusE <span class="ipa">[pʰlɘɪz]</span> (FLEECE → diphthong)<br>
+    <span class="ex-word">snow</span>: GAusE <span class="ipa">[ʃnɵ̃ʊ]</span> (GOAT → closing diphthong)
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> The FACE vowel <span class="ipa">[æɪ]</span> in GAusE is the stereotypical marker. Don't confuse GAusE diphthongisation (makes MORE diphthongs from long vowels) with IrE/ScotE/NigE monophthongisation (makes FEWER diphthongs). They go in opposite directions!
+  </div>
+  <div class="ref">Puskás Ch.4:3 (GAusE); Midterm model §1</div>
+</div>
+
+<!-- CARD V6: SCHWA / VOWEL REDUCTION -->
+<div class="card card-vowel">
+  <div class="card-title"><span class="card-num">V6</span> Schwa & Vowel Reduction</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    Are unstressed syllables reduced to <span class="ipa">[ə]</span>? Or does every syllable keep a full vowel? This is the single most powerful filter.
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Schwa <span class="ipa">[ə]</span> present in weak syllables <span class="tree-arrow">→</span> STRESS-TIMED:</div>
+    <div class="tree-row" style="padding-left: 14px;"><span class="variety-tag v-rp">RP</span> <span class="variety-tag v-ire">IrE</span> <span class="variety-tag v-scote">ScotE</span> <span class="variety-tag v-sae">SAE</span> <span class="variety-tag v-gause">GAusE</span> <span class="variety-tag v-aave">AAVE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> NO schwa, all syllables full vowels <span class="tree-arrow">→</span> SYLLABLE-TIMED:</div>
+    <div class="tree-row" style="padding-left: 14px;"><span class="variety-tag v-nige">NigE</span> <span class="variety-tag v-inde">IndE</span> <span class="variety-tag v-singe">SingE</span></div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    <span class="ex-word">letter</span>: RP <span class="ipa">[lɛtə]</span> (schwa) vs NigE <span class="ipa">[lɛta]</span> or <span class="ipa">[lɛte]</span> (full vowel)<br>
+    <span class="ex-word">banana</span>: RP <span class="ipa">[bənɑːnə]</span> (two schwas) vs IndE <span class="ipa">[banana]</span> (all full)
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> This should be your <b>FIRST FILTER</b> (Step 2 on the one-pager). It instantly splits 9 varieties into two groups. No schwa = Outer Circle (NigE/IndE/SingE). Then use consonants and syntax to distinguish within each group.
+  </div>
+  <div class="ref">Puskás Ch.6, Ch.7, Ch.8</div>
+</div>
+
+<!-- CARD V7: STRUT-FOOT -->
+<div class="card card-vowel">
+  <div class="card-title"><span class="card-num">V7</span> STRUT-FOOT Split (or lack of)</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    <span class="ex-word">cup/put</span> — same vowel or different? RP has <span class="ipa">[ʌ]</span> vs <span class="ipa">[ʊ]</span>. Northern BrE has <span class="ipa">[ʊ]</span> for both.
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> STRUT = FOOT (both <span class="ipa">[ʊ]</span>) <span class="tree-arrow">→</span> Northern BrE</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> STRUT ≠ FOOT (distinct) <span class="tree-arrow">→</span> <span class="variety-tag v-rp">RP</span> (Southern BrE) + most others</div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    Northern BrE: <span class="ex-word">cup</span> = <span class="ex-word">put</span> <span class="ipa">[kʊp] = [pʊt]</span><br>
+    RP: <span class="ex-word">cup</span> <span class="ipa">[kʌp]</span> ≠ <span class="ex-word">put</span> <span class="ipa">[pʊt]</span>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> This is specifically a <b>British North/South</b> diagnostic. Combined with BATH vowel (V3), it helps pinpoint regional BrE: STRUT=FOOT + BATH=[a] → Northern. STRUT≠FOOT + BATH=[ɑː] → Southern/RP.
+  </div>
+  <div class="ref">Puskás Ch.2 (BrE regional)</div>
+</div>
+
+<!-- CARD V8: FOOT-GOOSE MERGER -->
+<div class="card card-vowel">
+  <div class="card-title"><span class="card-num">V8</span> FOOT-GOOSE Merger</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    <span class="ex-word">foot</span> and <span class="ex-word">food</span> pronounced the same. No <span class="ipa">[ʊ]</span> vs <span class="ipa">[uː]</span> distinction.
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> FOOT = GOOSE (merged) <span class="tree-arrow">→</span> <span class="variety-tag v-nige">NigE</span> <span class="variety-tag v-singe">SingE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> FOOT ≠ GOOSE <span class="tree-arrow">→</span> all Inner Circle varieties</div>
+    <div class="tree-row" style="padding-left: 14px; font-size: 7pt;">Combines with V1 (KIT=FLEECE) to confirm: no length contrast system-wide</div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    NigE: <span class="ex-word">foot</span> = <span class="ex-word">food</span> <span class="ipa">[fut]</span> · <span class="ex-word">pull</span> = <span class="ex-word">pool</span> <span class="ipa">[pul]</span><br>
+    RP: <span class="ex-word">foot</span> <span class="ipa">[fʊt]</span> ≠ <span class="ex-word">food</span> <span class="ipa">[fuːd]</span>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> If you see KIT=FLEECE AND FOOT=GOOSE → the whole length system is collapsed. This confirms Outer Circle (NigE or SingE). It's a <b>system-wide pattern</b>, not just individual mergers.
+  </div>
+  <div class="ref">Puskás Ch.6 (NigE), Ch.8 (SingE)</div>
+</div>
+
+</div><!-- end vowel cards grid -->
+
+<div class="page-break"></div>
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║    SECTION 3: PROSODY FEATURES           ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+
+<div class="section-header prosody-header">PROSODY & RHYTHM</div>
+
+<div class="cards-grid">
+
+<!-- CARD P1: STRESS vs SYLLABLE TIMING -->
+<div class="card card-prosody">
+  <div class="card-title"><span class="card-num">P1</span> Stress-Timed vs Syllable-Timed Rhythm</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    Listen for equal syllable weight (syllable-timed) vs strong/weak alternation (stress-timed). In transcription: check for schwa <span class="ipa">[ə]</span> and reduced vowels as proxy.
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Stress-timed (schwas, reduced syllables):</div>
+    <div class="tree-row" style="padding-left: 14px;"><span class="variety-tag v-rp">RP</span> <span class="variety-tag v-ire">IrE</span> <span class="variety-tag v-scote">ScotE</span> <span class="variety-tag v-sae">SAE</span> <span class="variety-tag v-gause">GAusE</span> <span class="variety-tag v-aave">AAVE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Syllable-timed (all syllables equal, full vowels):</div>
+    <div class="tree-row" style="padding-left: 14px;"><span class="variety-tag v-nige">NigE</span> <span class="variety-tag v-inde">IndE</span> <span class="variety-tag v-singe">SingE</span></div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    Stress-timed: <span class="ex-word">comfortable</span> RP <span class="ipa">[kʌmftəbəl]</span> (3 syllables spoken, 2 schwas)<br>
+    Syllable-timed: <span class="ex-word">comfortable</span> IndE <span class="ipa">[kɔmfɔrtebl]</span> (all 4 syllables pronounced equally)<br>
+    Prof: <i>"like French"</i> — each syllable has the same weight
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> On a written IPA transcription, you can't directly "hear" rhythm — but you CAN detect it through <b>vowel reduction</b>. No schwa + full vowels everywhere = syllable-timed. This is Card V6's diagnostic applied to rhythm.
+  </div>
+  <div class="ref">Puskás Ch.6-8 (Outer Circle varieties)</div>
+</div>
+
+<!-- CARD P2: DOWNDRIFT -->
+<div class="card card-prosody">
+  <div class="card-title"><span class="card-num">P2</span> Downdrift Intonation</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    Progressive pitch lowering: H→L→H(lower)→L→H(even lower). Not a continuous fall — resets at phrase boundaries but each peak is lower.
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Downdrift pattern <span class="tree-arrow">→</span> <span class="variety-tag v-nige">NigE</span> (West African substrate)</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Particularly salient in questions — starts very high, descends</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Combined with syllable-timing = strong NigE indicator</div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    <span class="ex-word">"What makes you so interested?"</span> — starts very high, each subsequent stressed syllable is lower than the previous high point. Prof: <i>"You start relatively high and you lower... high → low → high (lower than first) → low"</i>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> Downdrift may not be visible in IPA transcription (it's suprasegmental). But if the exam gives audio or asks about intonation patterns, this is <b>unique to NigE</b> in the course. The cause is tonal substrate languages (Yoruba, Igbo).
+  </div>
+  <div class="ref">Puskás Ch.6 (NigE prosody)</div>
+</div>
+
+</div><!-- end prosody grid -->
+
+<!-- ╔══════════════════════════════════════════╗ -->
+<!-- ║    SECTION 4: MORPHOSYNTAX FEATURES      ║ -->
+<!-- ╚══════════════════════════════════════════╝ -->
+
+<div class="section-header syntax-header">MORPHOSYNTAX FEATURES</div>
+
+<div class="cards-grid">
+
+<!-- CARD M1: COPULA DELETION -->
+<div class="card card-syntax">
+  <div class="card-title"><span class="card-num">M1</span> Copula Deletion</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    Missing <span class="ex-word">is/are</span>: <i>"She Ø nice"</i> or <i>"They Ø happy"</i>. The copula (be verb) is absent.
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Copula deleted = CURRENT STATE <span class="tree-arrow">→</span> <span class="variety-tag v-aave">AAVE</span></div>
+    <div class="tree-row" style="padding-left: 14px; font-size: 7pt;">AAVE rule: deleted where StE would CONTRACT (<i>she's</i> → <i>she Ø</i>)</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Copula deleted (general) <span class="tree-arrow">→</span> <span class="variety-tag v-singe">SingE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Copula always present <span class="tree-arrow">→</span> all Inner Circle + NigE/IndE</div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    AAVE: <i>"She Ø nice"</i> = she is nice RIGHT NOW (temporary state)<br>
+    vs AAVE: <i>"She <b>be</b> nice"</i> = she is ALWAYS nice (habitual — see M2)<br>
+    SingE: <i>"This one Ø very good"</i>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> In AAVE, copula deletion is NOT random — it follows the contraction rule. Where StE can contract (<i>she's</i>), AAVE can delete. Where StE can't contract (<i>*"I know who she's"</i>), AAVE can't delete either. This is <b>systematic</b>, not "lazy speech."
+  </div>
+  <div class="ref">Puskás Ch.5 (AAVE TAM system)</div>
+</div>
+
+<!-- CARD M2: HABITUAL MARKERS -->
+<div class="card card-syntax">
+  <div class="card-title"><span class="card-num">M2</span> Habitual Markers</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    Special markers for habitual/ongoing states: <i>"She <b>be</b> working"</i> or <i>"He <b>do be</b> singing"</i>.
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Invariant <b>be</b> + V-ing (habitual) <span class="tree-arrow">→</span> <span class="variety-tag v-aave">AAVE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> <b>do be</b> (habitual) <span class="tree-arrow">→</span> <span class="variety-tag v-ire">IrE</span> (Northern)</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> <b>be</b> (habitual, without <i>do</i>) <span class="tree-arrow">→</span> <span class="variety-tag v-ire">IrE</span> (Southern)</div>
+    <div class="tree-row" style="padding-left: 14px; font-size: 7pt;">Possible Celtic substrate connection between IrE and AAVE</div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    AAVE: <i>"She <b>be</b> working late"</i> = she regularly/habitually works late<br>
+    IrE: <i>"He <b>does be</b> singing all the time"</i> = habitual<br>
+    Compare: <i>"She working late"</i> (no <i>be</i>) = progressive, happening now
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> Don't confuse AAVE habitual <i>be</i> with Standard English <i>be</i>. AAVE <i>"She be nice"</i> ≠ StE <i>"She is nice."</i> AAVE <i>be</i> = ALWAYS, intrinsic. Copula Ø = RIGHT NOW. This is a <b>rich aspectual distinction</b> that StE lacks.
+  </div>
+  <div class="ref">Puskás Ch.5 (AAVE), Ch.3 (IrE)</div>
+</div>
+
+<!-- CARD M3: AAVE TAM SYSTEM -->
+<div class="card card-syntax">
+  <div class="card-title"><span class="card-num">M3</span> AAVE Tense-Aspect-Mood System</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    Unique aspect markers: <b>done, béen</b> (stressed), <b>finna, steady, come</b>. These are found ONLY in AAVE.
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> <b>done</b> + V = completive (<i>"She done left"</i>) <span class="tree-arrow">→</span> <span class="variety-tag v-aave">AAVE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> <b>béen</b> (stressed) = remote past (<i>"I béen knew"</i>) <span class="tree-arrow">→</span> <span class="variety-tag v-aave">AAVE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> <b>finna</b> = immediate future (<i>"I finna go"</i>) <span class="tree-arrow">→</span> <span class="variety-tag v-aave">AAVE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> <b>steady</b> = persistent action <span class="tree-arrow">→</span> <span class="variety-tag v-aave">AAVE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> <b>come</b> = indignation <span class="tree-arrow">→</span> <span class="variety-tag v-aave">AAVE</span></div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    <i>"She <b>done</b> finished"</i> = completed · <i>"I <b>béen</b> knew that"</i> = I've known for a long time<br>
+    <i>"I <b>finna</b> leave"</i> = about to leave · <i>"He <b>come</b> telling me"</i> = indignation
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> Unstressed <i>been</i> = StE present perfect. STRESSED <i>béen</i> = AAVE remote past. Prof compared <i>béen</i> to French <i>passé surcomposé</i>. Any of these markers = instant AAVE identification.
+  </div>
+  <div class="ref">Puskás Ch.5 (AAVE)</div>
+</div>
+
+<!-- CARD M4: NEGATIVE CONCORD -->
+<div class="card card-syntax">
+  <div class="card-title"><span class="card-num">M4</span> Negative Concord (Multiple Negation)</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    Multiple negative elements: <i>"I don't know <b>nothing</b>"</i> or <i>"<b>Nobody</b> don't like him."</i>
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Neg. concord INCLUDING with subjects <span class="tree-arrow">→</span> <span class="variety-tag v-aave">AAVE</span> (rare cross-linguistically!)</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Neg. concord (objects/adverbs only) <span class="tree-arrow">→</span> <span class="variety-tag v-ire">IrE</span> <span class="variety-tag v-scote">ScotE</span> <span class="variety-tag v-nige">NigE</span> + vernacular BrE</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> No negative concord <span class="tree-arrow">→</span> Standard varieties</div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    AAVE: <i>"<b>Nobody</b> don't like him"</i> (subject + verb both negative — AAVE-specific)<br>
+    IrE/ScotE: <i>"I didn't do <b>nothing</b>"</i> (verb + object negative)<br>
+    StE: <i>"I didn't do <b>anything</b>"</i>
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> Negative concord exists in MANY varieties — it's not unique to AAVE. What IS unique is negation on the <b>subject</b> (<i>"Nobody don't..."</i>). If you see NC but no subject negation, it could be several varieties. Use other features to narrow down.
+  </div>
+  <div class="ref">Puskás Ch.5 (AAVE), Ch.2 (BrE vernaculars)</div>
+</div>
+
+<!-- CARD M5: RESUMPTIVE PRONOUNS -->
+<div class="card card-syntax">
+  <div class="card-title"><span class="card-num">M5</span> Resumptive Pronouns</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    Pronoun "copy" inside relative clause: <i>"The man <b>whom</b> I saw <b>him</b>"</i>. The pronoun doubles the relative.
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Resumptive pronouns <span class="tree-arrow">→</span> <span class="variety-tag v-ire">IrE</span> <span class="variety-tag v-scote">ScotE</span> (Celtic substrate) or <span class="variety-tag v-nige">NigE</span> (W. African substrate)</div>
+    <div class="tree-row" style="padding-left: 14px; font-size: 7pt;">Same pattern, different substrates — Prof: "Celtic and West African substrates — same pattern!"</div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    IrE: <i>"The guests whom I invited <b>them</b>"</i><br>
+    NigE: <i>"The woman that I know <b>her</b>"</i><br>
+    StE: <i>"The guests whom I invited Ø"</i> (gap, no pronoun)
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> Same surface feature in Celtic-substrate (IrE/ScotE) and W. African-substrate (NigE) varieties! Distinguish by other features: rhotic + schwa → IrE/ScotE; no schwa + syllable-timed → NigE.
+  </div>
+  <div class="ref">Puskás Ch.3 (IrE/ScotE), Ch.6 (NigE)</div>
+</div>
+
+<!-- CARD M6: DISCOURSE PARTICLES -->
+<div class="card card-syntax">
+  <div class="card-title"><span class="card-num">M6</span> Discourse Particles</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    Sentence-final particles: <b>lah, mah, lor, ah, hor</b>. These add pragmatic nuance.
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Any discourse particle (lah, mah, lor...) <span class="tree-arrow">→</span> <span class="variety-tag v-singe">SingE / Singlish</span> <b>(UNIQUE)</b></div>
+    <div class="tree-row" style="padding-left: 14px;"><b>lah</b> = softener · <b>mah</b> = obvious · <b>lor</b> = resignation</div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    <i>"Don't worry <b>lah</b>"</i> = softening · <i>"Like that <b>lor</b>"</i> = resigned acceptance<br>
+    <i>"Of course <b>mah</b>"</i> = it's obvious · <i>"Can or not?"</i> (A-not-A question, also SingE)
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> Particles = <b>instant Singlish</b>, no other variety has them. Substrate: Mandarin/Hokkien/Cantonese/Malay. Note: Singlish (vernacular) has particles; formal Singapore English may not. The variety shows <b>diglossia</b>.
+  </div>
+  <div class="ref">Puskás Ch.8 (SingE/Singlish)</div>
+</div>
+
+<!-- CARD M7: REDUPLICATION -->
+<div class="card card-syntax">
+  <div class="card-title"><span class="card-num">M7</span> Reduplication</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    Words doubled for emphasis or meaning: <i>"<b>small small</b>, <b>now now</b>, <b>quick quick</b>"</i>.
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Reduplication for intensification/iteration <span class="tree-arrow">→</span> <span class="variety-tag v-nige">NigE</span> <b>(West African substrate)</b></div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    <i>"Come <b>now now</b>"</i> = come immediately · <i>"The road is <b>small small</b>"</i> = very small / gradually small<br>
+    <i>"He was <b>looking looking</b>"</i> = looking continuously
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> Reduplication = <b>NigE marker</b>. Don't confuse with SingE which doesn't reduplicate in the same way. W. African languages use reduplication productively — this transfers directly to NigE.
+  </div>
+  <div class="ref">Puskás Ch.6 (NigE)</div>
+</div>
+
+<!-- CARD M8: EMBEDDED INVERSION -->
+<div class="card card-syntax">
+  <div class="card-title"><span class="card-num">M8</span> Embedded Clause Inversion</div>
+
+  <div class="spot">
+    <div class="spot-label">👁 What to Spot</div>
+    Subject-auxiliary inversion INSIDE embedded (subordinate) clauses — StE only allows it in main clauses.
+  </div>
+
+  <div class="tree">
+    <div class="tree-label">🌳 Decision Tree</div>
+    <div class="tree-row"><span class="tree-arrow">→</span> Inversion in embedded questions <span class="tree-arrow">→</span> <span class="variety-tag v-ire">IrE</span> <span class="variety-tag v-scote">ScotE</span> <span class="variety-tag v-aave">AAVE</span> <span class="variety-tag v-inde">IndE</span></div>
+    <div class="tree-row"><span class="tree-arrow">→</span> No inversion in embedded (standard order) <span class="tree-arrow">→</span> <span class="variety-tag v-rp">RP</span> <span class="variety-tag v-sae">SAE</span></div>
+    <div class="tree-row" style="padding-left: 14px; font-size: 7pt;">AAVE also has NO inversion in MAIN clause: <i>"What is you saying?"</i> = non-inverted!</div>
+  </div>
+
+  <div class="examples">
+    <div class="ex-label">📝 Examples</div>
+    AAVE: <i>"I asked her <b>could I</b> go"</i> (inverted in embedded = AAVE)<br>
+    IrE: <i>"I wonder <b>is she</b> coming"</i><br>
+    StE: <i>"I asked her <b>if I could</b> go"</i> (no inversion in embedded)
+  </div>
+
+  <div class="trap">
+    <span class="trap-label">⚠️ Trap</span> AAVE does the opposite of StE in BOTH directions: inverts in embedded (where StE doesn't) AND doesn't invert in main clause (where StE does). This double flip is diagnostic of AAVE.
+  </div>
+  <div class="ref">Puskás Ch.5 (AAVE), Ch.3 (IrE/ScotE), Ch.7 (IndE)</div>
+</div>
+
+</div><!-- end syntax cards grid -->
+
+<div class="footer">
+  Feature Cards v1 — Varieties of English · BA3 · Prof. G. Puskás · Univ. Geneva · Spring 2026<br>
+  <b>20 cards:</b> C1–C8 Consonants · V1–V8 Vowels · P1–P2 Prosody · M1–M8 Morphosyntax<br>
+  To be updated as course progresses — based on 2025 materials + 2026 Lesson 1 + corrected midterm
+</div>
+
+</body>
+</html>

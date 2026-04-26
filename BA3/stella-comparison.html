@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GMU Stella Passage — Variety Comparison</title>
+<style>
+  @page { size: A4 portrait; margin: 12mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 9pt;
+    line-height: 1.4;
+    color: #1a1a1a;
+    background: #f5f5f5;
+    padding: 14px;
+  }
+
+  h1 {
+    font-size: 18pt;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+
+  .intro {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 0 0 18px;
+    font-size: 9pt;
+    line-height: 1.45;
+  }
+  .intro .legend {
+    margin-top: 6px;
+    font-size: 8.5pt;
+  }
+  .legend-swatch {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-weight: bold;
+    margin-right: 2px;
+  }
+  .legend-consonant { background: #fde4e0; color: #922b21; border: 1px solid #e8b7ae; }
+  .legend-vowel     { background: #e1eefc; color: #1f618d; border: 1px solid #b5d3ec; }
+  .legend-prosody   { background: #ece0f4; color: #6c3483; border: 1px solid #cfb5e4; }
+  .legend-syntax    { background: #d8f0de; color: #1e8449; border: 1px solid #a6d9b4; }
+
+  /* VARIETY SECTION */
+  section.variety {
+    background: white;
+    border: 1.5px solid #ddd;
+    border-left: 6px solid #1a1a1a;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  section.variety h2 {
+    font-size: 13pt;
+    margin-bottom: 4px;
+    color: #1a1a1a;
+  }
+  .speaker-meta {
+    font-size: 9pt;
+    color: #666;
+    font-weight: normal;
+    font-style: italic;
+  }
+  .caveat {
+    background: #fff8e1;
+    border: 1px solid #f9a825;
+    border-left: 4px solid #e65100;
+    border-radius: 4px;
+    padding: 5px 8px;
+    margin: 6px 0 8px;
+    font-size: 8.5pt;
+    color: #5d4037;
+  }
+  .caveat b { color: #e65100; text-transform: uppercase; letter-spacing: 0.4px; font-size: 7.5pt; }
+
+  /* STELLA TRANSCRIPTION BLOCK */
+  .stella-transcription {
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    padding: 10px 12px;
+    margin: 6px 0 10px;
+    font-family: 'Doulos SIL', 'Charis SIL', 'Lucida Sans Unicode', 'DejaVu Sans', serif;
+    font-size: 10.5pt;
+    line-height: 1.85;
+    color: #222;
+  }
+
+  /* INLINE FEATURE HIGHLIGHTS */
+  .feat-consonant, .feat-vowel, .feat-prosody, .feat-syntax {
+    padding: 1px 3px;
+    border-radius: 3px;
+    position: relative;
+    white-space: nowrap;
+  }
+  .feat-consonant { background: #fde4e0; color: #922b21; border: 1px solid #e8b7ae; }
+  .feat-vowel     { background: #e1eefc; color: #1f618d; border: 1px solid #b5d3ec; }
+  .feat-prosody   { background: #ece0f4; color: #6c3483; border: 1px solid #cfb5e4; }
+  .feat-syntax    { background: #d8f0de; color: #1e8449; border: 1px solid #a6d9b4; }
+  [data-n]::after {
+    content: attr(data-n);
+    font-size: 7pt;
+    font-weight: bold;
+    vertical-align: super;
+    margin-left: 2px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+  .feat-consonant[data-n]::after { color: #c0392b; }
+  .feat-vowel[data-n]::after     { color: #2980b9; }
+  .feat-prosody[data-n]::after   { color: #8e44ad; }
+  .feat-syntax[data-n]::after    { color: #27ae60; }
+
+  /* FEATURE CARDS GRID */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .card {
+    border: 1.5px solid #ddd;
+    border-radius: 6px;
+    padding: 8px 10px;
+    background: white;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    font-size: 8.5pt;
+    line-height: 1.35;
+  }
+  .card-consonant { border-left: 5px solid #c0392b; }
+  .card-vowel     { border-left: 5px solid #2980b9; }
+  .card-prosody   { border-left: 5px solid #8e44ad; }
+  .card-syntax    { border-left: 5px solid #27ae60; }
+
+  .card-title {
+    font-size: 9.5pt;
+    font-weight: bold;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .card-consonant .card-title { color: #c0392b; }
+  .card-vowel     .card-title { color: #2980b9; }
+  .card-prosody   .card-title { color: #8e44ad; }
+  .card-syntax    .card-title { color: #27ae60; }
+
+  .card-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    color: white;
+    font-size: 7.5pt;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+  .card-consonant .card-num { background: #c0392b; }
+  .card-vowel     .card-num { background: #2980b9; }
+  .card-prosody   .card-num { background: #8e44ad; }
+  .card-syntax    .card-num { background: #27ae60; }
+
+  .tag {
+    display: inline-block;
+    font-size: 7pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: 4px;
+  }
+  .tag-predict { background: #d8f0de; color: #1e8449; }
+  .tag-partial { background: #fff0d0; color: #b45309; }
+  .tag-unpredict { background: #ffd9d9; color: #922b21; }
+
+  .evidence, .rule, .hypothesis {
+    margin-top: 4px;
+    font-size: 8.2pt;
+  }
+  .evidence b, .rule b, .hypothesis b {
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    font-size: 7pt;
+    color: #555;
+    display: block;
+    margin-bottom: 1px;
+  }
+  .ipa { font-family: 'Doulos SIL', 'Charis SIL', 'Lucida Sans Unicode', 'DejaVu Sans', serif; color: #222; }
+  .ex-word { font-style: italic; }
+  .cite { color: #666; font-size: 7.8pt; }
+  .flag { color: #b45309; font-weight: bold; }
+
+  /* SUMMARY TABLE */
+  section.summary {
+    background: white;
+    border: 1.5px solid #ddd;
+    border-left: 6px solid #1a1a1a;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: 20px;
+    page-break-before: always;
+  }
+  section.summary h2 {
+    font-size: 13pt;
+    margin-bottom: 8px;
+    color: #1a1a1a;
+  }
+  section.summary table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8pt;
+    margin-top: 4px;
+  }
+  section.summary thead th {
+    background: #1a1a1a;
+    color: white;
+    padding: 6px 5px;
+    text-align: left;
+    font-weight: bold;
+    font-size: 8pt;
+    position: sticky;
+    top: 0;
+  }
+  section.summary tbody tr:nth-child(even) { background: #fafafa; }
+  section.summary tbody td {
+    padding: 5px 5px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+  }
+  section.summary tbody td:first-child {
+    font-weight: bold;
+    color: #1a1a1a;
+    white-space: nowrap;
+  }
+
+  .footer {
+    text-align: center;
+    font-size: 7.5pt;
+    color: #888;
+    margin-top: 14px;
+    padding-top: 8px;
+    border-top: 1px solid #ddd;
+  }
+</style>
+</head>
+<body>
+
+<h1>GMU Stella Passage — Variety Comparison</h1>
+
+<div class="intro">
+  <p>The eleven varieties below each realise the same elicitation passage (<i>"Please call Stella. Ask her to bring these things with her from the store . . ."</i>) spoken by one native or representative speaker per variety, drawn from the <a href="https://accent.gmu.edu/">GMU Speech Accent Archive</a>. For each variety the five most diagnostic phonological features are highlighted inline in the verified IPA transcription and unpacked in the cards that follow, modelled on the midterm PEA structure (point–evidence–analysis) with explicit predictable/unpredictable judgements and hypotheses where the speaker departs from the course description.</p>
+  <p class="legend">
+    <b>Colour legend:</b>
+    <span class="legend-swatch legend-consonant">consonant</span>
+    <span class="legend-swatch legend-vowel">vowel</span>
+    <span class="legend-swatch legend-prosody">prosody / suprasegmental</span>
+    <span class="legend-swatch legend-syntax">structural / other</span>.
+    IPA transcriptions preserve every diacritic from the verified <code>GMU-Transcriptions-FINAL.md</code> (two-pass arbiter methodology, 2026-04-22). Page references marked <span class="flag">(?)</span> are inherited from the feature-analysis files and must be verified against the source PDF before use in graded work. Three samples (NigE, IndE, SgE) use L2 proxy speakers — see the caveat box within each section.
+  </p>
+</div>
+
+<!-- ================================================================= -->
+<!-- 1. RP — English13                                                  -->
+<!-- ================================================================= -->
+<section class="variety">
+  <h2>1. RP — English13 <span class="speaker-meta">(London-area, female)</span></h2>
+
+  <div class="stella-transcription">
+    [pʰiiz kʰɒ<span class="feat-consonant" data-n="5">lˠ</span> stelə <span class="feat-vowel" data-n="2">ask</span> ɚ tʰu bɹĩŋ <span class="feat-consonant" data-n="4">ð</span>iz <span class="feat-consonant" data-n="4">θ</span>ĩŋz wɪ<span class="feat-consonant" data-n="4">θ</span> <span class="feat-consonant" data-n="1">hɹ</span> fɹʌ̃m ðə <span class="feat-consonant" data-n="1">stoə</span> sɪks spũːnz ʌv fɹɛʃ <span class="feat-vowel" data-n="3">snou</span> pʰiːz faɹy θɪk slæbz ʌv bluː tʃiːz æn <span class="feat-vowel" data-n="3">meɪbi</span> ə snæk <span class="feat-consonant" data-n="1">fə</span> <span class="feat-consonant" data-n="1">hə</span> <span class="feat-consonant" data-n="1">bɹʌðə</span> bɒb wi ɒl<span class="feat-consonant" data-n="5">so</span> nid ə <span class="feat-consonant" data-n="5">smɒl</span> pʰ<span class="feat-consonant" data-n="5">l</span>æstɪk <span class="feat-vowel" data-n="3">sneɪk</span> æn̩ ə bɪg tʰɔɪ fɹɒg <span class="feat-consonant" data-n="1">fə</span> ðə kɪdz ʃi kʰæ̃n skup ðiz θĩŋz ɪntʰu θɹi ɹɛd bægz æn wi wɪ<span class="feat-consonant" data-n="5">l</span> go mit <span class="feat-consonant" data-n="1">hə</span> ɑ̃n wẽnzdeɪ æt˺ ðə t<span class="feat-vowel" data-n="3">ɹẽɪ</span>n stɛɪʃən]
+  </div>
+
+  <div class="cards-grid">
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">1</span> Non-rhoticity <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">store</span> <span class="ipa">[stoə]</span>, <span class="ex-word">her</span> <span class="ipa">[hə]</span>, <span class="ex-word">brother</span> <span class="ipa">[bɹʌðə]</span>, <span class="ex-word">for</span> <span class="ipa">[fə]</span>. Post-vocalic /r/ is systematically absent; NORTH surfaces as centring diphthong <span class="ipa">[oə]</span>.</div>
+      <div class="rule"><b>Rule</b> "Varieties of English in both Scotland and Ireland are rhotic . . . although the quality of the /r/ is different in the two cases" (Bauer 28). The corresponding rule for RP is that "post-vocalic /r/ is lost" <span class="cite">(Ihsane, "Lecture 3" § 1.2, 2026).</span></div>
+    </div>
+
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">2</span> TRAP–BATH split (London-fronted BATH) <span class="tag tag-partial">Partly predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">ask</span> <span class="ipa">[ask]</span> (short front [a]) vs. TRAP <span class="ex-word">plastic</span> <span class="ipa">[pʰlæstɪk]</span>. BATH remains distinct from TRAP but is not the canonical long back <span class="ipa">[ɑː]</span>.</div>
+      <div class="rule"><b>Rule</b> "Southern / RP: <i>trap</i> [træp] ≠ <i>bath</i> [bɑːθ] (long /ɑː/)" <span class="cite">(Ihsane, "Lecture 3" § 1.3, 2026).</span></div>
+      <div class="hypothesis"><b>Hypothesis</b> The fronted/shortened [a] reflects contemporary London-RP shortening of BATH — sociolectally consistent with the speaker bio rather than a textbook-conservative RP.</div>
+    </div>
+
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">3</span> Diphthongal GOAT and FACE <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">snow</span> <span class="ipa">[snou]</span>, <span class="ex-word">maybe</span> <span class="ipa">[meɪbi]</span>, <span class="ex-word">snake</span> <span class="ipa">[sneɪk]</span>, <span class="ex-word">train</span> <span class="ipa">[tɹẽɪn]</span>.</div>
+      <div class="rule"><b>Rule</b> "FACE / GOAT — RP [eɪ], [əʊ] diphthongs; ScotE [e], [o] monophthongs" <span class="cite">(Ihsane, "Lecture 4" § 3.11, 2026).</span></div>
+    </div>
+
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">4</span> Dental fricatives retained <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">these</span> <span class="ipa">[ðiz]</span>, <span class="ex-word">things</span> <span class="ipa">[θĩŋz]</span>, <span class="ex-word">with</span> <span class="ipa">[wɪθ]</span>, <span class="ex-word">three</span> <span class="ipa">[θɹi]</span> — no TH-stopping, no TH-fronting.</div>
+      <div class="rule"><b>Rule</b> TH is retained as dental fricative in conservative RP, in contrast to "Southern Hiberno-English [which] frequently replaces the dental fricatives . . . with dental plosives" (Bauer 28).</div>
+    </div>
+
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">5</span> Clear/dark [l] allophony <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> Clear in onset — <span class="ex-word">Stella</span> <span class="ipa">[stelə]</span>, <span class="ex-word">plastic</span> <span class="ipa">[pʰlæstɪk]</span>, <span class="ex-word">also</span> <span class="ipa">[ɒlso]</span>; dark in coda — <span class="ex-word">call</span> <span class="ipa">[kʰɒlˠ]</span>. <span class="ex-word">Will</span> <span class="ipa">[wɪl]</span> is transcribed without the velarisation diacritic but is phonologically expected to be dark by the same rule.</div>
+      <div class="rule"><b>Rule</b> "In RP, the distribution is allophonic: clear [l] occurs in the onset (before the vowel) and dark [lˠ] in the coda (after the vowel)" <span class="cite">(Haeberli 105, 115).</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<!-- 2. ScotE — English24                                               -->
+<!-- ================================================================= -->
+<section class="variety">
+  <h2>2. ScotE — English24 <span class="speaker-meta">(Edinburgh / Glasgow-area, female)</span></h2>
+
+  <div class="stella-transcription">
+    [pʰliz <span class="feat-consonant" data-n="1">kɔlˠ</span> ste<span class="feat-consonant" data-n="1">l</span>ə ask <span class="feat-consonant" data-n="2">ɚ</span> tə <span class="feat-consonant" data-n="2">bɾ</span>ɪŋ <span class="feat-vowel" data-n="3">ðiːz</span> θĩŋz wɪθ <span class="feat-consonant" data-n="2">hɚ</span> <span class="feat-consonant" data-n="2">fɹ</span>ʌ̃m ðə stou sɪks spɒ̃ŋz ʌv <span class="feat-vowel" data-n="3">fɹɛʃ</span> <span class="feat-vowel" data-n="5">sno:</span> pʰiːz faɪv θɪkʲ slæːbz ʌ bluː <span class="feat-vowel" data-n="3">tʃiːz</span> ɛ̃n <span class="feat-vowel" data-n="5">meɪbi</span> ə snækʰ <span class="feat-consonant" data-n="2">fɚ</span> ə <span class="feat-consonant" data-n="2">bɪʌðɚ</span> bɔbʰ wi ɒl<span class="feat-consonant" data-n="1">s</span>ə nid ʌ <span class="feat-consonant" data-n="1">smɒːlˠ</span> pʰ<span class="feat-consonant" data-n="1">lˠ</span>æːstɪk sneɪk ɛn ə bɪkʰ tʰɒɪ <span class="feat-consonant" data-n="2">fɾ</span>ɔɡ <span class="feat-consonant" data-n="2">fɚ</span> ðə kɪts ʃi gɛ̃n sk<span class="feat-vowel" data-n="3">ʊ</span>p ðis <span class="feat-consonant" data-n="4">sĩŋz</span> ɪntə <span class="feat-consonant" data-n="2">θɾiː</span> ɹɛd bæɡɡz ə̃n wɪ<span class="feat-consonant" data-n="1">lˠ</span> <span class="feat-vowel" data-n="5">gɔ</span> mit <span class="feat-consonant" data-n="2">hɚ</span> ɑ̃n weʃnzdei ɛtʰ ðə <span class="feat-consonant" data-n="2">tɾ</span>eɪn steɪʃə̃n]
+  </div>
+
+  <div class="cards-grid">
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">1</span> Dark /l/ in all positions <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> Coda — <span class="ex-word">call</span> <span class="ipa">[kɔlˠ]</span>, <span class="ex-word">small</span> <span class="ipa">[smɒːlˠ]</span>, <span class="ex-word">will</span> <span class="ipa">[wɪlˠ]</span>. Onset — <span class="ex-word">plastic</span> <span class="ipa">[pʰlˠæːstɪk]</span>. Plain [l] occasionally surfaces (<span class="ex-word">Stella</span>, <span class="ex-word">please</span>), consistent with Stuart-Smith's "tendency" caveat.</div>
+      <div class="rule"><b>Rule</b> "/l/ is dark in all positions in Scottish English and clear in all positions in Irish varieties" (Bauer 28); "the secondary articulation of /l/ tends to be dark in all positions in the word" (Stuart-Smith 63).</div>
+    </div>
+
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">2</span> Rhoticity with tapped /r/ <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">bring</span> <span class="ipa">[bɾɪŋ]</span>, <span class="ex-word">three</span> <span class="ipa">[θɾiː]</span>, <span class="ex-word">frog</span> <span class="ipa">[fɾɔɡ]</span>, <span class="ex-word">train</span> <span class="ipa">[tɾeɪn]</span>; post-vocalic <span class="ex-word">her</span> <span class="ipa">[hɚ]</span>, <span class="ex-word">brother</span> <span class="ipa">[bɪʌðɚ]</span>.</div>
+      <div class="rule"><b>Rule</b> "Scots is usually said to favour taps, though Johnston (1997: 510) notes that [ɹ], more typical of Scottish Standard English, is encroaching" (Stuart-Smith 63).</div>
+    </div>
+
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">3</span> SVLR — length conditioned by environment <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> Long in SVLR contexts — <span class="ex-word">three</span> <span class="ipa">[θɾiː]</span> (word-boundary), <span class="ex-word">cheese</span> <span class="ipa">[tʃiːz]</span>, <span class="ex-word">these</span> <span class="ipa">[ðiːz]</span> (before voiced fricative). Short elsewhere — <span class="ex-word">scoop</span> <span class="ipa">[skʊp]</span>.</div>
+      <div class="rule"><b>Rule</b> "Scottish Vowel Length Rule . . . vowels are phonetically long in certain environments: before voiced fricatives, before /r/, and before a boundary, including a morpheme boundary" (Stuart-Smith 56–57); "the monophthongs /i, u/ and the diphthong /ai/ alone are subject to the SVLR" (Stuart-Smith 57).</div>
+    </div>
+
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">4</span> TH-substitution ([s] for /θ/) <span class="tag tag-partial">Partly unpredictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">things</span> <span class="ipa">[θĩŋz]</span> (1st) retains [θ] but <span class="ipa">[sĩŋz]</span> (2nd) shows substitution; <span class="ex-word">three</span> <span class="ipa">[θɾiː]</span> keeps [θ] — fronting is variable.</div>
+      <div class="rule"><b>Rule</b> "the /θ/ in 'thick' is pronounced as a /f/, and the /ð/ as in 'rather' is pronounced as a /v/" <span class="cite">(Ihsane, "Lecture 4" § 3.10, 2026).</span></div>
+      <div class="hypothesis"><b>Hypothesis</b> [s] before [ĩŋ] may reflect assimilatory coarticulation — the following nasal-velar sequence disfavours labiodental [f], so the tongue-tip shifts to [s]. Alternatively, a speaker-specific Urban-Scots /θ/→[s] variant.</div>
+    </div>
+
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">5</span> Monophthongal GOAT (diphthongal FACE) <span class="tag tag-partial">Partly predictable</span></div>
+      <div class="evidence"><b>Evidence</b> GOAT — <span class="ex-word">snow</span> <span class="ipa">[sno:]</span>, <span class="ex-word">go</span> <span class="ipa">[gɔ]</span>. FACE — <span class="ex-word">maybe</span> <span class="ipa">[meɪbi]</span>, <span class="ex-word">snake</span> <span class="ipa">[sneɪk]</span> (diphthongal).</div>
+      <div class="rule"><b>Rule</b> "Monophthongal FACE [e] and GOAT [o] — where RP has diphthongs [eɪ], [əʊ] . . . ScotE holds a single steady vowel" <span class="cite">(Ihsane, "Lecture 4" § 0, 2026).</span></div>
+      <div class="hypothesis"><b>Hypothesis</b> The split (GOAT monophthong, FACE diphthong) places this speaker toward the ScStE-anglicised end of Stuart-Smith's (53–54) continuum — realistic for an Edinburgh-area read-speech elicitation.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<!-- 3. NIrE — English14                                                -->
+<!-- ================================================================= -->
+<section class="variety">
+  <h2>3. Northern Irish English — English14 <span class="speaker-meta">(Belfast / Ulster-area)</span></h2>
+
+  <div class="stella-transcription">
+    [pʰliːz <span class="feat-consonant" data-n="3">kʰɑl</span> stɛ<span class="feat-consonant" data-n="3">l</span>ə æsk <span class="feat-consonant" data-n="1">ɚ</span> ɹə <span class="feat-consonant" data-n="1">bɾ</span>ĩŋ <span class="feat-consonant" data-n="2">ð</span>iz <span class="feat-consonant" data-n="2">θ</span>ĩŋz wɪ<span class="feat-consonant" data-n="2">θ</span> <span class="feat-consonant" data-n="1">hɚ</span> <span class="feat-consonant" data-n="1">fɹ</span>ʌm ðə <span class="feat-consonant" data-n="1">stoɻ</span> sɪks spũŋz ə fɹɛːʃ <span class="feat-vowel" data-n="5">snö</span> pʰɹiːz faɾy <span class="feat-consonant" data-n="2">θ</span>ɪk slæbz əv blu tʃiːz ɛn mebi ə snæk fə <span class="feat-consonant" data-n="1">ɚ</span> <span class="feat-consonant" data-n="2">bɹ</span>ʌ<span class="feat-consonant" data-n="2">ð</span>ɚ <span class="feat-consonant" data-n="1">bɑɻbʰ</span> wi alsɒ nid ə smal pʰlæstɪk sneɪk ɛn ə bɪg tʰɔɪ fɹoɪɡ fə ðə kɪdz ʃi <span class="feat-vowel" data-n="4">kɛ̃n</span> skup ðiːz θĩŋz ĩnɹə <span class="feat-consonant" data-n="2">θ</span>ɹi ɹɛd bæɪgz æ̃n wi wɪ<span class="feat-consonant" data-n="3">l</span> <span class="feat-vowel" data-n="5">gö</span> ɹə mit <span class="feat-consonant" data-n="1">hɚ</span> wẽːnzdɛɪ æt ðə tɾẽn stɛʃɪn]
+  </div>
+
+  <div class="cards-grid">
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">1</span> Rhoticity with retroflex quality <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">store</span> <span class="ipa">[stoɻ]</span>, <span class="ex-word">Bob</span> <span class="ipa">[bɑɻbʰ]</span>, <span class="ex-word">her</span> <span class="ipa">[hɚ]</span>, <span class="ex-word">brother</span> <span class="ipa">[bɹʌðɚ]</span>. Retroflex [ɻ] surfaces especially in coda.</div>
+      <div class="rule"><b>Rule</b> "Varieties of English in both Scotland and Ireland are rhotic . . . although the quality of the /r/ is different" (Bauer 28); Hickey identifies retroflex [ɻ] as characteristic of the Ulster/north–south transitional area <span class="cite">(Hickey 74 <span class="flag">(?)</span>, in Kortmann and Schneider).</span></div>
+    </div>
+
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">2</span> Dental fricatives retained (unlike Southern IrE) <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">these</span> <span class="ipa">[ðiz]</span>, <span class="ex-word">things</span> <span class="ipa">[θĩŋz]</span>, <span class="ex-word">with</span> <span class="ipa">[wɪθ]</span>, <span class="ex-word">three</span> <span class="ipa">[θɹi]</span>, <span class="ex-word">brother</span> <span class="ipa">[bɹʌðɚ]</span> — fricative throughout; no stopping.</div>
+      <div class="rule"><b>Rule</b> "In the entire area of Ulster the THIN and THIS lexical sets show fricatives" <span class="cite">(Hickey 78–79 <span class="flag">(?)</span>, in Kortmann and Schneider)</span>, contrasting with Southern Hiberno-English stopping (Bauer 28).</div>
+    </div>
+
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">3</span> Clear /l/ throughout (non-Belfast) <span class="tag tag-partial">Partly unpredictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">call</span> <span class="ipa">[kʰɑl]</span>, <span class="ex-word">Stella</span> <span class="ipa">[stɛlə]</span>, <span class="ex-word">small</span> <span class="ipa">[smal]</span>, <span class="ex-word">will</span> <span class="ipa">[wɪl]</span> — no velarisation diacritic in any position.</div>
+      <div class="rule"><b>Rule</b> "/l/ is dark in all positions in Scottish English and clear in all positions in Irish varieties" (Bauer 28). Ihsane qualifies: "Belfast (Ulster): [ɫ] in all positions (dark). Probably a contact feature via the Ulster Plantation" <span class="cite">(Ihsane, "Lecture 4" § 3.9, 2026).</span></div>
+      <div class="hypothesis"><b>Hypothesis</b> The speaker aligns with the Irish (clear-/l/) pole rather than the Belfast (dark-/l/) pole, suggesting origin outside urban Belfast (e.g. western Ulster or Donegal) or register-driven suppression of a stigmatised dark realisation in read speech.</div>
+    </div>
+
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">4</span> TRAP-raising to [ɛ] pre-nasally <span class="tag tag-partial">Partly predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">can</span> <span class="ipa">[kɛ̃n]</span> — [ɛ] where RP has [æ]. Compare <span class="ex-word">plastic</span> <span class="ipa">[pʰlæstɪk]</span>, <span class="ex-word">snack</span> <span class="ipa">[snæk]</span> — [æ] elsewhere; raising is pre-nasal.</div>
+      <div class="rule"><b>Rule</b> Hickey notes Ulster raising/centring of short vowels, with TRAP raising to [ɛ] in certain environments <span class="cite">(Hickey 78 <span class="flag">(?)</span>).</span></div>
+      <div class="hypothesis"><b>Hypothesis</b> The pre-nasal raising reflects the cross-dialectally common /æ/-raising-before-nasal pattern interacting with Ulster's general raising tendency; an Ulster-Scots contact influence via Urban-Scots KIT/DRESS raising (Stuart-Smith 57) is also plausible.</div>
+    </div>
+
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">5</span> Central-onset GOAT [ö] <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">snow</span> <span class="ipa">[snö]</span>, <span class="ex-word">go</span> <span class="ipa">[gö]</span>; FACE more variable (<span class="ex-word">maybe</span> <span class="ipa">[mebi]</span>, <span class="ex-word">snake</span> <span class="ipa">[sneɪk]</span>).</div>
+      <div class="rule"><b>Rule</b> "When mid front vowels occur in stressed position, they tend to develop off-glides" <span class="cite">(Hickey 80 <span class="flag">(?)</span>);</span> central-onset GOAT is a recognised Ulster pattern <span class="cite">(Hickey 78 <span class="flag">(?)</span>).</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<!-- 4. IrE — English72                                                 -->
+<!-- ================================================================= -->
+<section class="variety">
+  <h2>4. Irish English — English72 <span class="speaker-meta">(Republic of Ireland, Dublin-area likely)</span></h2>
+
+  <div class="stella-transcription">
+    [pʰliːz <span class="feat-vowel" data-n="5">kʰəl</span> ste<span class="feat-consonant" data-n="2">l</span>ə ask <span class="feat-consonant" data-n="3">ɚ</span> ɾə <span class="feat-consonant" data-n="3">bɾ</span>ũŋ ðis θĩŋz wɪθ <span class="feat-consonant" data-n="3">ɚ</span> <span class="feat-consonant" data-n="3">fɹ</span>ʌm ðə <span class="feat-consonant" data-n="3">stoɻ</span> sɪks spũnz əy fɹɛʃ sno pʰiːz faɪv <span class="feat-consonant" data-n="1">t̪ʰ</span>ɪk s<span class="feat-consonant" data-n="2">l</span>abz ə b<span class="feat-consonant" data-n="2">l</span>u tʃʰiz ʔɛn <span class="feat-vowel" data-n="5">meɪbi</span> ə snæk fə ə <span class="feat-consonant" data-n="2">bɹ</span>ʌðɚ bab wi ʌ<span class="feat-consonant" data-n="2">l</span>so <span class="feat-consonant" data-n="3">niɻ</span> ə <span class="feat-consonant" data-n="2">smɑːl</span> pʰ<span class="feat-consonant" data-n="2">l</span>æ<span class="feat-consonant" data-n="4">s</span>ɪk <span class="feat-vowel" data-n="5">sneɪk</span> ɛn ə bɪg tʰɔɪ fɾɒɡ fə ðə kʰɪdz ʃi kən skup ðɪz θĩŋz ɪntu θɹi ɹɛd bæɡs ən wi <span class="feat-consonant" data-n="2">wɪl</span> go <span class="feat-consonant" data-n="4">mɪɾ</span> <span class="feat-consonant" data-n="3">ɚ</span> <span class="feat-vowel" data-n="5">wɛ̃nzeɪ</span> æt˺ ðə<span class="feat-consonant" data-n="4">ʔ</span> tʰ<span class="feat-vowel" data-n="5">ɹeɪ</span>n <span class="feat-vowel" data-n="5">steɪ</span>ʃə̃n]
+  </div>
+
+  <div class="cards-grid">
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">1</span> Dental stops [t̪, d̪] for /θ, ð/ (TH-stopping) <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">thick</span> <span class="ipa">[t̪ʰɪk]</span> — dental diacritic visible. Variable: <span class="ex-word">these</span> <span class="ipa">[ðis]</span>, <span class="ex-word">things</span> <span class="ipa">[θĩŋz]</span>, <span class="ex-word">three</span> <span class="ipa">[θɹi]</span> preserve the fricative.</div>
+      <div class="rule"><b>Rule</b> "Southern Hiberno-English frequently replaces the dental fricatives in words like <i>thin</i> and <i>that</i> with dental plosives" (Bauer 28); "/θ/ and /ð/ realised as dental stops [t̪, d̪] in all positions in Southern IrE" <span class="cite">(Ihsane, "Lecture 4" § 3.11, 2026).</span></div>
+    </div>
+
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">2</span> Clear /l/ in all positions <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> Onset — <span class="ex-word">please</span> <span class="ipa">[pʰliːz]</span>, <span class="ex-word">Stella</span> <span class="ipa">[stelə]</span>, <span class="ex-word">blue</span> <span class="ipa">[blu]</span>. Coda — <span class="ex-word">call</span> <span class="ipa">[kʰəl]</span>, <span class="ex-word">small</span> <span class="ipa">[smɑːl]</span>, <span class="ex-word">will</span> <span class="ipa">[wɪl]</span>. No velarisation diacritics.</div>
+      <div class="rule"><b>Rule</b> "/l/ is dark in all positions in Scottish English and clear in all positions in Irish varieties" (Bauer 28).</div>
+    </div>
+
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">3</span> Rhoticity with retroflex tendency <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">store</span> <span class="ipa">[stoɻ]</span>, <span class="ex-word">need</span> <span class="ipa">[niɻ]</span> (retroflex intervocalically), <span class="ex-word">her</span> <span class="ipa">[ɚ]</span>, <span class="ex-word">brother</span> <span class="ipa">[bɹʌðɚ]</span>; weak-form <span class="ex-word">for</span> <span class="ipa">[fə]</span>.</div>
+      <div class="rule"><b>Rule</b> "Varieties of English in both Scotland and Ireland are rhotic . . . although the quality of the /r/ is different" (Bauer 28); Southern IrE /r/ described as "retroflex [ɻ] (south)" <span class="cite">(Ihsane, "Lecture 4" § 3.9, 2026).</span></div>
+    </div>
+
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">4</span> /t/-lenition / deletion <span class="tag tag-partial">Partly unpredictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">plastic</span> <span class="ipa">[pʰlæsɪk]</span> — medial /t/ deleted; <span class="ex-word">meet</span> <span class="ipa">[mɪɾ]</span> — intervocalic tap; <span class="ex-word">Wednesday</span> <span class="ipa">[wɛ̃nzeɪ]</span> — medial /d/ deleted; <span class="ex-word">the</span> <span class="ipa">[ðəʔ]</span> — glottal.</div>
+      <div class="rule"><b>Rule</b> Southern IrE realises /t, d/ as "apical slit fricatives" with frication, "not generally to be found in the north" <span class="cite">(Hickey 79 <span class="flag">(?)</span>);</span> "/t/ and /d/ realised as apical slit fricatives . . . Southern IrE only; not in Ulster" <span class="cite">(Ihsane, "Lecture 4" § 3.12, 2026).</span></div>
+      <div class="hypothesis"><b>Hypothesis</b> [pʰlæsɪk] may represent the endpoint of the IrE lenition cline (stop → slit fricative → approximant → deletion); in casual reading the fricative release weakens to zero in high-frequency items. Possibly also a Dublin-area innovation, since Dublin is a noted locus of phonological change.</div>
+    </div>
+
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">5</span> Diphthongal FACE [eɪ] <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">maybe</span> <span class="ipa">[meɪbi]</span>, <span class="ex-word">snake</span> <span class="ipa">[sneɪk]</span>, <span class="ex-word">train</span> <span class="ipa">[tʰɹeɪn]</span>, <span class="ex-word">station</span> <span class="ipa">[steɪʃə̃n]</span>, <span class="ex-word">Wednesday</span> <span class="ipa">[wɛ̃nzeɪ]</span>.</div>
+      <div class="rule"><b>Rule</b> Course baseline: "ScotE [e]" monophthongal FACE vs. RP's diphthongal [eɪ] <span class="cite">(Ihsane, "Lecture 4" § 3.11, 2026);</span> IrE patterns with RP.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<!-- 5. GA — English1                                                   -->
+<!-- ================================================================= -->
+<section class="variety">
+  <h2>5. General American — English1 <span class="speaker-meta">(Midwestern / GA reference)</span></h2>
+
+  <div class="stella-transcription">
+    [pʰliiːz kʰ<span class="feat-vowel" data-n="3">ɑ</span>lˠ stelə æsk <span class="feat-consonant" data-n="1">ɚ</span> <span class="feat-consonant" data-n="2">ɾ</span>ə bɾĩŋ ðiːz θĩŋz wɪθ <span class="feat-consonant" data-n="1">ɚ</span> fɹʌm ðə <span class="feat-consonant" data-n="1">stɔɹ</span> sɪks spũːnz ʌv fɹɛʃ <span class="feat-vowel" data-n="5">snou</span> pʰiːz faɪ:v θɪk slæːbz əv bluː tʃiːz æn <span class="feat-vowel" data-n="5">meɪbi</span> ə snækʰ <span class="feat-consonant" data-n="1">fɚ</span> <span class="feat-consonant" data-n="1">hɚ</span> <span class="feat-consonant" data-n="1">bɹʌðɚ</span> <span class="feat-vowel" data-n="3">bɑːb</span> wiː <span class="feat-vowel" data-n="3">ɑː</span><span class="feat-consonant" data-n="4">lˠ</span>so <span class="feat-consonant" data-n="2">nɪɾɚ</span> ə <span class="feat-consonant" data-n="4">smalˠ</span> pʰ<span class="feat-consonant" data-n="4">l</span>æstɪkʰ <span class="feat-vowel" data-n="5">sneɪk</span> æ̃n ə bɪɡ tʰɔɪ <span class="feat-consonant" data-n="1">fɹɑːɡ</span> <span class="feat-consonant" data-n="1">fɚ</span> ðə kʰɪdz ʃiː kɑn skʷuːpʰ ðiːz θĩŋz ɪntə θɹi ɹɛd bæːɡz æːn wiː wɪ<span class="feat-consonant" data-n="4">lˠ</span> <span class="feat-vowel" data-n="5">goʊ</span> mitʰ hə wɛnzdei æt˺ ðə tʰ<span class="feat-vowel" data-n="5">ɹeɪ</span>n <span class="feat-vowel" data-n="5">steɪ</span>ʃn̩]
+  </div>
+
+  <div class="cards-grid">
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">1</span> Rhoticity <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">her</span> <span class="ipa">[ɚ]</span>, <span class="ex-word">store</span> <span class="ipa">[stɔɹ]</span>, <span class="ex-word">brother</span> <span class="ipa">[bɹʌðɚ]</span>, <span class="ex-word">for</span> <span class="ipa">[fɚ]</span>, <span class="ex-word">frog</span> <span class="ipa">[fɹɑːɡ]</span>.</div>
+      <div class="rule"><b>Rule</b> "GA, Canadian, Scottish and Irish varieties of English are rhotic . . . RP, Australian, New Zealand and South African Englishes are non-rhotic" (Bauer 78). Puskás's matrix lists SAE as "mainly rhotic" <span class="cite">(Puskás, <i>Chapter 4</i> 4).</span></div>
+    </div>
+
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">2</span> Intervocalic /t/-flapping <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">to</span> <span class="ipa">[ɾə]</span> (after <i>ask her</i>); <span class="ex-word">need a</span> <span class="ipa">[nɪɾɚ]</span>.</div>
+      <div class="rule"><b>Rule</b> "In some varieties a tap is heard in such environments instead, giving [bʌɾə], and this may be considered standard, for example in Canada, the USA, Australia and New Zealand" (Bauer 109); SAE <i>t</i> = "intervocalic t as flap: ɾ" <span class="cite">(Puskás, <i>Chapter 4</i> 4).</span></div>
+    </div>
+
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">3</span> LOT unrounded to [ɑ(ː)] <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">Bob</span> <span class="ipa">[bɑːb]</span>, <span class="ex-word">frog</span> <span class="ipa">[fɹɑːɡ]</span>, <span class="ex-word">also</span> <span class="ipa">[ɑːlˠso]</span>. Compare RP <span class="ipa">[bɒb, fɹɒg, ɒlso]</span>.</div>
+      <div class="rule"><b>Rule</b> "Some varieties of North American English have the same vowel in the THOUGHT lexical set as in the LOT lexical set" (Bauer 80); Puskás gives SAE LOT as "α ~ σ" vs. RP [ɒ] <span class="cite">(Puskás, <i>Chapter 4</i> 3).</span></div>
+    </div>
+
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">4</span> Velarised /l/ generalised <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">call</span> <span class="ipa">[kʰɑlˠ]</span>, <span class="ex-word">small</span> <span class="ipa">[smalˠ]</span>, <span class="ex-word">also</span> <span class="ipa">[ɑːlˠso]</span>, <span class="ex-word">will</span> <span class="ipa">[wɪlˠ]</span>. Dark [lˠ] extends to pre-vocalic-at-word-boundary.</div>
+      <div class="rule"><b>Rule</b> "RP has a more palatalised version of /l/ before a vowel, while most other standard international varieties have a rather darker version of /l/ in this position" (Bauer 77).</div>
+    </div>
+
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">5</span> GOAT as back-rounded [oʊ] <span class="tag tag-partial">Partly predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">snow</span> <span class="ipa">[snou]</span>, <span class="ex-word">go</span> <span class="ipa">[goʊ]</span>, <span class="ex-word">also</span> <span class="ipa">[ɑːlˠso]</span>. The RP sample in this pair also shows [snou], so the diagnostic rests on the broader pattern.</div>
+      <div class="rule"><b>Rule</b> Puskás, <i>Chapter 4</i>: GOAT = "σo" (RP /əʊ/) vs. "o ~ σσ" in SAE <span class="cite">(Puskás 3);</span> W5a describes SAE GOAT as [oʊ] with back-rounded onset <span class="cite">(Ihsane 2026, W5a § 1.3).</span></div>
+      <div class="hypothesis"><b>Hypothesis</b> The GA [goʊ] remains diagnostic only when paired with rhoticity, flapping, LOT-unrounding; the RP speaker's convergent [snou] may reflect younger-RP narrowing of GOAT toward a back-rounded variant.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<!-- 6. GAusE — English3                                                -->
+<!-- ================================================================= -->
+<section class="variety">
+  <h2>6. General Australian English — English3</h2>
+
+  <div class="stella-transcription">
+    [pʰliːz kʰɒlˠ stelə ask <span class="feat-consonant" data-n="1">hɚ</span> tʰu bɹĩŋ ðis ʃĩŋz wɪθ <span class="feat-consonant" data-n="1">hə</span> fɹʌm ðə <span class="feat-consonant" data-n="1">stoə</span> sɪks sp<span class="feat-vowel" data-n="3">ũːŋ</span>z ə fɹ<span class="feat-vowel" data-n="4">ɛ</span>ʃ <span class="feat-vowel" data-n="2">snəʊ</span> pʰiːz faɹy θɪk slæbz əv b<span class="feat-vowel" data-n="3">luː</span> tʃ<span class="feat-vowel" data-n="3">iːz</span> æn <span class="feat-vowel" data-n="5">meɪ</span>bi ə snæk <span class="feat-consonant" data-n="1">fə</span> <span class="feat-consonant" data-n="1">hə</span> <span class="feat-consonant" data-n="1">bɹʌðə</span> bɒb wi ɒlso nid ə smɒl pʰlæstɪk <span class="feat-vowel" data-n="5">sneɪk</span> æn ə bɪɡ tʰɔɪ fɹɒɡ <span class="feat-consonant" data-n="1">fə</span> ðə kʰɪdz ʃi kʰẽn sk<span class="feat-vowel" data-n="3">uː</span>p ðiːz ʃĩŋz ɪntʰ<span class="feat-vowel" data-n="3">u</span> θɾi ɾ<span class="feat-vowel" data-n="4">ɛ</span>d bæɡz æn wi wɪl <span class="feat-vowel" data-n="2">gəʊ</span> mit <span class="feat-consonant" data-n="1">hə</span> wẽnzd<span class="feat-vowel" data-n="5">eɪ</span> <span class="feat-prosody" data-n="5">æʔ</span> ðə tɹ<span class="feat-vowel" data-n="5">eɪ</span>n <span class="feat-vowel" data-n="4">ste</span>ʃɪn]
+  </div>
+
+  <div class="cards-grid">
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">1</span> Non-rhoticity with linking /r/ <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">her</span> <span class="ipa">[hə]</span> (pre-consonantal) vs. <span class="ex-word">ask her to</span> <span class="ipa">[hɚ]</span> (pre-vocalic linking r); <span class="ex-word">brother</span> <span class="ipa">[bɹʌðə]</span>, <span class="ex-word">for</span> <span class="ipa">[fə]</span>, <span class="ex-word">store</span> <span class="ipa">[stoə]</span>.</div>
+      <div class="rule"><b>Rule</b> "RP, Australian, New Zealand and South African Englishes are non-rhotic" (Bauer 78); GAusE <i>r</i> = "Non-rhotic" <span class="cite">(Puskás, <i>Chapter 4</i> 4).</span></div>
+    </div>
+
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">2</span> Diphthongised GOAT with central onset <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">go</span> <span class="ipa">[gəʊ]</span>, <span class="ex-word">snow</span> <span class="ipa">[snəʊ]</span>. Compare RP [snou, go] and GA [goʊ].</div>
+      <div class="rule"><b>Rule</b> Puskás lists GAusE GOAT as "σσ" (i.e. [əʊ]) vs. RP's "σo" <span class="cite">(Puskás, <i>Chapter 4</i> 3);</span> W5b: "GOAT: /əʊ/ → /əʉ/ (central-fronted offset)" <span class="cite">(Ihsane 2026, W5b § 1.3).</span></div>
+    </div>
+
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">3</span> GOOSE relatively unfronted <span class="tag tag-partial">Partly unpredictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">scoop</span> <span class="ipa">[skuːp]</span>, <span class="ex-word">blue</span> <span class="ipa">[bluː]</span>, <span class="ex-word">spoons</span> <span class="ipa">[spũːŋz]</span>, <span class="ex-word">into</span> <span class="ipa">[ɪntʰu]</span> — [u(ː)] close-back, not fronted [ʉː].</div>
+      <div class="rule"><b>Rule</b> "Fronted GOOSE [ʉː]" is listed as a GAusE diagnostic <span class="cite">(Ihsane 2026, W5b § 0);</span> GAusE GOOSE = "uσ/σu" <span class="cite">(Puskás, <i>Chapter 4</i> 3).</span></div>
+      <div class="hypothesis"><b>Hypothesis</b> The speaker may sit at the Cultivated end of the Broad–General–Cultivated continuum (roughly 10% of the population per Puskás, <i>Chapter 4</i> 2), where GOOSE fronting has not completed; alternatively, the GMU rendering may under-specify the backness diacritic.</div>
+    </div>
+
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">4</span> DRESS raising toward [e] (uneven) <span class="tag tag-partial">Partly unpredictable</span></div>
+      <div class="evidence"><b>Evidence</b> Raised in <span class="ex-word">Stella</span> <span class="ipa">[stelə]</span>, <span class="ex-word">station</span> <span class="ipa">[steʃɪn]</span>; not raised in <span class="ex-word">fresh</span> <span class="ipa">[fɹɛʃ]</span>, <span class="ex-word">red</span> <span class="ipa">[ɾɛd]</span>.</div>
+      <div class="rule"><b>Rule</b> GAusE DRESS listed as "e" vs. RP's "e ~ ε" and SAE's "ε" <span class="cite">(Puskás, <i>Chapter 4</i> 3).</span></div>
+      <div class="hypothesis"><b>Hypothesis</b> DRESS-raising is lexically uneven — CVCV words (<i>Stella</i>, <i>station</i>) accept the raising, whereas closed-syllable CVC words (<i>fresh</i>, <i>red</i>) resist it. Phonotactically, DRESS before a voiced stop or sibilant may resist the push upward. This mirrors the "DRESS reversal" anomaly noted in the midterm corrigé <span class="cite">(Puskás, <i>Midterm Corrigé</i> <span class="flag">(?)</span>).</span></div>
+    </div>
+
+    <div class="card card-prosody">
+      <div class="card-title"><span class="card-num">5</span> Word-final T-glottalling <span class="tag tag-unpredict">Unpredictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">at</span> <span class="ipa">[æʔ]</span>. RP sample has [æt˺] (unreleased stop).</div>
+      <div class="rule"><b>Rule</b> "Extensive use of a glottal stop either intervocalically or word finally . . . is characterised as 'a non-standard accent in most varieties of English'" (Bauer 109); "a certain amount of glottal use is compatible with standard status, as long as it is not intervocalic" (Bauer 109).</div>
+      <div class="hypothesis"><b>Hypothesis</b> Word-final glottalling suggests contact with non-standard urban Australian or Cockney-style T-glottalling — one of four "pronunciation features [shared] with Cockney" in colonial Southern-Hemisphere varieties (Bauer 109).</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<!-- 7. NZE — English41                                                 -->
+<!-- ================================================================= -->
+<section class="variety">
+  <h2>7. New Zealand English — English41</h2>
+
+  <div class="stella-transcription">
+    [a: pliːz kol st<span class="feat-vowel" data-n="4">e</span>lə æsk ə ɾə bɾĩŋ ðis θĩŋz w<span class="feat-vowel" data-n="1">ɪ</span>θ <span class="feat-consonant" data-n="2">hə</span> fɹʌ̃m nə <span class="feat-consonant" data-n="2">stoə</span> sɪks spəʊnz əy fɹ<span class="feat-vowel" data-n="4">ɛ</span>ʃ snɘʊ pɪːz im m<span class="feat-vowel" data-n="3">eɪ</span>bi ə sn<span class="feat-vowel" data-n="4">æ</span>k <span class="feat-consonant" data-n="2">fɚ</span> <span class="feat-consonant" data-n="2">hə</span> <span class="feat-consonant" data-n="2">bɹʌðə</span> bɒbʰ wi ɒlsoʊ niːd ə smɒl plæstɪk <span class="feat-vowel" data-n="3">snaɪk</span> æ̃n ə bɪɡ tɒɪ fɾɒɡ <span class="feat-consonant" data-n="2">fə</span> ðə k<span class="feat-vowel" data-n="1">ɪ</span>dz ʃi <span class="feat-vowel" data-n="4">kɛ̃n</span> skuːpʰ ðiz θĩŋz <span class="feat-vowel" data-n="1">ɪ̃</span>ntü θɹi ɹɛd bæɡz ə̃n wi wɪl gäʊ miːt <span class="feat-consonant" data-n="2">hə</span> w<span class="feat-vowel" data-n="1">ɪ</span>nzd<span class="feat-vowel" data-n="3">eɪ</span> æt ðə t<span class="feat-vowel" data-n="3">ɹeɪ</span>n st<span class="feat-vowel" data-n="3">ɛɪ</span>ʃə̃n]
+  </div>
+
+  <div class="cards-grid">
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">1</span> Centralised KIT vowel <span class="tag tag-partial">Partly predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">Wednesday</span> <span class="ipa">[wɪnzdeɪ]</span>, <span class="ex-word">kids</span> <span class="ipa">[kɪdz]</span>, <span class="ex-word">with</span> <span class="ipa">[wɪθ]</span>, <span class="ex-word">into</span> <span class="ipa">[ɪ̃ntü]</span>.</div>
+      <div class="rule"><b>Rule</b> "The KIT vowel is a well-known shibboleth for distinguishing Australians from New Zealanders. Australians accuse New Zealanders of saying <i>fush and chups</i> for <i>fish and chips</i>" (Bauer 77).</div>
+      <div class="hypothesis"><b>Hypothesis</b> A younger-urban NZE speaker (Auckland, Christchurch) with less extreme centralisation than older Southland/rural varieties; the careful GMU reading-style also inhibits the full shibboleth realisation.</div>
+    </div>
+
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">2</span> Non-rhoticity <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">her</span> <span class="ipa">[hə]</span>, <span class="ex-word">brother</span> <span class="ipa">[bɹʌðə]</span>, <span class="ex-word">for</span> <span class="ipa">[fə]</span>, <span class="ex-word">store</span> <span class="ipa">[stoə]</span>.</div>
+      <div class="rule"><b>Rule</b> "RP, Australian, New Zealand and South African Englishes are non-rhotic, as is the English in parts of the Atlantic States in the United States" (Bauer 78); exception: "the English in a small area in the south of New Zealand" is rhotic (Bauer 78).</div>
+    </div>
+
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">3</span> Chain-shifted FACE with lowered onset <span class="tag tag-partial">Partly unpredictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">snake</span> <span class="ipa">[snaɪk]</span> (lowered onset, overlapping PRICE); <span class="ex-word">maybe</span> <span class="ipa">[meɪbi]</span>, <span class="ex-word">Wednesday</span> <span class="ipa">[wɪnzdeɪ]</span> retain near-RP [eɪ].</div>
+      <div class="rule"><b>Rule</b> Bauer's Figure 6.2 places NZE FACE and DRESS pulled upward, with FACE's onset lowered toward the area vacated by PRICE <span class="cite">(Bauer 77 <span class="flag">(?)</span> — figure referenced, not verbatim quoted).</span></div>
+      <div class="hypothesis"><b>Hypothesis</b> The NZE push-chain is lexically diffused: frequent words (<i>maybe</i>, <i>Wednesday</i>) are more conservative; lower-frequency targets (<i>snake</i>) realise the shift more completely, consistent with the lexical-diffusion model of chain-shift spread.</div>
+    </div>
+
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">4</span> TRAP→DRESS raising (short front vowel shift) <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">can</span> <span class="ipa">[kɛ̃n]</span> — TRAP raised to DRESS area; <span class="ex-word">Stella</span> <span class="ipa">[stelə]</span> — DRESS raised to [e]; <span class="ex-word">fresh</span> <span class="ipa">[fɹɛʃ]</span>, <span class="ex-word">red</span> <span class="ipa">[ɹɛd]</span> preserve [ɛ].</div>
+      <div class="rule"><b>Rule</b> "For many speakers of New Zealand English if there is a following /l/ . . . <i>Alan</i> and <i>Ellen</i> are homophones" — pointer to the TRAP/DRESS push-chain (Bauer 79).</div>
+    </div>
+
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">5</span> NEAR–SQUARE merger <span class="tag tag-unpredict">Not testable</span></div>
+      <div class="evidence"><b>Evidence</b> The passage elicits no NEAR/SQUARE minimal pairs. <span class="ex-word">store</span> <span class="ipa">[stoə]</span> is the only centring diphthong.</div>
+      <div class="rule"><b>Rule</b> "<i>beer and bear</i>: often not distinguished in New Zealand English" (Bauer 80, Figure 6.4).</div>
+      <div class="hypothesis"><b>Hypothesis</b> The feature should be retained as a GA-vs-NZE near-neighbour diagnostic for the exam, using a supplementary elicitation containing <i>beer</i>, <i>bear</i>, <i>hair</i>, <i>here</i> <span class="cite">(Ihsane 2026, Derivative-A § A.3 <span class="flag">(?)</span>).</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<!-- 8. JamE — English4                                                 -->
+<!-- ================================================================= -->
+<section class="variety">
+  <h2>8. Jamaican English — English4</h2>
+
+  <div class="stella-transcription">
+    [pʰiːz kəl stelʌ ask <span class="feat-consonant" data-n="2">hɛɹ</span> tʰu <span class="feat-consonant" data-n="4">biŋ</span> <span class="feat-consonant" data-n="1">ðiːz</span> <span class="feat-consonant" data-n="1">θ</span>ĩŋz wɪ<span class="feat-consonant" data-n="1">θ</span> <span class="feat-consonant" data-n="2">hɛɹ</span> fɹʌm ðə <span class="feat-consonant" data-n="2">stoɹ</span> sɪks spuːnz ʌv fɹɛːʃ <span class="feat-vowel" data-n="3">sno</span> pʰiːz faɪv <span class="feat-consonant" data-n="1">θ</span>ɪkʰ slæbz ʌf blu tʃiːz æ̃nd <span class="feat-vowel" data-n="3">meɪbi</span> ə snæk <span class="feat-consonant" data-n="2">fɔɹ</span> <span class="feat-consonant" data-n="2">hɛɹ</span> <span class="feat-consonant" data-n="5">bɹʌðə</span> bab wi ɒlso nid ə smɒl pʰlæstɪk <span class="feat-vowel" data-n="3">sneɪk</span> æ̃nd ə bɪɡ tʰɔɪ fɾɒɡ <span class="feat-consonant" data-n="2">fɔɹ</span> ðə kɪdz ʃi kʰẽn skuːpʰ <span class="feat-consonant" data-n="1">ð</span>iz <span class="feat-consonant" data-n="1">θ</span>ĩŋz ɪntʰu <span class="feat-consonant" data-n="1">θ</span>ɹiː ɹɛd bæɡz æn wi wɪl <span class="feat-vowel" data-n="3">goʊ</span> nekʰ <span class="feat-vowel" data-n="3">go</span> mit <span class="feat-consonant" data-n="2">hɛɹ</span> wẽnzdeɪ æt˺ ðə tɹẽɪn steɪʃə̃n]
+  </div>
+
+  <div class="cards-grid">
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">1</span> Dental fricatives preserved <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">things</span> <span class="ipa">[θĩŋz]</span>, <span class="ex-word">three</span> <span class="ipa">[θɹiː]</span>, <span class="ex-word">thick</span> <span class="ipa">[θɪkʰ]</span>, <span class="ex-word">these</span> <span class="ipa">[ðiːz]</span>, <span class="ex-word">the</span> <span class="ipa">[ðə]</span> — fricative throughout.</div>
+      <div class="rule"><b>Rule</b> "the JamE linked variant, [θ], . . . occurring in 88% of the occurrences of this variable" (Devonish and Harry 475); JamE, unlike JamC, possesses /θ, ð/ in its consonant inventory (Devonish and Harry 473).</div>
+    </div>
+
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">2</span> Variable rhoticity <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> Rhotic in <span class="ex-word">store</span> <span class="ipa">[stoɹ]</span>, <span class="ex-word">for</span> <span class="ipa">[fɔɹ]</span>, <span class="ex-word">her</span> <span class="ipa">[hɛɹ]</span>, <span class="ex-word">three</span> <span class="ipa">[θɹiː]</span>; non-rhotic in <span class="ex-word">brother</span> <span class="ipa">[bɹʌðə]</span>.</div>
+      <div class="rule"><b>Rule</b> "JamE is generally rhotic" (Devonish and Harry 476).</div>
+      <div class="hypothesis"><b>Hypothesis</b> Unstressed final-syllable /r/ (<span class="ex-word">brother</span>) is the environment where rhoticity is least robust cross-linguistically; one non-rhotic token is consistent with the "general but not categorical" framing.</div>
+    </div>
+
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">3</span> FACE / GOAT mixed monophthong-diphthong <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> Monophthong — <span class="ex-word">snow</span> <span class="ipa">[sno]</span>, <span class="ex-word">go</span> <span class="ipa">[go]</span>. Diphthong — <span class="ex-word">maybe</span> <span class="ipa">[meɪbi]</span>, <span class="ex-word">snake</span> <span class="ipa">[sneɪk]</span>, <span class="ex-word">go</span> <span class="ipa">[goʊ]</span>.</div>
+      <div class="rule"><b>Rule</b> "the idealised JamE variants are [oː] and [eː]" for GOAT and FACE; JamC diphthongs "are not part of the idealised phonological system of JamE" (Devonish and Harry 463).</div>
+      <div class="hypothesis"><b>Hypothesis</b> The mix instantiates Devonish and Harry's "differential convergence" (475): the speaker alternates across tokens rather than selecting the creole pole or the metropolitan pole categorically.</div>
+    </div>
+
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">4</span> Onset /pl-/ and /br-/ cluster simplification <span class="tag tag-unpredict">Unpredictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">please</span> <span class="ipa">[pʰiːz]</span> (no /l/); <span class="ex-word">bring</span> <span class="ipa">[biŋ]</span> (no /r/). Compare RP <span class="ipa">[pʰiiz, bɹĩŋ]</span>.</div>
+      <div class="rule"><b>Rule</b> Devonish and Harry describe cluster simplification primarily at syllable codas, not in word-initial onsets, and list initial /pl, br/ within JamE's inventory (Devonish and Harry 473).</div>
+      <div class="hypothesis"><b>Hypothesis</b> JamC-style onset reduction surfacing in JamE output; alternatively a lexicalised pronunciation of the highly frequent items <i>please</i> and <i>bring</i>. Either way, it does not reflect the "idealised JamE" system.</div>
+    </div>
+
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">5</span> Unstressed non-rhotic <i>brother</i> as convergence marker <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">brother</span> <span class="ipa">[bɹʌðə]</span> — the sole non-rhotic token in an otherwise rhotic idiolect.</div>
+      <div class="rule"><b>Rule</b> JamE rhoticity is "general" but not categorical (Devonish and Harry 476); differential convergence predicts selective token-level alignment with metropolitan non-rhotic varieties (Devonish and Harry 475).</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<!-- 9. NigE — Yoruba2                                                  -->
+<!-- ================================================================= -->
+<section class="variety">
+  <h2>9. Nigerian English — Yoruba2 <span class="speaker-meta">(L1 Yoruba — L2 proxy)</span></h2>
+
+  <div class="caveat"><b>Speaker-substitution caveat.</b> No native-English L1 speaker from Nigeria in the GMU archive displayed the institutionalised NigE phonology described in Gut's chapter with a full transcription. The L1 Yoruba speaker is used as a proxy because L2 Yoruba-accented features overlap substantially with the NigE sub-variety Gut labels "Yoruba English" (Gut 820–23). Read as an approximation; L2-specific interference is flagged in the hypotheses.</div>
+
+  <div class="stella-transcription">
+    [pʰlis kɒl stelə æsk <span class="feat-vowel" data-n="2">hæː</span> tŭ bɾĩŋ ðis <span class="feat-consonant" data-n="1">θ</span>ĩŋz wɪ<span class="feat-consonant" data-n="1">θ</span> <span class="feat-vowel" data-n="2">hæ</span> fɹʌm ðə <span class="feat-vowel" data-n="2">stɔː</span> sɪks spũnz əy fɹɛʃ sno <span class="feat-vowel" data-n="3">pɪːz</span> faɪv <span class="feat-consonant" data-n="1">t</span>ɪk slæːbz əv blu tʃiːz æn <span class="feat-prosody" data-n="4">meɪbi</span> <span class="feat-prosody" data-n="4">e</span> snæk <span class="feat-vowel" data-n="2">fɔ</span> <span class="feat-vowel" data-n="2">hæ</span> bɹʌðə <span class="feat-vowel" data-n="2">bɒb</span> wi <span class="feat-prosody" data-n="4">also</span> nid <span class="feat-prosody" data-n="4">e</span> smɒl pʰ<span class="feat-prosody" data-n="4">l</span>æstɪk sneɪk æn <span class="feat-prosody" data-n="4">e</span> bɪɡ tʰɔɪ fɹɔɡ <span class="feat-vowel" data-n="2">fə</span> ðə kʰiːdz ʃi kæn skup ðis <span class="feat-consonant" data-n="1">ð</span>ĩŋz ɪntu <span class="feat-consonant" data-n="1">θ</span>ɹi ɹɛd bæɡz æn wi wi gou mit <span class="feat-vowel" data-n="2">hæ</span> <span class="feat-prosody" data-n="4">wẽnzdeɪ</span> <span class="feat-vowel" data-n="5">at</span> ðə tʃɹẽɪn <span class="feat-prosody" data-n="4">steɪʃən</span>]
+  </div>
+
+  <div class="cards-grid">
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">1</span> Variable TH-stopping <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> Stopped — <span class="ex-word">thick</span> <span class="ipa">[tɪk]</span>; preserved — <span class="ex-word">things</span> <span class="ipa">[θĩŋz]</span>, <span class="ex-word">three</span> <span class="ipa">[θɹi]</span>, <span class="ex-word">with</span> <span class="ipa">[wɪθ]</span>; voiced-TH alternation — <span class="ex-word">things</span> <span class="ipa">[ðĩŋz]</span> (2nd occurrence).</div>
+      <div class="rule"><b>Rule</b> Gut lists Yoruba English realisations of /θ/ as "[θ], [t], [ṭ]" and of /ð/ as "[ð], [d], [ḍ]" (Gut 823).</div>
+      <div class="hypothesis"><b>Hypothesis</b> Lexical diffusion — high-frequency function words (<i>the</i>, <i>this</i>) pattern differently from lower-frequency content words (<i>thick</i>), consistent with the variable distribution Gut documents.</div>
+    </div>
+
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">2</span> Non-rhoticity <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">her</span> <span class="ipa">[hæ]</span>, <span class="ex-word">store</span> <span class="ipa">[stɔː]</span>, <span class="ex-word">brother</span> <span class="ipa">[bɹʌðə]</span>, <span class="ex-word">for</span> <span class="ipa">[fɔ]</span>. Every post-vocalic /r/ is absent.</div>
+      <div class="rule"><b>Rule</b> "NigE is non-rhotic" (Gut 822).</div>
+    </div>
+
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">3</span> FLEECE–KIT quality merger / length neutralisation <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">please</span> <span class="ipa">[pʰlis]</span> (short FLEECE), <span class="ex-word">peas</span> <span class="ipa">[pɪːz]</span> (KIT-quality with length), <span class="ex-word">call</span> <span class="ipa">[kɒl]</span>.</div>
+      <div class="rule"><b>Rule</b> In Yoruba English and Igbo English, the FLEECE vowel "is shorter and the same as in KIT" (Gut 820).</div>
+    </div>
+
+    <div class="card card-prosody">
+      <div class="card-title"><span class="card-num">4</span> Syllable-timed rhythm / no vowel reduction <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">maybe</span> <span class="ipa">[meɪbi]</span> (full [i]), <span class="ex-word">plastic</span> <span class="ipa">[pʰlæstɪk]</span> (no schwa), <span class="ex-word">Wednesday</span> <span class="ipa">[wẽnzdeɪ]</span> (full [eɪ]), <span class="ex-word">a</span> <span class="ipa">[e]</span> rather than [ə].</div>
+      <div class="rule"><b>Rule</b> "Vowel reduction does not occur in NigE, which results in a more equal duration of syllables" (Gut 827–28).</div>
+      <div class="hypothesis"><b>Hypothesis</b> The indefinite article rendered as [e] rather than [ə] is a spelling pronunciation — NigE often resolves a reduced vowel to the full orthographic vowel, consistent with Gut's syllable-timing description and with Ihsane's framing of NigE as strongly orthography-driven <span class="cite">(Ihsane, "Week 8: Nigerian English" <span class="flag">(?)</span>).</span></div>
+    </div>
+
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">5</span> Conservative codas / spelling-driven /t/ <span class="tag tag-partial">Partially predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">slabs</span> <span class="ipa">[slæːbz]</span> (retained), <span class="ex-word">at</span> <span class="ipa">[at]</span> (fully released), <span class="ex-word">thick</span> <span class="ipa">[tɪk]</span> — codas not simplified in this reading.</div>
+      <div class="rule"><b>Rule</b> Gut documents cluster simplification such as "hand → [han], post → [pɔs], cold → [kɔl]" (Gut 824); the passage contains no exact matches.</div>
+      <div class="hypothesis"><b>Hypothesis</b> Reading-style carefulness elicited by the GMU passage suppresses the more extensive coda simplification Gut describes for conversational NigE, producing more conservative codas than would appear in spontaneous speech.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<!-- 10. IndE — Hindi1                                                  -->
+<!-- ================================================================= -->
+<section class="variety">
+  <h2>10. Indian English — Hindi1 <span class="speaker-meta">(L1 Hindi — L2 proxy)</span></h2>
+
+  <div class="caveat"><b>Speaker-substitution caveat.</b> The L1 Hindi speaker is used as a proxy for IndE. IndE as described in Gargesh is itself heavily substrate-influenced by Hindi; the L2 speaker displays the same retroflex, stopping, and /v/~/w/ features. Read as an approximation.</div>
+
+  <div class="stella-transcription">
+    [plis kal stela ask ɦ̆<span class="feat-consonant" data-n="4">ɚ</span> <span class="feat-consonant" data-n="1">ʈ</span>u <span class="feat-consonant" data-n="4">bɾ</span>ɪŋ d<span class="feat-consonant" data-n="2">ı</span>z <span class="feat-consonant" data-n="2">t</span>ɪŋks <span class="feat-consonant" data-n="3">v</span>ɪt <span class="feat-consonant" data-n="4">hɚ</span> <span class="feat-consonant" data-n="4">fɹ</span>ʌm ðʌ sto sɪks spunz əv <span class="feat-consonant" data-n="4">fɾ</span>eʃ sno piz fa<span class="feat-vowel" data-n="5">ɪf</span> <span class="feat-consonant" data-n="2">θ</span>ɪk slæbz ɔv blu tʃiz æn meɪbi ə snæk <span class="feat-consonant" data-n="4">fɔɹ</span> ə <span class="feat-consonant" data-n="4">bɹ</span>ʌðə(<span class="feat-consonant" data-n="4">ɾ</span>) bɒb <span class="feat-consonant" data-n="3">vi</span> also niɾə smal plastɪk sneɪk ændə bɪɡ tɔɪ <span class="feat-consonant" data-n="4">fɹ</span>ɑɡ <span class="feat-consonant" data-n="4">fɚ</span> ðə kɪdz ʃi kæn sk<span class="feat-vowel" data-n="5">ub</span> d<span class="feat-consonant" data-n="2">ɪ</span>z <span class="feat-consonant" data-n="2">t</span>ɪŋz ɪntu <span class="feat-consonant" data-n="2">t</span>ɹi <span class="feat-consonant" data-n="4">ɾ</span>ɛd bæɡz æn <span class="feat-consonant" data-n="3">vi</span> <span class="feat-consonant" data-n="3">v</span>ɪl ɡo mi<span class="feat-consonant" data-n="1">ʈ</span> hə wɛnzdeɪ æt <span class="feat-consonant" data-n="1">ʈ</span>ə? t<span class="feat-consonant" data-n="4">ɾ</span>eɪn steɪʃ(ə̃)n]
+  </div>
+
+  <div class="cards-grid">
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">1</span> Retroflex stops [ʈ, ɖ] for /t, d/ <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">to</span> <span class="ipa">[ʈu]</span>, <span class="ex-word">meet</span> <span class="ipa">[miʈ]</span>, <span class="ex-word">the</span> <span class="ipa">[ʈə]</span> (in <i>at the train station</i>).</div>
+      <div class="rule"><b>Rule</b> "T and D tend to be retroflexed as in the words <i>certificate</i> [sərʈifike:t] and <i>London</i> [lənɖən]" (Gargesh 997).</div>
+    </div>
+
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">2</span> TH → dental/alveolar stops <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">thick</span> <span class="ipa">[tɪk]</span>, <span class="ex-word">things</span> <span class="ipa">[tɪŋks]/[tɪŋz]</span>, <span class="ex-word">three</span> <span class="ipa">[tɹi]</span>, <span class="ex-word">these</span> <span class="ipa">[dɪz]</span>, <span class="ex-word">the</span> <span class="ipa">[ðʌ]~[də]</span>.</div>
+      <div class="rule"><b>Rule</b> "The dental fricatives /θ/ and /ð/ are non-existent in IndE. The aspirated voiceless stop [tʰ] is realized for /θ/; the voiced stop [d̪] is realized for /ð/" (Gargesh 998). The unaspirated [t] here is consistent with the separate claim that "voiceless stops are not aspirated in the syllable-initial position in IndE" (Gargesh 997).</div>
+    </div>
+
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">3</span> V-for-W substitution <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">with</span> <span class="ipa">[vɪt]</span>, <span class="ex-word">we</span> <span class="ipa">[vi]</span>, <span class="ex-word">will</span> <span class="ipa">[vɪl]</span>.</div>
+      <div class="rule"><b>Rule</b> "V often overlaps with W as in the realizations of the word <i>power</i> — [pa:vər] ~ [pa: wər]" (Gargesh 998).</div>
+    </div>
+
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">4</span> Trilled / tapped rhotic with rhoticity <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">bring</span> <span class="ipa">[bɾɪŋ]</span>, <span class="ex-word">fresh</span> <span class="ipa">[fɾeʃ]</span>, <span class="ex-word">red</span> <span class="ipa">[ɾɛd]</span>, <span class="ex-word">need a</span> <span class="ipa">[niɾə]</span>, <span class="ex-word">brother</span> <span class="ipa">[bɹʌðə(ɾ)]</span>, <span class="ex-word">for</span> <span class="ipa">[fɔɹ]</span>, <span class="ex-word">her</span> <span class="ipa">[hɚ]</span>.</div>
+      <div class="rule"><b>Rule</b> "The liquid /r/ is generally trilled . . . This is true of postvocalic /r/ as well" (Gargesh 998).</div>
+    </div>
+
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">5</span> Final obstruent devoicing <span class="tag tag-partial">Partly unpredictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">five</span> <span class="ipa">[faɪf]</span> (devoiced /v/), <span class="ex-word">scoop</span> <span class="ipa">[skub]</span> (ambiguous), <span class="ex-word">of</span> <span class="ipa">[ɔv]</span> (retained).</div>
+      <div class="rule"><b>Rule</b> Gargesh's chapter describes consonantal features principally at the dental fricative, retroflex, and /v/~/w/ loci (Gargesh 998) and does not foreground final-obstruent devoicing.</div>
+      <div class="hypothesis"><b>Hypothesis</b> Likely substrate L1-Hindi transfer rather than an institutionalised IndE feature — Hindi phonotactics reduce final voicing contrasts. Because the speaker is L1 Hindi (see caveat), the feature may reflect individual L2 interference rather than the stable IndE system Gargesh catalogues.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<!-- 11. SgE — Mandarin12                                               -->
+<!-- ================================================================= -->
+<section class="variety">
+  <h2>11. Singapore English — Mandarin12 <span class="speaker-meta">(L1 Mandarin — L2 proxy)</span></h2>
+
+  <div class="caveat"><b>Speaker-substitution caveat.</b> The L1 Mandarin speaker is used as a proxy for CollSgE, whose substrate pressures come primarily from Hokkien/Mandarin/Malay (Wee 1017). The speaker displays the consonant-deletion, glottalisation, and devoicing features Wee catalogues. Read as an approximation; Mandarin-specific TH substitutions are flagged in the hypothesis for Feature 4.</div>
+
+  <div class="stella-transcription">
+    [pʰliːz kʰɒl stelə <span class="feat-consonant" data-n="1">əs</span> hə tʰu bɾĩŋ diːz θĩŋz wɪθ hɚ fɹʌm də sto sɪks spʉnz əv fɹɛʃ snou pʰiːz faɪv <span class="feat-consonant" data-n="4">t</span>ɪk <span class="feat-consonant" data-n="3">slæbʰs</span> əv blu tʃiːz æn meɪbi ə <span class="feat-consonant" data-n="2">snækˀ</span> əv hə bɹʌðə bɒb wi ɒlso ni<span class="feat-vowel" data-n="5">d</span> ə smɒːl plastɪk <span class="feat-consonant" data-n="1">sneɪ</span> æ̃n ə bɪɡ tʰɔɪ <span class="feat-consonant" data-n="1">fɹɒ</span> fə ðə kɾdz ʃi kən sk<span class="feat-vowel" data-n="5">up</span> <span class="feat-consonant" data-n="4">dız</span> <span class="feat-consonant" data-n="4">ʃĩŋz</span> ɪntu <span class="feat-consonant" data-n="4">tʃi</span> ɹɛd <span class="feat-consonant" data-n="3">bæks</span> æn wi wi gou <span class="feat-consonant" data-n="2">miʔ</span> hə wẽnzdei <span class="feat-consonant" data-n="2">æt</span> ðə tɾẽm steɪʃə̃n]
+  </div>
+
+  <div class="cards-grid">
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">1</span> Final consonant deletion <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">snake</span> <span class="ipa">[sneɪ]</span> (no /k/), <span class="ex-word">frog</span> <span class="ipa">[fɹɒ]</span> (no /g/), <span class="ex-word">ask</span> <span class="ipa">[əs]</span> (no /k/).</div>
+      <div class="rule"><b>Rule</b> "stops are deleted in final position after continuant" — giving "limp [lɪm], cent [sɛn], stink [stɪŋ]" (Wee 1027); also "the stops may on occasion themselves get deleted so that the word then ends in a glottal stop" (Wee 1028).</div>
+    </div>
+
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">2</span> Glottal-stop replacement for final /t/ <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">meet</span> <span class="ipa">[miʔ]</span>, <span class="ex-word">snack</span> <span class="ipa">[snækˀ]</span> (pre-glottalised); <span class="ex-word">at</span> <span class="ipa">[æt]</span> (fully released — the rule is variable).</div>
+      <div class="rule"><b>Rule</b> Stops in final position "are often unreleased . . . the stops may on occasion themselves get deleted so that the word then ends in a glottal stop, as in <i>like</i> [laɪʔ] and <i>hit</i> [hɪʔ]" (Wee 1028).</div>
+    </div>
+
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">3</span> Final obstruent devoicing <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> <span class="ex-word">slabs</span> <span class="ipa">[slæbʰs]</span> (devoiced /z/), <span class="ex-word">bags</span> <span class="ipa">[bæks]</span> (devoiced /g/ and /z/). Compare RP/GA <span class="ipa">[slæbz, bæɡz]</span>.</div>
+      <div class="rule"><b>Rule</b> "voiced obstruents commonly become devoiced when in word-final position" (Wee 1027).</div>
+    </div>
+
+    <div class="card card-consonant">
+      <div class="card-title"><span class="card-num">4</span> Variable TH-realisation <span class="tag tag-partial">Partly predictable</span></div>
+      <div class="evidence"><b>Evidence</b> Pre-vocalic [d] — <span class="ex-word">these</span> <span class="ipa">[dız]</span>, <span class="ex-word">the</span> <span class="ipa">[də]</span>, <span class="ex-word">this</span> <span class="ipa">[dɪz]</span>. Alveolar [t] — <span class="ex-word">thick</span> <span class="ipa">[tɪk]</span>. Preserved [θ] — <span class="ex-word">things</span> <span class="ipa">[θĩŋz]</span>. Idiosyncratic — <span class="ex-word">things</span> <span class="ipa">[ʃĩŋz]</span> (2nd); <span class="ex-word">three</span> <span class="ipa">[tʃi]</span>.</div>
+      <div class="rule"><b>Rule</b> "the interdental fricatives tend to be realized as [t, d] when pre-vocalic and [f] when at the end of a word" (Wee 1025).</div>
+      <div class="hypothesis"><b>Hypothesis</b> [θ] retention, [tʃ] for <i>three</i>, and [ʃ] for <i>things</i> likely reflect substrate L1-Mandarin interference rather than the institutionalised CollSgE pattern — Mandarin lacks interdentals, so Mandarin L1 speakers can produce idiosyncratic replacements differing from Wee's CollSgE norms. Flagged because the speaker is L2 Mandarin (see caveat).</div>
+    </div>
+
+    <div class="card card-vowel">
+      <div class="card-title"><span class="card-num">5</span> No KIT/FLEECE length contrast <span class="tag tag-predict">Predictable</span></div>
+      <div class="evidence"><b>Evidence</b> Long — <span class="ex-word">please</span> <span class="ipa">[pʰliːz]</span>, <span class="ex-word">peas</span> <span class="ipa">[pʰiːz]</span>; short — <span class="ex-word">need</span> <span class="ipa">[nid]</span>, <span class="ex-word">scoop</span> <span class="ipa">[skup]</span>, <span class="ex-word">meet</span> <span class="ipa">[miʔ]</span>. Length is not systematic.</div>
+      <div class="rule"><b>Rule</b> "there is no length contrast so that any length difference tends to be sporadic . . . the distinction found in RP . . . in pairs like <i>pool/pull</i> or <i>beat/bit</i> is absent in CollSgE" (Wee 1025–26).</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<!-- CROSS-VARIETY SUMMARY TABLE                                        -->
+<!-- ================================================================= -->
+<section class="summary">
+  <h2>Cross-variety summary</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Variety</th>
+        <th>Rhoticity</th>
+        <th>/l/ quality</th>
+        <th>Dental fricatives</th>
+        <th>Signature vowel feature</th>
+        <th>Other key diagnostic</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>RP</td>
+        <td>Non-rhotic</td>
+        <td>Clear onset / dark coda</td>
+        <td>[θ, ð] retained</td>
+        <td>Diphthongal FACE/GOAT [eɪ, əʊ]; London-fronted BATH [a]</td>
+        <td>Centring diphthong NORTH [oə]</td>
+      </tr>
+      <tr>
+        <td>ScotE</td>
+        <td>Rhotic (tapped [ɾ])</td>
+        <td>Dark [lˠ] in all positions</td>
+        <td>Variable: [s] for /θ/ in <i>things</i>; [θ] retained in <i>three</i></td>
+        <td>Monophthongal GOAT [o:]; SVLR conditioning length</td>
+        <td>Aspirated voiceless stops coda [bɔbʰ, kʰ]</td>
+      </tr>
+      <tr>
+        <td>NIrE</td>
+        <td>Rhotic (retroflex [ɻ])</td>
+        <td>Clear throughout (non-Belfast)</td>
+        <td>[θ, ð] retained (unlike Southern IrE)</td>
+        <td>Central-onset GOAT [ö]; TRAP-raising [kɛ̃n]</td>
+        <td>Aspirated coda stops [bɑɻbʰ]</td>
+      </tr>
+      <tr>
+        <td>IrE</td>
+        <td>Rhotic (retroflex [ɻ])</td>
+        <td>Clear in all positions</td>
+        <td>TH-stopping [t̪ʰ] in <i>thick</i> (variable)</td>
+        <td>Diphthongal FACE [eɪ]</td>
+        <td>/t/-lenition/deletion (<i>plastic</i> [pʰlæsɪk])</td>
+      </tr>
+      <tr>
+        <td>GA</td>
+        <td>Rhotic (approximant [ɹ])</td>
+        <td>Dark [lˠ] generalised to onset</td>
+        <td>[θ, ð] retained</td>
+        <td>LOT unrounded [ɑ(ː)] (<i>Bob</i> [bɑːb]); GOAT [oʊ]</td>
+        <td>Intervocalic /t/-flapping ([nɪɾɚ])</td>
+      </tr>
+      <tr>
+        <td>GAusE</td>
+        <td>Non-rhotic (with linking r)</td>
+        <td>Clear onset / dark coda</td>
+        <td>[θ, ð] retained</td>
+        <td>Central-onset GOAT [əʊ]; uneven DRESS raising</td>
+        <td>Word-final T-glottalling [æʔ]</td>
+      </tr>
+      <tr>
+        <td>NZE</td>
+        <td>Non-rhotic</td>
+        <td>Clear onset / dark coda</td>
+        <td>[θ, ð] retained</td>
+        <td>Short front vowel shift: TRAP→DRESS ([kɛ̃n]), centralised KIT</td>
+        <td>Chain-shifted FACE with lowered onset ([snaɪk])</td>
+      </tr>
+      <tr>
+        <td>JamE</td>
+        <td>Generally rhotic; variable</td>
+        <td>Not velarised (course silent; speaker shows clear)</td>
+        <td>[θ, ð] preserved</td>
+        <td>FACE/GOAT mixed mono/diph ([sno] vs. [goʊ])</td>
+        <td>Onset cluster simplification (<i>please</i> [pʰiːz], <i>bring</i> [biŋ])</td>
+      </tr>
+      <tr>
+        <td>NigE <span class="flag">(L2 proxy)</span></td>
+        <td>Non-rhotic</td>
+        <td>Clear [l] throughout</td>
+        <td>Variable TH-stopping ([tɪk] vs. retained [θĩŋz])</td>
+        <td>FLEECE–KIT quality merger; no vowel reduction</td>
+        <td>Syllable-timed rhythm; spelling-driven [e] for <i>a</i></td>
+      </tr>
+      <tr>
+        <td>IndE <span class="flag">(L2 proxy)</span></td>
+        <td>Rhotic (trilled/tapped [ɾ])</td>
+        <td>Clear [l] throughout</td>
+        <td>TH → unaspirated [t, d] (Gargesh predicts aspirated [tʰ])</td>
+        <td>Final-obstruent devoicing (<i>five</i> [faɪf])</td>
+        <td>Retroflex /t, d/ [ʈ, ɖ]; V-for-W [vɪt, vi, vɪl]</td>
+      </tr>
+      <tr>
+        <td>SgE <span class="flag">(L2 proxy)</span></td>
+        <td>Variable; largely non-rhotic</td>
+        <td>Clear throughout</td>
+        <td>Pre-vocalic [d] for /ð/; variable [t, θ, tʃ, ʃ] for /θ/</td>
+        <td>No KIT/FLEECE length contrast; sporadic length</td>
+        <td>Final consonant deletion ([sneɪ, fɹɒ]) + devoicing ([bæks])</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="footer">
+  Sources: verified IPA from <code>GMU-Transcriptions-FINAL.md</code> (two-pass arbiter methodology, 2026-04-22); feature analyses from <code>GMU-Features-BritishIsles.md</code>, <code>GMU-Features-InnerCircle.md</code>, <code>GMU-Features-Outer.md</code>. Format modelled on the midterm IrE vs. GAusE corrigé. MLA citations per Geneva Style Sheet § 3.2.
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Variety-ID Game — BA3 Exam Trainer</title>
+<style>
+  :root{
+    --ox:#7a1f1f; --ox2:#9a2d2d; --ink:#1b1b1b; --mute:#5a5a5a;
+    --paper:#fbf7ee; --card:#fffdf7; --rule:#d8cfbd; --hit:#f3e7c9;
+    --good:#2d7a3a; --bad:#c33; --blue:#2b4b6f; --gold:#b58b2c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:"EB Garamond","Iowan Old Style","Apple Garamond",Georgia,serif;
+       background:var(--paper);color:var(--ink);line-height:1.5;font-size:17px}
+  header{background:var(--ox);color:#f7ead1;padding:14px 22px;border-bottom:4px double #f7ead1;
+         display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  header h1{margin:0;font-size:22px;font-weight:600;letter-spacing:.3px}
+  header .meta{font-size:13px;opacity:.9;font-style:italic}
+  .statbar{background:#2c1212;color:#e6d9b9;padding:8px 22px;font-size:13.5px;
+           display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+  .statbar b{color:#fff7d9;font-size:14.5px}
+  .statbar .streak{color:var(--gold)}
+  .statbar .correct{color:#9cd89c}
+  .statbar .wrong{color:#ffb3a7}
+  main{max-width:900px;margin:0 auto;padding:22px 26px 60px}
+
+  .mode-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:24px}
+  .mode-btn{background:var(--card);border:2px solid var(--rule);padding:16px 18px;cursor:pointer;
+            text-align:left;font:inherit;border-radius:4px;transition:.15s}
+  .mode-btn:hover{border-color:var(--ox);background:var(--hit);transform:translateY(-1px)}
+  .mode-btn.active{border-color:var(--ox);background:var(--hit);box-shadow:0 2px 6px rgba(122,31,31,.2)}
+  .mode-btn .mt{font-weight:600;color:var(--ox);font-size:16px;margin-bottom:4px}
+  .mode-btn .md{font-size:13.5px;color:var(--mute);line-height:1.35}
+
+  .q-card{background:var(--card);border:1px solid var(--rule);padding:22px 26px;margin:16px 0;
+          border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .q-kicker{font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px}
+  .q-prompt{font-size:18px;margin-bottom:6px;color:var(--ink)}
+  .q-ipa{font-family:"Doulos SIL","Charis SIL","Gentium","DejaVu Sans",monospace;
+         font-size:28px;color:var(--ox);background:#f3eddc;padding:10px 16px;border-radius:4px;
+         display:inline-block;margin:8px 0;font-weight:500}
+  .q-word{font-size:26px;color:var(--ink);font-style:italic;margin-right:12px}
+  .q-hint{font-size:14px;color:var(--mute);font-style:italic;margin:6px 0}
+
+  .options{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:14px}
+  .opt{background:#fdf8e6;border:1.5px solid var(--rule);padding:14px 16px;cursor:pointer;
+       text-align:left;font:inherit;font-size:16px;border-radius:3px;transition:.12s;position:relative}
+  .opt:hover{background:var(--hit);border-color:var(--ox);transform:translateX(2px)}
+  .opt.correct{background:#e3f1e3;border-color:var(--good);color:#1a4a1a}
+  .opt.wrong{background:#ffeae6;border-color:var(--bad);color:#5a1a1a}
+  .opt.dim{opacity:.55}
+  .opt .tag{font-size:11px;color:var(--mute);letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:2px}
+  .opt .val{font-weight:600}
+  .opt.correct::after{content:"✓";position:absolute;right:10px;top:8px;color:var(--good);font-size:18px;font-weight:700}
+  .opt.wrong::after{content:"✗";position:absolute;right:10px;top:8px;color:var(--bad);font-size:18px;font-weight:700}
+
+  .feedback{margin-top:14px;padding:12px 16px;border-radius:3px;font-size:15px;display:none}
+  .feedback.show{display:block}
+  .feedback.ok{background:#e3f1e3;border-left:4px solid var(--good)}
+  .feedback.err{background:#ffeae6;border-left:4px solid var(--bad)}
+  .feedback b{font-variant:small-caps;letter-spacing:.5px}
+  .feedback .chap{font-size:12.5px;color:var(--mute);font-style:italic;margin-top:8px;padding-top:6px;border-top:1px dashed var(--rule)}
+  .feedback .verdict{font-size:17px;font-weight:600;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--rule)}
+  .ex{font-size:14.5px;line-height:1.5}
+  .ex-sec{margin:12px 0;padding:8px 12px;background:rgba(255,255,255,.55);border-left:3px solid var(--ox);border-radius:2px}
+  .ex-sec:first-child{margin-top:2px}
+  .feedback.ok .ex-sec{background:#f7fcf7;border-left-color:var(--good)}
+  .feedback.err .ex-sec{background:#fff7f5;border-left-color:var(--bad)}
+  .ex-h{font-variant:small-caps;letter-spacing:1px;font-size:12.5px;color:var(--ox);font-weight:600;margin-bottom:4px}
+  .ex-body{font-size:14.5px;margin:2px 0}
+  .ex-body .ipa{font-size:14px}
+  .ex-gloss{font-size:13.5px;color:#3a3a3a;font-style:italic;margin-top:5px;padding:4px 8px;background:#fdf8e6;border-radius:2px}
+  .ex-context{margin-top:8px;padding:8px 12px;background:#f6f1e3;border-left:2px solid var(--gold);border-radius:2px;font-size:13.8px;line-height:1.55}
+  .ex-ctx-h{font-variant:small-caps;letter-spacing:1px;font-size:11.5px;color:var(--gold);font-weight:600;margin-bottom:3px}
+  .ex-context i,.ex-context em{color:#3a2a10}
+  .ex-list{list-style:disc;margin:4px 0 0 18px;padding:0;font-size:13.8px}
+  .ex-list li{margin-bottom:4px;line-height:1.45}
+  .ex-list .ipa{font-size:13.5px}
+  .ex-note{color:#5a5a5a;font-style:italic;font-size:12.5px}
+
+  .controls{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+  .btn{background:var(--ox);color:#f7ead1;border:none;padding:9px 18px;cursor:pointer;
+       font:inherit;font-size:14.5px;border-radius:3px;transition:.12s}
+  .btn:hover{background:var(--ox2)}
+  .btn.sec{background:#6a6a6a}
+  .btn.sec:hover{background:#4a4a4a}
+  .btn.big{padding:12px 24px;font-size:16px}
+
+  .filter-bar{background:#efe6cc;padding:10px 14px;border-radius:3px;margin:10px 0;
+              display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:13.5px}
+  .filter-bar label{cursor:pointer;user-select:none}
+  .filter-bar .chip{background:var(--card);border:1px solid var(--rule);padding:3px 10px;
+                    border-radius:12px;margin:2px;cursor:pointer;font-size:12.5px}
+  .filter-bar .chip.on{background:var(--ox);color:#f7ead1;border-color:var(--ox)}
+
+  .mistake-review{background:#fff;border:1px solid var(--rule);padding:14px 18px;margin-top:16px;border-radius:4px}
+  .mistake-review h3{margin-top:0;color:var(--ox);font-size:17px}
+  .mistake-item{padding:8px 10px;border-bottom:1px solid var(--rule);font-size:14.5px}
+  .mistake-item:last-child{border-bottom:none}
+  .mistake-item b{color:var(--ox)}
+
+  .progress-boxes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+  .pbox{background:#fff;border:1px solid var(--rule);padding:10px;text-align:center;border-radius:3px}
+  .pbox .pn{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:1px}
+  .pbox .pv{font-size:24px;color:var(--ox);font-weight:600;margin-top:4px}
+  .pbox .pl{font-size:12px;color:var(--mute);margin-top:2px}
+
+  .multi-select .opt{display:flex;align-items:center;gap:8px}
+  .multi-select .opt.selected{background:var(--hit);border-color:var(--ox)}
+  .multi-select .opt .check{width:16px;height:16px;border:1.5px solid var(--mute);border-radius:2px;display:inline-block}
+  .multi-select .opt.selected .check{background:var(--ox);border-color:var(--ox)}
+
+  .welcome{background:var(--card);border:1px solid var(--rule);padding:24px 28px;border-radius:4px;margin-bottom:20px}
+  .welcome h2{margin-top:0;color:var(--ox)}
+  .welcome ul{margin:8px 0;padding-left:22px}
+  .welcome li{margin-bottom:6px}
+
+  .foot{text-align:center;color:var(--mute);font-size:12px;margin-top:30px;font-style:italic}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Variety-ID Game — BA3 Exam Trainer</h1>
+    <div class="meta">Five modes · Leitner spaced repetition · 200+ items from Ihsane 2026 chapters</div>
+  </div>
+  <button class="btn sec" id="reset-all-btn" title="Reset all progress">Reset all</button>
+</header>
+
+<div class="statbar">
+  <span>Session: <b id="s-session">0</b></span>
+  <span class="correct">Correct: <b id="s-correct">0</b></span>
+  <span class="wrong">Wrong: <b id="s-wrong">0</b></span>
+  <span>Accuracy: <b id="s-acc">–</b></span>
+  <span class="streak">Streak: <b id="s-streak">0</b></span>
+  <span>Best streak: <b id="s-best">0</b></span>
+</div>
+
+<main id="app">
+  <div class="welcome" id="welcome">
+    <h2>How this game works</h2>
+    <p>Every item is drawn from your Ihsane 2026 chapters — the same words, the same IPA, the same varieties you'll meet on the exam. Five modes train different exam skills:</p>
+    <ul>
+      <li><b>Identify Variety</b> — word + IPA shown, you pick the variety. Tests clip-to-label association.</li>
+      <li><b>Identify Feature</b> — word + IPA + variety shown, you name the phonological rule. Tests terminology.</li>
+      <li><b>Minimal Pair</b> — two transcriptions of the same word shown, you pick which variety each goes with.</li>
+      <li><b>Spot the Intruder</b> — four features shown for a named variety, you pick the odd one out.</li>
+      <li><b>Signature Assembly</b> — pick every feature that belongs to a named variety (multi-select).</li>
+    </ul>
+    <p>Items you miss come back sooner (<b>Box 1</b>), items you get right move up (<b>Box 2</b>, then <b>Box 3</b>). Boxes 1 items appear with highest frequency in the rotation. This is a classic <b>Leitner</b> system.</p>
+    <div class="progress-boxes" id="pboxes"></div>
+    <p style="margin-top:14px;margin-bottom:6px"><b>Pick a mode to start:</b></p>
+    <div class="mode-picker" id="mode-picker"></div>
+  </div>
+
+  <div id="game" style="display:none">
+    <div class="filter-bar">
+      <b>Mode:</b> <span id="mode-label"></span>
+      <button class="btn sec" id="mode-back" style="padding:4px 10px;font-size:12px">← change mode</button>
+      <span style="flex:1"></span>
+      <b>Filter:</b>
+      <span id="tag-filters"></span>
+    </div>
+    <div id="q-container"></div>
+  </div>
+</main>
+
+<p class="foot">v1 · built from Ihsane 2026 Ch 1–8 · BA3 Final Exam prep</p>
+
+<script>
+/* ============================================================
+   QUESTION BANK — 200+ items from Ihsane 2026 chapters
+   ============================================================ */
+
+const ITEMS = [
+/* Chapter 2 — lexical sets, BE vs SAE/GAusE, NURSE mergers */
+{word:"ship", ipa:"[ʃɪp]", variety:"RP", feature:"KIT vowel", chap:"Ch2", tag:"phon", note:"Wells lexical set KIT = /ɪ/"},
+{word:"step", ipa:"[stɛp]", variety:"RP", feature:"DRESS vowel", chap:"Ch2", tag:"phon"},
+{word:"tap", ipa:"[tæp]", variety:"RP", feature:"TRAP vowel", chap:"Ch2", tag:"phon"},
+{word:"stop", ipa:"[stɒp]", variety:"RP", feature:"LOT vowel", chap:"Ch2", tag:"phon"},
+{word:"cup", ipa:"[kʌp]", variety:"RP", feature:"STRUT vowel", chap:"Ch2", tag:"phon"},
+{word:"put", ipa:"[pʊt]", variety:"RP", feature:"FOOT vowel", chap:"Ch2", tag:"phon"},
+{word:"staff", ipa:"[stɑːf]", variety:"RP", feature:"BATH broad", chap:"Ch2", tag:"phon"},
+{word:"hurt", ipa:"[hɜːt]", variety:"RP", feature:"NURSE vowel", chap:"Ch2", tag:"phon"},
+{word:"creep", ipa:"[kriːp]", variety:"RP", feature:"FLEECE vowel", chap:"Ch2", tag:"phon"},
+{word:"tape", ipa:"[teɪp]", variety:"RP", feature:"FACE diphthong", chap:"Ch2", tag:"phon"},
+{word:"soap", ipa:"[səʊp]", variety:"RP", feature:"GOAT diphthong", chap:"Ch2", tag:"phon"},
+{word:"loop", ipa:"[luːp]", variety:"RP", feature:"GOOSE vowel", chap:"Ch2", tag:"phon"},
+{word:"ripe", ipa:"[raɪp]", variety:"RP", feature:"PRICE diphthong", chap:"Ch2", tag:"phon"},
+{word:"out", ipa:"[aʊt]", variety:"RP", feature:"MOUTH diphthong", chap:"Ch2", tag:"phon"},
+{word:"face", ipa:"[feː]", variety:"Northern", feature:"FACE monophthong", chap:"Ch2", tag:"phon", note:"North vs South diphthong [feɪ]"},
+{word:"goat", ipa:"[ɡɔː]", variety:"Northern", feature:"GOAT monophthong", chap:"Ch2", tag:"phon", note:"North vs South [ɡəʊt]"},
+{word:"bath", ipa:"[baθ]", variety:"Northern", feature:"BATH = TRAP (short)", chap:"Ch2", tag:"phon"},
+{word:"strut", ipa:"[strʊt]", variety:"Northern", feature:"FOOT–STRUT merger", chap:"Ch2", tag:"phon"},
+{word:"strut", ipa:"[strʌt]", variety:"RP", feature:"FOOT–STRUT split", chap:"Ch2", tag:"phon"},
+{word:"nurse / square", ipa:"[ɛː]", variety:"Scouse", feature:"NURSE–SQUARE merger", chap:"Ch2", tag:"phon", note:"Liverpool: fur=fair"},
+{word:"nurse / north", ipa:"[ɜː]", variety:"Geordie", feature:"NURSE–NORTH merger", chap:"Ch2", tag:"phon", note:"Newcastle"},
+
+/* Chapter 3 — ScotE / IrE */
+{word:"face", ipa:"[feː]", variety:"ScotE", feature:"FACE monophthong", chap:"Ch3", tag:"phon"},
+{word:"goat", ipa:"[goː]", variety:"ScotE", feature:"GOAT monophthong", chap:"Ch3", tag:"phon"},
+{word:"loch", ipa:"[lɔx]", variety:"ScotE", feature:"velar fricative /x/", chap:"Ch3", tag:"phon", note:"ch → [x]"},
+{word:"think", ipa:"[fɪŋk]", variety:"ScotE", feature:"TH-fronting", chap:"Ch3", tag:"phon", note:"/θ/→[f]"},
+{word:"brother", ipa:"[brʌvə]", variety:"ScotE", feature:"TH-fronting", chap:"Ch3", tag:"phon", note:"/ð/→[v]"},
+{word:"ball", ipa:"[bɔː]", variety:"ScotE", feature:"L-deletion", chap:"Ch3", tag:"phon"},
+{word:"golf", ipa:"[ɡɔf]", variety:"ScotE", feature:"L-deletion", chap:"Ch3", tag:"phon"},
+{word:"road", ipa:"[ɽoːd]", variety:"IrE", feature:"retroflex /r/", chap:"Ch3", tag:"phon"},
+{word:"car", ipa:"[kɑɽ]", variety:"IrE", feature:"retroflex /r/", chap:"Ch3", tag:"phon"},
+{word:"thin", ipa:"[t̪ɪn]", variety:"IrE", feature:"TH-stopping (dental)", chap:"Ch3", tag:"phon"},
+{word:"brother", ipa:"[brʌd̪ə]", variety:"IrE", feature:"TH-stopping (dental)", chap:"Ch3", tag:"phon"},
+{word:"cat", ipa:"[kjat]", variety:"IrE", feature:"palatalisation of /k/", chap:"Ch3", tag:"phon", note:"Southern IrE"},
+{word:"gap", ipa:"[ɡjap]", variety:"IrE", feature:"palatalisation of /ɡ/", chap:"Ch3", tag:"phon"},
+
+/* Chapter 3 — ScotE morphosyntax */
+{word:"He'll can help us tomorrow", ipa:"", variety:"ScotE", feature:"double modals", chap:"Ch3", tag:"syn"},
+{word:"They might could be working", ipa:"", variety:"ScotE", feature:"double modals", chap:"Ch3", tag:"syn"},
+{word:"She might can get away early", ipa:"", variety:"ScotE", feature:"double modals", chap:"Ch3", tag:"syn"},
+{word:"He's not understanding a single thing you say", ipa:"", variety:"ScotE", feature:"progressive with statives", chap:"Ch3", tag:"syn"},
+{word:"I was speaking to John on Friday there", ipa:"", variety:"ScotE", feature:"recent-past 'there'", chap:"Ch3", tag:"syn"},
+{word:"I've no seen him the day", ipa:"", variety:"ScotE", feature:"negation with free 'no'", chap:"Ch3", tag:"syn"},
+{word:"He doesnae help in the house", ipa:"", variety:"ScotE", feature:"bound negative -nae", chap:"Ch3", tag:"syn"},
+{word:"He isnae interested", ipa:"", variety:"IrE", feature:"bound negative -nae (Ulster)", chap:"Ch3", tag:"syn"},
+{word:"You're after ruinin' me", ipa:"", variety:"IrE", feature:"after-perfect (recent past)", chap:"Ch3", tag:"syn"},
+{word:"I'm after doing it this very minute", ipa:"", variety:"IrE", feature:"after-perfect", chap:"Ch3", tag:"syn"},
+{word:"She has the soup made", ipa:"", variety:"IrE", feature:"resultative O–V", chap:"Ch3", tag:"syn"},
+{word:"They do be shooting", ipa:"", variety:"IrE", feature:"habitual 'do be' (North)", chap:"Ch3", tag:"syn"},
+{word:"They be shooting and fishing", ipa:"", variety:"IrE", feature:"habitual bare 'be' (South)", chap:"Ch3", tag:"syn"},
+{word:"I don't know was it a priest", ipa:"", variety:"IrE", feature:"embedded subj–aux inversion", chap:"Ch3", tag:"syn"},
+{word:"It's to Dublin he's going today", ipa:"", variety:"IrE", feature:"cleft focus", chap:"Ch3", tag:"syn"},
+
+/* Chapter 3 — ScotE / IrE lexical */
+{word:"wee", ipa:"", variety:"ScotE", feature:"lexical", chap:"Ch3", tag:"lex", note:"'small'"},
+{word:"mirk", ipa:"", variety:"ScotE", feature:"lexical", chap:"Ch3", tag:"lex", note:"'dark'"},
+{word:"dreich", ipa:"", variety:"ScotE", feature:"lexical", chap:"Ch3", tag:"lex", note:"'wet/dreary'"},
+{word:"scran", ipa:"", variety:"ScotE", feature:"lexical", chap:"Ch3", tag:"lex", note:"'food'"},
+{word:"bairn", ipa:"", variety:"ScotE", feature:"lexical (Germanic/Norse)", chap:"Ch3", tag:"lex", note:"'child'"},
+{word:"kirk", ipa:"", variety:"ScotE", feature:"lexical (Germanic/Norse)", chap:"Ch3", tag:"lex", note:"'church'"},
+{word:"craic", ipa:"", variety:"IrE", feature:"lexical (Irish borrowing)", chap:"Ch3", tag:"lex", note:"'social enjoyment'"},
+{word:"hames", ipa:"", variety:"IrE", feature:"lexical", chap:"Ch3", tag:"lex", note:"'mess'"},
+{word:"mitch", ipa:"", variety:"IrE", feature:"lexical", chap:"Ch3", tag:"lex", note:"'play truant'"},
+{word:"cog", ipa:"", variety:"IrE", feature:"lexical", chap:"Ch3", tag:"lex", note:"'cheat'"},
+
+/* Chapter 4 — Geographical (SAE, GAusE + triplet) */
+{word:"dance", ipa:"[dɑːns]", variety:"RP", feature:"BATH broad", chap:"Ch4", tag:"phon"},
+{word:"dance", ipa:"[dæns]", variety:"SAE", feature:"BATH flat", chap:"Ch4", tag:"phon"},
+{word:"dance", ipa:"[dɛns]", variety:"GAusE", feature:"TRAP/BATH raised", chap:"Ch4", tag:"phon"},
+{word:"eighteen", ipa:"[eɪˈɾin]", variety:"SAE", feature:"T-flapping", chap:"Ch4", tag:"phon"},
+{word:"hitman", ipa:"[hɪʔmæn]", variety:"SAE", feature:"T-glottalisation", chap:"Ch4", tag:"phon"},
+{word:"went", ipa:"[wɛnts]", variety:"GAusE", feature:"final-t affrication", chap:"Ch4", tag:"phon"},
+{word:"he said", ipa:"[iː sɛd]", variety:"GAusE", feature:"H-dropping", chap:"Ch4", tag:"phon"},
+{word:"Mary", ipa:"[meəɹi]", variety:"RP", feature:"MARY vowel distinct", chap:"Ch4", tag:"phon"},
+{word:"merry", ipa:"[meɹi]", variety:"RP", feature:"MERRY vowel distinct", chap:"Ch4", tag:"phon"},
+{word:"marry", ipa:"[mæɹi]", variety:"RP", feature:"MARRY vowel distinct", chap:"Ch4", tag:"phon"},
+{word:"Mary/merry/marry", ipa:"[meɹi]", variety:"SAE", feature:"Mary–merry–marry merger", chap:"Ch4", tag:"phon"},
+
+/* Chapter 4 — SAE morphosyntax + GAusE */
+{word:"He done sold his house", ipa:"", variety:"SAE", feature:"'done' as completion marker", chap:"Ch4", tag:"syn", note:"Appalachian (Midland)"},
+{word:"He might could come Friday", ipa:"", variety:"SAE", feature:"double modals", chap:"Ch4", tag:"syn", note:"Southern"},
+{word:"She be here tomorrow", ipa:"", variety:"SAE", feature:"invariant be", chap:"Ch4", tag:"syn", note:"Southern"},
+{word:"They ain't here", ipa:"", variety:"SAE", feature:"ain't negation", chap:"Ch4", tag:"syn"},
+{word:"They've gotten all blue", ipa:"", variety:"SAE", feature:"past participle 'gotten'", chap:"Ch4", tag:"syn"},
+{word:"Funny old bag. I quite like her but.", ipa:"", variety:"GAusE", feature:"sentence-final 'but'", chap:"Ch4", tag:"syn"},
+{word:"barbie", ipa:"", variety:"GAusE", feature:"lexical (-ie diminutive)", chap:"Ch4", tag:"lex", note:"'barbecue'"},
+{word:"tinnie", ipa:"", variety:"GAusE", feature:"lexical (-ie diminutive)", chap:"Ch4", tag:"lex", note:"'can of beer'"},
+{word:"Chrissy", ipa:"", variety:"GAusE", feature:"lexical (-ie diminutive)", chap:"Ch4", tag:"lex", note:"'Christmas'"},
+{word:"smoko", ipa:"", variety:"GAusE", feature:"lexical (-o suffix)", chap:"Ch4", tag:"lex", note:"'work break'"},
+
+/* Chapter 5 — AAVE (richest phonological yield) */
+{word:"kid", ipa:"[kiɪd]", variety:"AAVE", feature:"KIT lengthening", chap:"Ch5", tag:"phon"},
+{word:"since", ipa:"[siɪns]", variety:"AAVE", feature:"KIT lengthening", chap:"Ch5", tag:"phon"},
+{word:"head", ipa:"[hɪed]", variety:"AAVE", feature:"DRESS diphthongisation", chap:"Ch5", tag:"phon"},
+{word:"when", ipa:"[wɪen]", variety:"AAVE", feature:"DRESS diphthongisation", chap:"Ch5", tag:"phon"},
+{word:"face", ipa:"[feːs]", variety:"AAVE", feature:"FACE long monophthong", chap:"Ch5", tag:"phon"},
+{word:"same", ipa:"[sɛːm]", variety:"AAVE", feature:"FACE before nasal → [ɛː]", chap:"Ch5", tag:"phon"},
+{word:"saying", ipa:"[sɛːn]", variety:"AAVE", feature:"FACE before nasal + -ing→-in", chap:"Ch5", tag:"phon"},
+{word:"mine", ipa:"[mɑːn]", variety:"AAVE", feature:"PRICE monophthong", chap:"Ch5", tag:"phon"},
+{word:"hi", ipa:"[hɑː]", variety:"AAVE", feature:"PRICE monophthong", chap:"Ch5", tag:"phon"},
+{word:"slide", ipa:"[slɑːd]", variety:"AAVE", feature:"PRICE monophthong", chap:"Ch5", tag:"phon"},
+{word:"and", ipa:"[ɛn]", variety:"AAVE", feature:"TRAP-raising before nasal + cluster simp", chap:"Ch5", tag:"phon"},
+{word:"bang", ipa:"[bɛŋ]", variety:"AAVE", feature:"TRAP-raising before nasal", chap:"Ch5", tag:"phon"},
+{word:"pin", ipa:"[pɪn]", variety:"AAVE", feature:"PIN–PEN merger", chap:"Ch5", tag:"phon"},
+{word:"pen", ipa:"[pɪn]", variety:"AAVE", feature:"PIN–PEN merger", chap:"Ch5", tag:"phon"},
+{word:"seven", ipa:"[sɛbn]", variety:"AAVE", feature:"v→b before nasal", chap:"Ch5", tag:"phon"},
+{word:"isn't", ipa:"[ɪdnt]", variety:"AAVE", feature:"z→d before nasal", chap:"Ch5", tag:"phon"},
+{word:"thing", ipa:"[tɪŋ]", variety:"AAVE", feature:"TH-stopping initial", chap:"Ch5", tag:"phon"},
+{word:"those", ipa:"[dɒz]", variety:"AAVE", feature:"TH-stopping initial", chap:"Ch5", tag:"phon"},
+{word:"bath", ipa:"[bæf]", variety:"AAVE", feature:"TH-fronting final", chap:"Ch5", tag:"phon"},
+{word:"mother", ipa:"[mʌvə]", variety:"AAVE", feature:"TH-fronting internal", chap:"Ch5", tag:"phon"},
+{word:"floor", ipa:"[floː]", variety:"AAVE", feature:"non-rhoticity", chap:"Ch5", tag:"phon"},
+{word:"Carol", ipa:"[kaəl]", variety:"AAVE", feature:"intervocalic /r/ deletion", chap:"Ch5", tag:"phon"},
+{word:"help", ipa:"[hɛʊp]", variety:"AAVE", feature:"L-vocalisation", chap:"Ch5", tag:"phon"},
+{word:"help", ipa:"[hɛp]", variety:"AAVE", feature:"L-deletion", chap:"Ch5", tag:"phon"},
+{word:"self", ipa:"[sɛf]", variety:"AAVE", feature:"L-deletion", chap:"Ch5", tag:"phon"},
+{word:"and", ipa:"[æn]", variety:"AAVE", feature:"cluster simp (nd)", chap:"Ch5", tag:"phon"},
+{word:"left", ipa:"[lɛf]", variety:"AAVE", feature:"cluster simp (ft)", chap:"Ch5", tag:"phon"},
+{word:"desk", ipa:"[dɛs]", variety:"AAVE", feature:"cluster simp (sk)", chap:"Ch5", tag:"phon"},
+{word:"comin'", ipa:"[kʌmɪn]", variety:"AAVE", feature:"-ing → -in", chap:"Ch5", tag:"phon"},
+{word:"police", ipa:"[ˈpoʊliːs]", variety:"AAVE", feature:"initial-syllable stress", chap:"Ch5", tag:"phon"},
+{word:"racoon", ipa:"[ˈræˌkuːn]", variety:"AAVE", feature:"initial-syllable stress", chap:"Ch5", tag:"phon"},
+{word:"last", ipa:"[læs]", variety:"AAVE", feature:"cluster simp (st)", chap:"Ch5", tag:"phon"},
+{word:"raised", ipa:"[reːz]", variety:"AAVE", feature:"cluster simp (zd)", chap:"Ch5", tag:"phon"},
+
+/* Chapter 5 — AAVE morphosyntax */
+{word:"She nice", ipa:"", variety:"AAVE", feature:"copula deletion", chap:"Ch5", tag:"syn"},
+{word:"Dey actin' silly", ipa:"", variety:"AAVE", feature:"auxiliary be deletion", chap:"Ch5", tag:"syn"},
+{word:"She be quiet", ipa:"", variety:"AAVE", feature:"habitual 'be'", chap:"Ch5", tag:"syn"},
+{word:"Dey be fightin'", ipa:"", variety:"AAVE", feature:"habitual 'be'", chap:"Ch5", tag:"syn"},
+{word:"Dr. Dre be the name", ipa:"", variety:"AAVE", feature:"habitual/copular be", chap:"Ch5", tag:"syn"},
+{word:"My ice-cream be done melted", ipa:"", variety:"AAVE", feature:"be done (resultative future)", chap:"Ch5", tag:"syn"},
+{word:"They done used all the good ones", ipa:"", variety:"AAVE", feature:"done (recent completion)", chap:"Ch5", tag:"syn"},
+{word:"I finna go", ipa:"", variety:"AAVE", feature:"finna (immediate future)", chap:"Ch5", tag:"syn"},
+{word:"Ah'm a hep you", ipa:"", variety:"AAVE", feature:"'a' future/intention", chap:"Ch5", tag:"syn"},
+{word:"Ah been see dat movie", ipa:"", variety:"AAVE", feature:"remote past BEEN", chap:"Ch5", tag:"syn"},
+{word:"Ain't nobody at home", ipa:"", variety:"AAVE", feature:"negative concord + ain't", chap:"Ch5", tag:"syn"},
+{word:"It wasn't nothing", ipa:"", variety:"AAVE", feature:"negative concord", chap:"Ch5", tag:"syn"},
+{word:"Nobody don't like him", ipa:"", variety:"AAVE", feature:"negative concord (subject)", chap:"Ch5", tag:"syn"},
+{word:"She ain't do it", ipa:"", variety:"AAVE", feature:"ain't for 'didn't'", chap:"Ch5", tag:"syn"},
+{word:"She walk", ipa:"", variety:"AAVE", feature:"no 3SG -s", chap:"Ch5", tag:"syn"},
+{word:"I asked her could I go with her", ipa:"", variety:"AAVE", feature:"embedded subj–aux inversion", chap:"Ch5", tag:"syn"},
+{word:"Where that is?", ipa:"", variety:"AAVE", feature:"no wh-inversion", chap:"Ch5", tag:"syn"},
+{word:"She likes them apples", ipa:"", variety:"AAVE", feature:"'them' as demonstrative", chap:"Ch5", tag:"syn"},
+{word:"The dog tail was wagging", ipa:"", variety:"AAVE", feature:"possessive -s absence", chap:"Ch5", tag:"syn"},
+
+/* Chapter 6 — NigE */
+{word:"hand", ipa:"[han]", variety:"NigE", feature:"cluster simplification", chap:"Ch6", tag:"phon"},
+{word:"post", ipa:"[poːs]", variety:"NigE", feature:"cluster simplification", chap:"Ch6", tag:"phon"},
+{word:"cold", ipa:"[koːl]", variety:"NigE", feature:"cluster simplification", chap:"Ch6", tag:"phon"},
+{word:"sit = seat", ipa:"[sit]", variety:"NigE", feature:"KIT–FLEECE merger", chap:"Ch6", tag:"phon"},
+{word:"full = fool", ipa:"[ful]", variety:"NigE", feature:"FOOT–GOOSE merger", chap:"Ch6", tag:"phon"},
+{word:"march = match", ipa:"[matʃ]", variety:"NigE", feature:"BATH–TRAP merger", chap:"Ch6", tag:"phon"},
+{word:"let = late", ipa:"[let]", variety:"NigE", feature:"DRESS–FACE merger", chap:"Ch6", tag:"phon"},
+{word:"I am hearing you", ipa:"", variety:"NigE", feature:"progressive with statives", chap:"Ch6", tag:"syn"},
+{word:"Yesterday they go to the office", ipa:"", variety:"NigE", feature:"no past tense marking", chap:"Ch6", tag:"syn"},
+{word:"The guests whom I invited them have arrived", ipa:"", variety:"NigE", feature:"resumptive pronoun", chap:"Ch6", tag:"syn"},
+{word:"I met the teacher our new", ipa:"", variety:"NigE", feature:"Det–possessive order", chap:"Ch6", tag:"syn"},
+{word:"I will like to see you, sir", ipa:"", variety:"NigE", feature:"present modal for conditional", chap:"Ch6", tag:"syn"},
+{word:"You like it, isn't it?", ipa:"", variety:"NigE", feature:"invariant tag 'isn't it'", chap:"Ch6", tag:"syn"},
+{word:"small-small", ipa:"", variety:"NigE", feature:"reduplication", chap:"Ch6", tag:"lex", note:"'insignificant things'"},
+{word:"now-now", ipa:"", variety:"NigE", feature:"reduplication", chap:"Ch6", tag:"lex", note:"'at once'"},
+{word:"half-half", ipa:"", variety:"NigE", feature:"reduplication", chap:"Ch6", tag:"lex", note:"'incompletely'"},
+{word:"opportuned", ipa:"", variety:"NigE", feature:"lexical innovation", chap:"Ch6", tag:"lex", note:"'privileged'"},
+{word:"jealousising", ipa:"", variety:"NigE", feature:"lexical innovation", chap:"Ch6", tag:"lex", note:"'envying'"},
+{word:"instalmentally", ipa:"", variety:"NigE", feature:"lexical innovation", chap:"Ch6", tag:"lex", note:"'in installments'"},
+{word:"confusionist", ipa:"", variety:"NigE", feature:"lexical innovation", chap:"Ch6", tag:"lex", note:"'causer of confusion'"},
+{word:"detribalized", ipa:"", variety:"NigE", feature:"semantic shift", chap:"Ch6", tag:"lex", note:"'cosmopolitan'"},
+
+/* Chapter 7 — IndE */
+{word:"kit", ipa:"[kiːt]", variety:"IndE", feature:"KIT raised/lengthened", chap:"Ch7", tag:"phon"},
+{word:"bad", ipa:"[bɛd]", variety:"IndE", feature:"TRAP raised", chap:"Ch7", tag:"phon"},
+{word:"tooth", ipa:"[tuːθ]", variety:"IndE", feature:"FOOT lengthening", chap:"Ch7", tag:"phon"},
+{word:"bath", ipa:"[bɑːθ]", variety:"IndE", feature:"BATH long", chap:"Ch7", tag:"phon"},
+{word:"nurse", ipa:"[nʌrs]", variety:"IndE", feature:"NURSE with retroflex r", chap:"Ch7", tag:"phon"},
+{word:"shame", ipa:"[ʃeːm]", variety:"IndE", feature:"FACE monophthong", chap:"Ch7", tag:"phon"},
+{word:"old", ipa:"[oːld]", variety:"IndE", feature:"GOAT monophthong", chap:"Ch7", tag:"phon"},
+{word:"park", ipa:"[pɑːrk]", variety:"IndE", feature:"no aspiration + rhotic", chap:"Ch7", tag:"phon"},
+{word:"certificate", ipa:"[sərʈifikeʈ]", variety:"IndE", feature:"retroflex stops", chap:"Ch7", tag:"phon"},
+{word:"London", ipa:"[lənɖən]", variety:"IndE", feature:"retroflex /d/", chap:"Ch7", tag:"phon"},
+{word:"fellow", ipa:"[pʰelou]", variety:"IndE", feature:"/f/ → [pʰ]", chap:"Ch7", tag:"phon"},
+{word:"wine = vine", ipa:"[wain]", variety:"IndE", feature:"v–w merger", chap:"Ch7", tag:"phon"},
+{word:"three", ipa:"[t̪riː]", variety:"IndE", feature:"TH-dentalisation", chap:"Ch7", tag:"phon"},
+{word:"then", ipa:"[d̪en]", variety:"IndE", feature:"TH-dentalisation", chap:"Ch7", tag:"phon"},
+{word:"she", ipa:"[siː]", variety:"IndE", feature:"/ʃ/ → [s]", chap:"Ch7", tag:"phon"},
+{word:"pleasure", ipa:"[pleːdʒər]", variety:"IndE", feature:"/ʒ/ → [dʒ]", chap:"Ch7", tag:"phon"},
+{word:"speech", ipa:"[ispiːtʃ]", variety:"IndE", feature:"prothetic /i/ before sC", chap:"Ch7", tag:"phon"},
+{word:"school", ipa:"[iskuːl]", variety:"IndE", feature:"prothetic /i/ before sC", chap:"Ch7", tag:"phon"},
+{word:"speech", ipa:"[səpiːtʃ]", variety:"IndE", feature:"schwa epenthesis in sC", chap:"Ch7", tag:"phon"},
+{word:"school", ipa:"[səkuːl]", variety:"IndE", feature:"schwa epenthesis in sC", chap:"Ch7", tag:"phon"},
+{word:"act", ipa:"[ɛk]", variety:"IndE", feature:"final cluster simplification", chap:"Ch7", tag:"phon"},
+{word:"fruits", ipa:"[fruit]", variety:"IndE", feature:"final cluster simplification", chap:"Ch7", tag:"phon"},
+{word:"against", ipa:"[aɡenəst]", variety:"IndE", feature:"schwa epenthesis", chap:"Ch7", tag:"phon"},
+{word:"dispensary", ipa:"[disˈpensri]", variety:"IndE", feature:"schwa deletion", chap:"Ch7", tag:"phon"},
+{word:"allegory", ipa:"[aˈleɡriː]", variety:"IndE", feature:"schwa deletion", chap:"Ch7", tag:"phon"},
+{word:"innate", ipa:"[innet]", variety:"IndE", feature:"geminate pronunciation", chap:"Ch7", tag:"phon"},
+{word:"fully", ipa:"[fulliː]", variety:"IndE", feature:"geminate pronunciation", chap:"Ch7", tag:"phon"},
+{word:"cannot", ipa:"[kɛnnot]", variety:"IndE", feature:"geminate pronunciation", chap:"Ch7", tag:"phon"},
+{word:"traced", ipa:"[tresd]", variety:"IndE", feature:"-ed as [d]", chap:"Ch7", tag:"phon"},
+{word:"packed", ipa:"[pækd]", variety:"IndE", feature:"-ed as [d]", chap:"Ch7", tag:"phon"},
+{word:"metal", ipa:"[metəl]", variety:"IndE", feature:"no syllabic consonant", chap:"Ch7", tag:"phon"},
+{word:"button", ipa:"[bʌtən]", variety:"IndE", feature:"no syllabic consonant", chap:"Ch7", tag:"phon"},
+{word:"Lilia is having two children", ipa:"", variety:"IndE", feature:"progressive with statives", chap:"Ch7", tag:"syn"},
+{word:"I have bought the book yesterday", ipa:"", variety:"IndE", feature:"present perfect for simple past", chap:"Ch7", tag:"syn"},
+{word:"You are going home soon, isn't it?", ipa:"", variety:"IndE", feature:"invariant tag 'isn't it'", chap:"Ch7", tag:"syn"},
+{word:"What he has eaten?", ipa:"", variety:"IndE", feature:"no wh-inversion", chap:"Ch7", tag:"syn"},
+{word:"Those people, I telephoned yesterday only", ipa:"", variety:"IndE", feature:"object topicalisation + 'only'", chap:"Ch7", tag:"syn"},
+{word:"Her mother only is doing this to her", ipa:"", variety:"IndE", feature:"focus 'only'", chap:"Ch7", tag:"syn"},
+
+/* Chapter 8 — SinE */
+{word:"three = tree", ipa:"[triː]", variety:"SinE", feature:"TH-stopping", chap:"Ch8", tag:"phon"},
+{word:"then = den", ipa:"[dɛn]", variety:"SinE", feature:"TH-stopping", chap:"Ch8", tag:"phon"},
+{word:"car", ipa:"[ka]", variety:"SinE", feature:"non-rhoticity", chap:"Ch8", tag:"phon"},
+{word:"bowl", ipa:"[bou]", variety:"SinE", feature:"L-vocalisation", chap:"Ch8", tag:"phon"},
+{word:"fool", ipa:"[fu]", variety:"SinE", feature:"L-vocalisation", chap:"Ch8", tag:"phon"},
+{word:"bottle", ipa:"[bətəl]", variety:"SinE", feature:"no syllabic consonants", chap:"Ch8", tag:"phon"},
+{word:"cotton", ipa:"[kətən]", variety:"SinE", feature:"no syllabic consonants", chap:"Ch8", tag:"phon"},
+{word:"out", ipa:"[ʔaʊ]", variety:"SinE", feature:"initial glottal stop", chap:"Ch8", tag:"phon"},
+{word:"back", ipa:"[baʔ]", variety:"SinE", feature:"final glottal stop", chap:"Ch8", tag:"phon"},
+{word:"raise = race", ipa:"[rɛs]", variety:"SinE", feature:"final devoicing", chap:"Ch8", tag:"phon"},
+{word:"past", ipa:"[pas]", variety:"SinE", feature:"cluster simplification", chap:"Ch8", tag:"phon"},
+{word:"poor", ipa:"[puə]", variety:"SinE", feature:"CURE diphthong", chap:"Ch8", tag:"phon"},
+{word:"cure", ipa:"[kjə]", variety:"SinE", feature:"CURE reduced", chap:"Ch8", tag:"phon"},
+{word:"Eight years she work here already", ipa:"", variety:"SinE", feature:"'already' as completion marker", chap:"Ch8", tag:"syn"},
+{word:"How much it will be?", ipa:"", variety:"SinE", feature:"no wh-inversion", chap:"Ch8", tag:"syn"},
+{word:"You have pen or not?", ipa:"", variety:"SinE", feature:"A-not-A question", chap:"Ch8", tag:"syn"},
+{word:"She can play piano", ipa:"", variety:"SinE", feature:"determiner deletion", chap:"Ch8", tag:"syn"},
+{word:"Ok lah", ipa:"", variety:"SinE", feature:"discourse particle 'lah'", chap:"Ch8", tag:"syn"},
+{word:"Like this la", ipa:"", variety:"SinE", feature:"discourse particle 'la/lah'", chap:"Ch8", tag:"syn"},
+{word:"Dat one his wife lah", ipa:"", variety:"SinE", feature:"copula deletion + lah", chap:"Ch8", tag:"syn"},
+{word:"I got three sister and two brother", ipa:"", variety:"SinE", feature:"no plural -s", chap:"Ch8", tag:"syn"},
+{word:"Dat joker dere cannot trust", ipa:"", variety:"SinE", feature:"object topicalisation", chap:"Ch8", tag:"syn"},
+{word:"small-small", ipa:"", variety:"SinE", feature:"adjectival reduplication", chap:"Ch8", tag:"lex"},
+{word:"sweet-sweet", ipa:"", variety:"SinE", feature:"intensification reduplication", chap:"Ch8", tag:"lex"},
+{word:"hot-hot", ipa:"", variety:"SinE", feature:"intensification reduplication", chap:"Ch8", tag:"lex"},
+{word:"walk-walk", ipa:"", variety:"SinE", feature:"verbal reduplication", chap:"Ch8", tag:"lex", note:"'stroll'"},
+{word:"stop-stop", ipa:"", variety:"SinE", feature:"verbal reduplication", chap:"Ch8", tag:"lex", note:"'short stop'"},
+{word:"buddy-buddy", ipa:"", variety:"SinE", feature:"reduplication", chap:"Ch8", tag:"lex"},
+
+/* Cross-variety duplicates — same word, shared IPA across multiple varieties
+   (lets the multi-answer logic trigger when a pronunciation is genuinely ambiguous) */
+{word:"bath", ipa:"[bɑːθ]", variety:"RP", feature:"BATH broad", chap:"Ch2", tag:"phon", note:"South British BATH = [ɑː]; shared with IndE, conservative GAusE"},
+{word:"bath", ipa:"[bɑːθ]", variety:"GAusE", feature:"BATH broad", chap:"Ch4", tag:"phon", note:"GAusE conservative form shares the RP long BATH"},
+{word:"face", ipa:"[feː]", variety:"Northern", feature:"FACE monophthong", chap:"Ch2", tag:"phon"},
+{word:"face", ipa:"[feːs]", variety:"ScotE", feature:"FACE monophthong", chap:"Ch3", tag:"phon", note:"ScotE FACE is long and monophthongal"},
+{word:"face", ipa:"[feːs]", variety:"IndE", feature:"FACE monophthong", chap:"Ch7", tag:"phon", note:"IndE FACE is monophthongal like ScotE, NigE, AAVE"},
+{word:"face", ipa:"[feːs]", variety:"AAVE", feature:"FACE long monophthong", chap:"Ch5", tag:"phon"},
+{word:"goat", ipa:"[ɡoː]", variety:"ScotE", feature:"GOAT monophthong", chap:"Ch3", tag:"phon"},
+{word:"goat", ipa:"[ɡoː]", variety:"Northern", feature:"GOAT monophthong", chap:"Ch2", tag:"phon"},
+{word:"car", ipa:"[kɑː]", variety:"RP", feature:"non-rhoticity", chap:"Ch2", tag:"phon"},
+{word:"car", ipa:"[kɑː]", variety:"GAusE", feature:"non-rhoticity", chap:"Ch4", tag:"phon"},
+{word:"car", ipa:"[kɑː]", variety:"AAVE", feature:"non-rhoticity", chap:"Ch5", tag:"phon"},
+{word:"three", ipa:"[triː]", variety:"AAVE", feature:"TH-stopping initial", chap:"Ch5", tag:"phon"},
+{word:"think", ipa:"[tɪŋk]", variety:"AAVE", feature:"TH-stopping initial", chap:"Ch5", tag:"phon"},
+{word:"think", ipa:"[tɪŋk]", variety:"IndE", feature:"TH-dentalisation", chap:"Ch7", tag:"phon", note:"IndE is dental [t̪], AAVE is alveolar [t]"},
+
+/* Chapter 2 — vernacular British/Welsh/Northern syntax */
+{word:"I see / I do see", ipa:"", variety:"WestCountry", feature:"habitual 'do'", chap:"Ch2", tag:"syn"},
+{word:"I never done it", ipa:"", variety:"Welsh English", feature:"'never' for 'not'", chap:"Ch2", tag:"syn"},
+{word:"the man what was driving", ipa:"", variety:"Vernacular Br", feature:"relative 'what'", chap:"Ch2", tag:"syn"},
+{word:"we sees / he go", ipa:"", variety:"Northern", feature:"Northern Subject Rule", chap:"Ch2", tag:"syn"},
+{word:"this / that / yon", ipa:"", variety:"Northern", feature:"three-way demonstratives", chap:"Ch2", tag:"syn"},
+{word:"you / thou", ipa:"", variety:"Northern", feature:"retained 2SG 'thou'", chap:"Ch2", tag:"syn"},
+{word:"I couldn't find none nowhere", ipa:"", variety:"Vernacular Br", feature:"negative concord", chap:"Ch2", tag:"syn"},
+
+/* ============================================================
+   CONTEXTUAL DISCOURSE EXAMPLES
+   Longer, multi-utterance examples showing features in use.
+   The `context` field carries the full exchange;
+   the `word` field is a short trigger for the question prompt.
+   ============================================================ */
+
+/* --- SinE discourse particles (Leimgruber 2011, via Ch8) --- */
+{word:"Like this la.", ipa:"", variety:"SinE", feature:"discourse particle 'lah' (softening)", chap:"Ch8", tag:"syn", note:"'lah' softens the statement",
+ context:"A: How's the project going?<br>B: <i>Like this la.</i><br><br>[then A is asked about his own work]<br>A: <i>Ok la.</i><br><br>[B is asked about her work]<br>B: <i>stressed la.</i><br><br>Here <b>la/lah</b> does not add literal meaning — it softens, confirms, or appeals for mutual understanding."},
+{word:"Ok lah, confirm ah, Bangkok. Let's have a try ah.", ipa:"", variety:"SinE", feature:"discourse particle 'lah' + 'ah' stacking", chap:"Ch8", tag:"syn", note:"Multiple particles in one utterance",
+ context:"<i>Ok lah, confirm ah, Bangkok. Let's have a try ah. . . It's more like a survival things ah, with three hundred.</i><br><br><b>lah</b> marks the speaker's stance (softening); <b>ah</b> is a tentative/continuation marker. Stacking multiple particles is highly characteristic of Colloquial Singapore English."},
+{word:"Because she wants to sing mah. So we just groom her lor.", ipa:"", variety:"SinE", feature:"discourse particle 'mah' + 'lor'", chap:"Ch8", tag:"syn", note:"'mah' marks information as obvious; 'lor' marks obviousness/resignation",
+ context:"<i>Because she wants to sing mah. So she want to use, she want to join to sing, so we just groom her lor.</i><br><br><b>mah</b> flags the reason as self-evident ('obviously, because…'); <b>lor</b> conveys 'it just follows / what can you do'. Both come from Cantonese."},
+{word:"Dat one his wife lah.", ipa:"", variety:"SinE", feature:"copula deletion + discourse 'lah'", chap:"Ch8", tag:"syn", note:"Zero copula + particle",
+ context:"<i>Dat one his wife lah.</i><br><br>= 'That one (is) his wife, lah.' No copula 'is', and the final <b>lah</b> flags the statement as uncontroversial ('of course, you should know')."},
+{word:"How come you so late still playin music, ah?", ipa:"", variety:"SinE", feature:"discourse particle 'ah' (question marker)", chap:"Ch8", tag:"syn",
+ context:"<i>How come you so late still playin music, ah?</i><br><br>The final <b>ah</b> turns a bald complaint into a question/prompt. Standard English would use rising intonation or a tag; Singlish uses a dedicated particle."},
+{word:"You go where hah?", ipa:"", variety:"SinE", feature:"discourse particle 'hah' (question)", chap:"Ch8", tag:"syn", note:"hah = question marker",
+ context:"<i>You go where hah?</i><br><br>= 'Where are you going?' The <b>hah</b> (distinct from 'ah') is a pure interrogative marker, often at the end of an otherwise SVO structure."},
+{word:"Can lah, confirm can hor?", ipa:"", variety:"SinE", feature:"discourse particle 'hor' (seek agreement)", chap:"Ch8", tag:"syn",
+ context:"<i>Can lah, confirm can hor?</i><br><br><b>hor</b> appeals to the listener for agreement — roughly 'right?' The particle chain <i>lah … hor</i> is conversationally layered."},
+{word:"Cannot meh?", ipa:"", variety:"SinE", feature:"discourse particle 'meh' (scepticism)", chap:"Ch8", tag:"syn",
+ context:"<i>Cannot meh?</i><br><br>= 'Really? It can't be done?' <b>meh</b> expresses doubt or challenge — 'surely not?'"},
+
+/* --- ScotE morphosyntax in context --- */
+{word:"He'll can help us tomorrow.", ipa:"", variety:"ScotE", feature:"double modals", chap:"Ch3", tag:"syn",
+ context:"<i>He'll can help us tomorrow.</i> · <i>They might could be working.</i> · <i>She might can get away early.</i><br><br>Two modal verbs stack directly, which Standard English forbids ('*will can'). ScotE and some SAE varieties retain this older English pattern."},
+{word:"I've no seen him the day.", ipa:"", variety:"ScotE", feature:"negation with free 'no' + recent-past 'the day'", chap:"Ch3", tag:"syn",
+ context:"<i>I've no seen him the day.</i><br><br>= 'I haven't seen him today.' Two features: negation uses the free morpheme <b>no</b> (cf. -nae: <i>I havenae seen him</i>), and 'the day' replaces 'today'."},
+{word:"He doesnae help in the house.", ipa:"", variety:"ScotE", feature:"bound negative -nae", chap:"Ch3", tag:"syn",
+ context:"<i>He doesnae help in the house.</i> · <i>She cannae come.</i> · <i>They wouldnae say.</i><br><br>The bound negative clitic <b>-nae</b> attaches to modals and auxiliaries. This is a Scottish-specific reflex of Middle English 'na'."},
+
+/* --- IrE morphosyntax in context --- */
+{word:"You're after ruinin' me.", ipa:"", variety:"IrE", feature:"after-perfect (recent past)", chap:"Ch3", tag:"syn",
+ context:"<i>You're after ruinin' me.</i> · <i>I'm after doing it this very minute.</i><br><br>The <b>be + after + V-ing</b> construction expresses recent past — 'I've just done it'. Calqued from Irish <i>tar éis</i>. Unique to IrE."},
+{word:"They do be shooting.", ipa:"", variety:"IrE", feature:"habitual 'do be' (Northern IrE)", chap:"Ch3", tag:"syn",
+ context:"<i>They do be shooting.</i> · <i>They does be lonesome by night, the priests does, surely.</i><br><br>Habitual aspect marked by periphrastic <b>do be</b>. Contrasts with Southern IrE bare habitual <b>be</b>: <i>They be shooting and fishing out at the forestry lake.</i>"},
+{word:"She be's going, and she leaves us in, too.", ipa:"", variety:"IrE", feature:"habitual 'be's' (Southern IrE)", chap:"Ch3", tag:"syn",
+ context:"<i>She be's going, and she leaves us in, too.</i><br><br>Southern IrE marks habitual with <b>be's</b> (agreement-suffixed). Compare Northern IrE periphrastic <i>do be</i>."},
+{word:"It's to Dublin he's going today.", ipa:"", variety:"IrE", feature:"cleft focus", chap:"Ch3", tag:"syn",
+ context:"<i>It's to Dublin he's going today.</i><br><br>Strong use of initial clefts for focus. IrE allows a wider range of constituents to be clefted than Standard English — including prepositional phrases."},
+{word:"I don't know was it a priest.", ipa:"", variety:"IrE", feature:"embedded subject-aux inversion", chap:"Ch3", tag:"syn",
+ context:"<i>I don't know was it a priest or who it was at all.</i><br><br>Subject-auxiliary inversion retained in an embedded clause — Standard English requires 'whether it was…'."},
+
+/* --- AAVE aspectual system in context --- */
+{word:"Dr. Dre be the name.", ipa:"", variety:"AAVE", feature:"habitual 'be' (identity)", chap:"Ch5", tag:"syn", note:"Kendrick Lamar, Compton",
+ context:"<i>Dr. Dre be the name.</i><br><br>Habitual <b>be</b> is not just for activities — here it marks the identity 'ongoing / across time'. AAVE <b>be</b> is aspectual (habitual), not tensed."},
+{word:"My ice-cream be done melted by the time we get there.", ipa:"", variety:"AAVE", feature:"'be done' (resultative future)", chap:"Ch5", tag:"syn",
+ context:"<i>My ice-cream be done melted by the time we get there.</i><br><br>The <b>be done</b> auxiliary stacks habitual/future <i>be</i> with resultative <i>done</i>. Reading: 'by X point, the melting will have happened'."},
+{word:"Dey come comin' in here like dey owned de place.", ipa:"", variety:"AAVE", feature:"'come' marking indignation", chap:"Ch5", tag:"syn",
+ context:"<i>Dey come comin' in here like dey owned de place.</i><br><br><b>come</b> is an aspectual auxiliary marking speaker's indignation at the described action. Unique to AAVE in the English varieties."},
+{word:"We be steady rappin'.", ipa:"", variety:"AAVE", feature:"'steady' (intense habitual)", chap:"Ch5", tag:"syn",
+ context:"<i>We be steady rappin' / we be rappin' 'steady'.</i><br><br><b>steady</b> intensifies the habitual — 'persistently, continuously'. Often co-occurs with habitual <i>be</i>."},
+{word:"I finna go.", ipa:"", variety:"AAVE", feature:"'finna' (immediate future)", chap:"Ch5", tag:"syn", note:"From 'fixing to' → 'fixna' → 'finna'",
+ context:"<i>I finna go.</i> · <i>She finna call you.</i><br><br><b>finna</b> = immediate future ('about to, fixing to'). Derived phonologically from 'fixing to' through Southern US dialect."},
+{word:"Ain't nobody at home.", ipa:"", variety:"AAVE", feature:"negative concord + 'ain't' subject", chap:"Ch5", tag:"syn",
+ context:"<i>Ain't nobody at home.</i> · <i>Nobody don't like him.</i> · <i>It wasn't nothing.</i><br><br>Multiple negative elements agree — one proposition, many morphological negatives. Fronting <b>ain't</b> to subject position emphasises."},
+
+/* --- NigE reduplication + invariant tag --- */
+{word:"He likes to talk about small-small things.", ipa:"", variety:"NigE", feature:"reduplication (diminutive)", chap:"Ch6", tag:"syn",
+ context:"<i>He likes to talk about small-small things.</i> = 'insignificant things'.<br><i>Tell Mr Bello to come now-now.</i> = 'at once'.<br><i>Labake does her work half-half.</i> = 'incompletely'.<br><br>NigE reduplicates adjectives and adverbs to intensify or narrow meaning. Substrate influence from Yoruba/Igbo."},
+{word:"You like it, isn't it?", ipa:"", variety:"NigE", feature:"invariant tag 'isn't it?' (+response)", chap:"Ch6", tag:"syn",
+ context:"<i>— You like it, isn't it?</i><br><i>— Yes.</i> (or <i>No, I don't.</i>)<br><br>Also: <i>He didn't greet his father.</i> <i>— Isn't it?</i> (= 'really?')<br><br>Invariant <b>isn't it?</b> is used regardless of subject/tense. Identical innovation in IndE."},
+
+/* --- IndE morphosyntax in context --- */
+{word:"You are going home soon, isn't it?", ipa:"", variety:"IndE", feature:"invariant tag 'isn't it'", chap:"Ch7", tag:"syn",
+ context:"<i>You are going home soon, isn't it?</i> · <i>She passed the exam, isn't it?</i><br><br>IndE generalises <b>isn't it?</b> as an invariant tag, regardless of the main clause's subject and tense — Standard English would require <i>aren't you? / didn't she?</i>"},
+{word:"Those people, I telephoned yesterday only.", ipa:"", variety:"IndE", feature:"object topicalisation + 'only' focus", chap:"Ch7", tag:"syn",
+ context:"<i>Those people, I telephoned yesterday only.</i><br><br>Object topicalised to the front; the focus particle <b>only</b> (calqued from Hindi <i>hī</i>) tightens the temporal — 'I telephoned them yesterday, not before'."},
+{word:"Her mother only is doing this to her.", ipa:"", variety:"IndE", feature:"subject focus 'only'", chap:"Ch7", tag:"syn",
+ context:"<i>Her mother only is doing this to her.</i><br><br>= 'It is her mother (specifically) who is doing this…' The focus <b>only</b> attaches to the subject. Compare Hindi <i>hī</i> for exclusive focus."},
+{word:"I have bought the book yesterday.", ipa:"", variety:"IndE", feature:"present perfect for simple past", chap:"Ch7", tag:"syn",
+ context:"<i>I have bought the book yesterday.</i><br><br>Standard English requires simple past with definite time adverbs (<i>I bought … yesterday</i>). IndE generalises the present perfect, a common feature of L2 Englishes."},
+
+/* --- SAE in context --- */
+{word:"Y'all comin' tonight?", ipa:"", variety:"SAE", feature:"'y'all' plural second-person", chap:"Ch4", tag:"syn", note:"Southern SAE",
+ context:"<i>— Y'all comin' tonight?</i><br><i>— All y'all? Sure are.</i><br><br><b>y'all</b> fills the gap left by the loss of 'ye/you all' vs singular 'you' in Standard English. <i>All y'all</i> is an emphatic plural."},
+{word:"He might could come Friday.", ipa:"", variety:"SAE", feature:"double modals (Southern)", chap:"Ch4", tag:"syn",
+ context:"<i>He might could come Friday.</i> · <i>I used to could lift that.</i> · <i>We might should leave.</i><br><br>Southern SAE (Coastal and Hill) retains older English double modals, like ScotE."},
+{word:"She be here tomorrow.", ipa:"", variety:"SAE", feature:"invariant 'be'", chap:"Ch4", tag:"syn", note:"Southern SAE",
+ context:"<i>She be here tomorrow.</i><br><br>Southern white vernacular also uses invariant <b>be</b>, but as a future/planned event rather than AAVE habitual. Shared origin debated (Anglo-Irish input + AAVE contact)."},
+
+/* --- GAusE in context --- */
+{word:"Funny old bag. I quite like her but.", ipa:"", variety:"GAusE", feature:"sentence-final 'but'", chap:"Ch4", tag:"syn",
+ context:"<i>Funny old bag. I quite like her but.</i><br><br>= 'Funny old bag — but I quite like her.' GAusE (and some Scots/Ulster) use <b>but</b> clause-finally as a concessive. Unusual in other Englishes."},
+{word:"Throw another prawn on the barbie.", ipa:"", variety:"GAusE", feature:"diminutive -ie (informal register)", chap:"Ch4", tag:"lex",
+ context:"<i>Throw another prawn on the barbie. Grab a tinnie from the esky. Back by Chrissy?</i><br><br><b>-ie</b> diminutives are pervasive and informal: <i>barbie</i> = barbecue, <i>tinnie</i> = can of beer, <i>Chrissy</i> = Christmas, <i>mozzie</i> = mosquito."},
+{word:"Just goin' for a smoko.", ipa:"", variety:"GAusE", feature:"diminutive -o (informal)", chap:"Ch4", tag:"lex",
+ context:"<i>Just goin' for a smoko.</i> (work break)<br><i>She went to the arvo session.</i> (afternoon)<br><i>Good on ya, mate — bottle-o's still open.</i><br><br><b>-o</b> is the other GAusE diminutive (from clipping + vowel). Note register: all three suffixes mark informality / solidarity."},
+
+/* --- Northern English + Welsh English in context --- */
+{word:"We sees the buses going past / He go to Leeds on Fridays.", ipa:"", variety:"Northern", feature:"Northern Subject Rule", chap:"Ch2", tag:"syn",
+ context:"<i>We sees the buses going past.</i> · <i>He go to Leeds on Fridays.</i><br><br>The Northern Subject Rule: a verb takes -s unless the subject is an immediately adjacent pronoun. 'We sees' (non-adjacent interpretation) but 'he go' (bare with immediately adjacent pronoun in some varieties)."},
+{word:"This / that / yon.", ipa:"", variety:"Northern", feature:"three-way demonstrative system", chap:"Ch2", tag:"syn",
+ context:"<i>Pass me this book.</i> (proximal, near speaker)<br><i>Pass me that book.</i> (medial, near hearer)<br><i>Pass me yon book.</i> (distal, far from both)<br><br>Retained from Middle English; collapsed to two-way in Standard English (<i>this</i>/<i>that</i>)."},
+{word:"I never done it.", ipa:"", variety:"Welsh English", feature:"'never' for single-event 'not'", chap:"Ch2", tag:"syn", note:"Thomas 1985",
+ context:"<i>— Did you eat the cake?</i><br><i>— I never done it.</i> (= 'I didn't do it.')<br><br>Standard English uses <i>never</i> only for all-time negation. Welsh English (and Cockney) extend it to a single-event 'not'."}
+];
+
+/* Canonical variety list for option generation */
+const VARIETIES = ["RP","ScotE","IrE","Cockney","Scouse","Geordie","WestCountry","Northern","SAE","GAusE","AAVE","NigE","IndE","SinE","Welsh English","Vernacular Br"];
+const CORE_VARIETIES = ["RP","ScotE","IrE","Cockney","Scouse","Geordie","SAE","GAusE","AAVE","NigE","IndE","SinE"];
+
+/* Variety-level signature-assembly data (real features from ITEMS) */
+function featuresForVariety(v){
+  return [...new Set(ITEMS.filter(i=>i.variety===v).map(i=>i.feature))];
+}
+
+/* ----- Cross-item helpers for multi-answer + rich explanations ----- */
+function normWord(w){
+  if (!w) return "";
+  return w.split(" =")[0].split("/")[0].trim().toLowerCase();
+}
+
+/* All items that share (word, IPA) with the given item — including itself */
+function siblingsSameIpa(idx){
+  const it = ITEMS[idx];
+  if (!it.word || !it.ipa) return [it];
+  const wk = normWord(it.word);
+  return ITEMS.filter(o => normWord(o.word) === wk && o.ipa === it.ipa);
+}
+
+/* Items with the same word but a DIFFERENT IPA (contrast set) */
+function contrastSameWord(idx){
+  const it = ITEMS[idx];
+  if (!it.word || !it.ipa) return [];
+  const wk = normWord(it.word);
+  return ITEMS.filter((o,i) => i !== idx && normWord(o.word) === wk && o.ipa !== it.ipa);
+}
+
+/* Items with the SAME feature label in OTHER varieties */
+function siblingsSameFeature(idx){
+  const it = ITEMS[idx];
+  return ITEMS.filter((o,i) => i !== idx && o.feature === it.feature && o.variety !== it.variety);
+}
+
+/* Varieties that also carry the same feature (for multi-answer feature detection) */
+function varietiesWithFeature(feature){
+  return [...new Set(ITEMS.filter(o => o.feature === feature).map(o => o.variety))];
+}
+
+/* Plain-English descriptions for common features (shown in the explanation).
+   Keys are the short feature labels used in the ITEMS bank. */
+const FEATURE_GLOSS = {
+  "GOAT monophthong": "GOAT is realised as a single long vowel rather than a diphthong (e.g. [ɡoː] not [ɡəʊt]).",
+  "FACE monophthong": "FACE is a pure long vowel, not a diphthong (e.g. [feː] not [feɪ]).",
+  "FACE diphthong": "FACE is diphthongal [eɪ], the Southern British pattern.",
+  "GOAT diphthong": "GOAT is diphthongal [əʊ], the Southern British pattern.",
+  "FOOT–STRUT merger": "No contrast between FOOT [ʊ] and STRUT [ʌ] — both merge to [ʊ].",
+  "FOOT–STRUT split": "STRUT has its own vowel [ʌ] distinct from FOOT [ʊ] — the Southern pattern.",
+  "BATH broad": "BATH takes the long [ɑː] vowel (Southern British, IndE, conservative GAusE).",
+  "BATH = TRAP (short)": "BATH shares the short TRAP vowel [a]/[æ], the Northern English pattern.",
+  "BATH flat": "BATH uses the short/flat TRAP-like vowel.",
+  "TRAP/BATH raised": "TRAP and BATH are raised toward [ɛ], characteristic of GAusE.",
+  "SVLR": "Scottish Vowel Length Rule: vowels are long before /r v ð z/ or a morpheme boundary.",
+  "velar fricative /x/": "Retains [x] in words like loch, unique among English varieties.",
+  "TH-stopping initial": "Word-initial /θ ð/ becomes alveolar [t d] (e.g. this → [dɪs]).",
+  "TH-stopping (dental)": "/θ ð/ become dental stops [t̪ d̪], typical of IrE.",
+  "TH-dentalisation": "/θ ð/ become dental stops [t̪ d̪], typical of IndE.",
+  "TH-fronting": "/θ ð/ become labiodental [f v] (e.g. three → [friː]).",
+  "TH-fronting final": "Word-final /θ/ → [f] (AAVE/Cockney feature).",
+  "TH-fronting word-final": "Word-final /θ/ → [f] (AAVE/Cockney feature).",
+  "TH-fronting internal": "Word-internal /ð/ → [v] (AAVE/Cockney feature).",
+  "TH-fronting word-internal": "Word-internal /ð/ → [v] (AAVE/Cockney feature).",
+  "non-rhoticity": "Post-vocalic /r/ is not pronounced (e.g. car → [kɑː]).",
+  "retroflex /r/": "/r/ is realised as a retroflex approximant [ɽ].",
+  "retroflex stops": "/t d/ become retroflex [ʈ ɖ], a South-Asian signature.",
+  "no aspiration + rhotic": "/p t k/ lack aspiration and /r/ is pronounced — typical IndE.",
+  "L-vocalisation": "/l/ turns into a vowel-like sound [ʊ] (e.g. milk → [mɪʊk]).",
+  "L-deletion": "Final /l/ is deleted (e.g. golf → [ɡɔf]).",
+  "H-dropping": "Word-initial /h/ is not pronounced (e.g. house → [aʊs]).",
+  "PIN–PEN merger": "PIN and PEN are homophonous before nasals, both [pɪn].",
+  "KIT–FLEECE merger": "KIT and FLEECE are homophonous, both [i].",
+  "FOOT–GOOSE merger": "FOOT and GOOSE are homophonous, both [u].",
+  "BATH–TRAP merger": "BATH and TRAP share the same vowel.",
+  "DRESS–FACE merger": "DRESS and FACE are homophonous.",
+  "Mary–merry–marry merger": "All three words share the same vowel sequence [ˈmɛri] (typical GAmE).",
+  "T-flapping": "Intervocalic /t/ becomes an alveolar flap [ɾ] (e.g. butter → [ˈbʌɾɚ]).",
+  "T-glottalisation": "Non-intervocalic medial /t/ becomes a glottal stop [ʔ].",
+  "final-t affrication": "Final /t/ becomes an affricate [ts].",
+  "Northern Subject Rule": "Agreement mismatch: 'we sees', 'he go'.",
+  "habitual 'be'": "Invariant 'be' marks habitual aspect (AAVE: she be working = she habitually works).",
+  "copula deletion": "The copula 'be' can be omitted (she nice).",
+  "cluster simplification": "Final consonant clusters simplify (cold → [koːl], hand → [han]).",
+  "reduplication": "Words are doubled to mark intensification or plurality (small-small, walk-walk).",
+  "invariant tag 'isn't it'": "Generalised question tag used regardless of matrix clause.",
+  "palatalisation of /k/": "/k/ palatalises to [kʲ] before front vowels (Southern IrE)."
+};
+
+/* Build a rich explanation block for any item — structured into clear sections */
+function richExplanation(it, opts = {}) {
+  const idx = ITEMS.indexOf(it);
+  let html = '<div class="ex">';
+
+  /* 1. HEADER FACT */
+  html += `<div class="ex-sec">`;
+  html += `<div class="ex-h">Why ${it.variety}?</div>`;
+  html += `<div class="ex-body"><i>${it.word}</i>${it.ipa?' <span class="ipa">'+it.ipa+'</span>':''} displays <b>${it.feature}</b>`;
+  if (it.note) html += ` — ${it.note}`;
+  html += `.</div>`;
+  if (FEATURE_GLOSS[it.feature]) {
+    html += `<div class="ex-gloss">${FEATURE_GLOSS[it.feature]}</div>`;
+  }
+  if (it.context) {
+    html += `<div class="ex-context"><div class="ex-ctx-h">In context</div>${it.context}</div>`;
+  }
+  html += `</div>`;
+
+  /* 2. SHARED PRONUNCIATION (also-correct list) */
+  if (!opts.skipAccepted) {
+    const accVars = [...new Set(siblingsSameIpa(idx).map(x=>x.variety))];
+    const others = accVars.filter(v => v !== it.variety);
+    if (others.length) {
+      html += `<div class="ex-sec">`;
+      html += `<div class="ex-h">Also correct: ${others.join(", ")}</div>`;
+      html += `<div class="ex-body">This same IPA <span class="ipa">${it.ipa}</span> is produced by ${others.join(", ")} too — all count as right answers.</div>`;
+      html += `</div>`;
+    }
+  }
+
+  /* 3. SAME FEATURE IN OTHER VARIETIES — dedupe by variety */
+  const feat = siblingsSameFeature(idx);
+  const seen = new Set([it.variety]);
+  const uniqueFeat = [];
+  feat.forEach(s => {
+    if (!seen.has(s.variety)) { seen.add(s.variety); uniqueFeat.push(s); }
+  });
+  if (uniqueFeat.length) {
+    html += `<div class="ex-sec">`;
+    html += `<div class="ex-h">"${it.feature}" elsewhere</div>`;
+    html += `<ul class="ex-list">`;
+    uniqueFeat.slice(0, 4).forEach(s => {
+      const body = `<i>${s.word}</i>${s.ipa?' <span class="ipa">'+s.ipa+'</span>':''}${s.note?' <span class="ex-note">— '+s.note+'</span>':''}`;
+      html += `<li><b>${s.variety}</b> — ${body}</li>`;
+    });
+    html += `</ul></div>`;
+  }
+
+  /* 4. CONTRAST — same word, different varieties */
+  const contrast = contrastSameWord(idx).slice(0, 4);
+  if (contrast.length) {
+    html += `<div class="ex-sec">`;
+    html += `<div class="ex-h">Same word, other varieties</div>`;
+    html += `<ul class="ex-list">`;
+    contrast.forEach(c => {
+      html += `<li><b>${c.variety}</b> <span class="ipa">${c.ipa}</span> — ${c.feature}</li>`;
+    });
+    html += `</ul></div>`;
+  }
+
+  /* 5. OTHER SIGNATURES OF THIS VARIETY — with examples */
+  const sigFeats = [...new Set(ITEMS.filter(o => o.variety === it.variety && o.feature !== it.feature).map(o => o.feature))].slice(0, 3);
+  if (sigFeats.length) {
+    html += `<div class="ex-sec">`;
+    html += `<div class="ex-h">Other ${it.variety} signatures</div>`;
+    html += `<ul class="ex-list">`;
+    sigFeats.forEach(f => {
+      const ex = ITEMS.find(o => o.variety === it.variety && o.feature === f && o.ipa);
+      html += `<li><b>${f}</b>${ex && ex.ipa ? ': <i>'+ex.word+'</i> <span class="ipa">'+ex.ipa+'</span>' : ''}</li>`;
+    });
+    html += `</ul></div>`;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+/* ============================================================
+   STATE: stats, Leitner boxes, session log
+   ============================================================ */
+
+const state = {
+  mode: null,
+  current: null,          // current item(s) for the question
+  stats: {session:0, correct:0, wrong:0, streak:0, best:0},
+  boxes: { 1: [], 2: [], 3: [] },   // item indices by box (Leitner)
+  mistakes: [],           // recent mistakes
+  answered: false,
+  filter: { phon:true, syn:true, lex:true }
+};
+
+/* Initialise all items into Box 1 */
+ITEMS.forEach((_, idx) => state.boxes[1].push(idx));
+
+/* Box draw probabilities: box 1 = 60%, box 2 = 30%, box 3 = 10% */
+function drawItemIndex() {
+  const pool = [];
+  const b1 = state.boxes[1].filter(i => passesFilter(ITEMS[i]));
+  const b2 = state.boxes[2].filter(i => passesFilter(ITEMS[i]));
+  const b3 = state.boxes[3].filter(i => passesFilter(ITEMS[i]));
+  const r = Math.random();
+  if (r < .6 && b1.length) return b1[Math.floor(Math.random() * b1.length)];
+  if (r < .9 && b2.length) return b2[Math.floor(Math.random() * b2.length)];
+  if (b3.length) return b3[Math.floor(Math.random() * b3.length)];
+  return b1[Math.floor(Math.random() * b1.length)] ?? b2[0] ?? b3[0] ?? 0;
+}
+
+function passesFilter(it) {
+  return state.filter[it.tag];
+}
+
+function moveItem(idx, delta) {
+  /* delta = +1 move up on correct, -1 move to box 1 on wrong */
+  let cur = null;
+  for (let b of [1,2,3]) {
+    const i = state.boxes[b].indexOf(idx);
+    if (i !== -1) { cur = b; state.boxes[b].splice(i,1); break; }
+  }
+  if (cur === null) cur = 1;
+  let next = delta > 0 ? Math.min(3, cur + 1) : 1;
+  state.boxes[next].push(idx);
+}
+
+/* ============================================================
+   GAME MODES
+   ============================================================ */
+
+const MODES = [
+  { id:"variety", name:"Identify Variety",
+    desc:"You see word + IPA. Pick the variety that pronounces it this way." },
+  { id:"feature", name:"Identify Feature",
+    desc:"You see word + IPA + variety. Name the phonological rule at work." },
+  { id:"pair", name:"Minimal Pair",
+    desc:"Two transcriptions of the same word. Which variety produces which?" },
+  { id:"intruder", name:"Spot the Intruder",
+    desc:"Four features — three belong to the named variety, one doesn't. Find the intruder." },
+  { id:"assembly", name:"Signature Assembly",
+    desc:"Named variety + eight features. Select every feature that belongs to it." }
+];
+
+/* ------------ Mode 1: Identify Variety ------------ */
+function makeVarietyQuestion() {
+  const idx = drawItemIndex();
+  const it = ITEMS[idx];
+  /* Collect every variety that shares this exact (word, IPA) — these are ALL correct */
+  const accepted = [...new Set(siblingsSameIpa(idx).map(x=>x.variety))];
+  const isMulti = accepted.length > 1;
+  const distractorCount = isMulti ? Math.max(2, 6 - accepted.length) : 3;
+  const distractors = shuffled(VARIETIES.filter(v => !accepted.includes(v))).slice(0, distractorCount);
+  const options = shuffled([...accepted, ...distractors]);
+  return { idx, it, options, answer: accepted, isMulti };
+}
+function renderVarietyQuestion(q) {
+  const { it, isMulti } = q;
+  const ipaBit = it.ipa ? `<span class="q-ipa">${it.ipa}</span>` : "";
+  const wordBit = it.word ? `<span class="q-word">${it.word}</span>` : "";
+  const kicker = isMulti ? "Identify the varieties — select all that apply" : "Identify the variety";
+  const hint = isMulti
+    ? `<div class="q-hint"><b>This pronunciation is shared.</b> Select every variety that would produce this IPA.</div>`
+    : (it.feature ? `<div class="q-hint">Feature: ${it.feature}</div>` : "");
+  return `
+    <div class="q-card ${isMulti ? 'multi-select' : ''}">
+      <div class="q-kicker">${kicker}</div>
+      <div class="q-prompt">${wordBit}${ipaBit}</div>
+      ${hint}
+      <div class="options" id="var-opts">
+        ${q.options.map(o => `<button class="opt" data-v="${o}">${isMulti ? '<span class="check"></span>' : ''}<span class="tag">Variety</span><span class="val">${o}</span></button>`).join("")}
+      </div>
+      ${isMulti ? '<button class="btn" id="var-submit" style="margin-top:10px">Submit answer</button>' : ''}
+      <div class="feedback" id="fb"></div>
+      <div class="controls" id="ctrl"></div>
+    </div>`;
+}
+function handleVarietyClick(q, chosen, chosenBtn) {
+  if (state.answered) return;
+  const correct = q.answer.includes(chosen);
+  const correctBtns = [...document.querySelectorAll(".opt")].filter(b => q.answer.includes(b.dataset.v));
+  chosenBtn.classList.add(correct ? "correct" : "wrong");
+  correctBtns.forEach(b => b.classList.add("correct"));
+  document.querySelectorAll(".opt").forEach(b => {
+    if (b !== chosenBtn && !correctBtns.includes(b)) b.classList.add("dim");
+  });
+  finalize(q, correct, richExplanation(q.it));
+}
+function handleVarietyMultiSetup(q) {
+  const selected = new Set();
+  document.querySelectorAll("#var-opts .opt").forEach(btn => {
+    btn.onclick = () => {
+      if (state.answered) return;
+      const v = btn.dataset.v;
+      if (selected.has(v)) { selected.delete(v); btn.classList.remove("selected"); }
+      else { selected.add(v); btn.classList.add("selected"); }
+    };
+  });
+  document.getElementById("var-submit").onclick = () => {
+    if (state.answered) return;
+    const ans = new Set(q.answer);
+    const tp = [...selected].filter(x => ans.has(x)).length;
+    const fp = [...selected].filter(x => !ans.has(x)).length;
+    const fn = [...ans].filter(x => !selected.has(x)).length;
+    const correct = fp === 0 && fn === 0;
+    const partial = tp > 0 && !correct;
+    document.querySelectorAll("#var-opts .opt").forEach(btn => {
+      const v = btn.dataset.v;
+      btn.classList.remove("selected");
+      if (ans.has(v) && selected.has(v)) btn.classList.add("correct");
+      else if (ans.has(v) && !selected.has(v)) btn.classList.add("wrong");
+      else if (!ans.has(v) && selected.has(v)) btn.classList.add("wrong");
+      else btn.classList.add("dim");
+    });
+    document.getElementById("var-submit").style.display = "none";
+    const scoreBit = `<div class="ex-sec" style="background:#fdf8e6;border-left-color:#b58b2c"><div class="ex-h">Your score</div><div class="ex-body"><b>${tp}</b> hit${tp!==1?"s":""} · <b>${fp}</b> false positive${fp!==1?"s":""} · <b>${fn}</b> missed${partial ? " — partial credit" : ""}</div></div>`;
+    finalize(q, correct, scoreBit + richExplanation(q.it, {skipAccepted:false}));
+  };
+}
+
+/* ------------ Mode 2: Identify Feature ------------ */
+function makeFeatureQuestion() {
+  /* use only phonological items with IPA and a concrete feature */
+  const candidates = ITEMS.map((it,idx)=>({it,idx})).filter(x=>x.it.tag==="phon" && x.it.ipa && passesFilter(x.it));
+  if (candidates.length === 0) return makeVarietyQuestion();
+  const pick = candidates[Math.floor(Math.random()*candidates.length)];
+  const it = pick.it; const idx = pick.idx;
+  const sameVariety = ITEMS.filter(o => o.variety === it.variety && o.feature !== it.feature && o.tag === "phon");
+  const otherFeatures = shuffled([...new Set(sameVariety.map(o=>o.feature))]).slice(0,3);
+  while (otherFeatures.length < 3) {
+    const alt = ITEMS[Math.floor(Math.random()*ITEMS.length)].feature;
+    if (!otherFeatures.includes(alt) && alt !== it.feature) otherFeatures.push(alt);
+  }
+  const options = shuffled([it.feature, ...otherFeatures.slice(0,3)]);
+  return { idx, it, options, answer: it.feature };
+}
+function renderFeatureQuestion(q) {
+  const { it } = q;
+  return `
+    <div class="q-card">
+      <div class="q-kicker">Identify the feature — ${it.variety}</div>
+      <div class="q-prompt"><span class="q-word">${it.word}</span><span class="q-ipa">${it.ipa}</span></div>
+      <div class="q-hint">Pick the phonological rule at work in this pronunciation.</div>
+      <div class="options">
+        ${q.options.map(o => `<button class="opt" data-v="${o.replace(/"/g,'&quot;')}"><span class="tag">Feature</span><span class="val">${o}</span></button>`).join("")}
+      </div>
+      <div class="feedback" id="fb"></div>
+      <div class="controls" id="ctrl"></div>
+    </div>`;
+}
+function handleFeatureClick(q, chosen, chosenBtn) {
+  if (state.answered) return;
+  const correct = chosen === q.answer;
+  const correctBtn = [...document.querySelectorAll(".opt")].find(b => b.dataset.v === q.answer);
+  chosenBtn.classList.add(correct ? "correct" : "wrong");
+  if (!correct && correctBtn) correctBtn.classList.add("correct");
+  document.querySelectorAll(".opt").forEach(b => { if (b !== chosenBtn && b !== correctBtn) b.classList.add("dim"); });
+  finalize(q, correct, richExplanation(q.it));
+}
+
+/* ------------ Mode 3: Minimal Pair ------------ */
+function makePairQuestion() {
+  /* find a word that appears in >=2 varieties with different IPA */
+  const byWord = {};
+  ITEMS.forEach((it, idx) => {
+    if (!it.word || !it.ipa) return;
+    const key = it.word.split(" =")[0].split("/")[0].trim().toLowerCase();
+    byWord[key] = byWord[key] || [];
+    byWord[key].push({it, idx});
+  });
+  const pairs = Object.values(byWord).filter(arr => {
+    const vs = new Set(arr.map(x=>x.it.variety));
+    const ipas = new Set(arr.map(x=>x.it.ipa));
+    return vs.size >= 2 && ipas.size >= 2;
+  });
+  if (pairs.length === 0) return makeVarietyQuestion();
+  const pool = pairs[Math.floor(Math.random()*pairs.length)];
+  const shuff = shuffled(pool).slice(0,2);
+  const [a, b] = shuff;
+  const options = shuffled([a.it.variety, b.it.variety]);
+  return {
+    idx: a.idx, idx2: b.idx,
+    pair: [a.it, b.it],
+    options,
+    answer: [a.it.variety, b.it.variety]
+  };
+}
+function renderPairQuestion(q) {
+  const [a, b] = q.pair;
+  return `
+    <div class="q-card">
+      <div class="q-kicker">Minimal pair — same word, two varieties</div>
+      <div class="q-prompt"><span class="q-word">${a.word}</span></div>
+      <div style="display:flex;gap:20px;margin:14px 0;flex-wrap:wrap">
+        <div style="flex:1;min-width:180px">
+          <div class="q-hint">Pronunciation A</div>
+          <span class="q-ipa">${a.ipa}</span>
+          <div class="options" style="margin-top:8px">
+            ${q.options.map(o => `<button class="opt match-a" data-v="${o}"><span class="tag">for A</span><span class="val">${o}</span></button>`).join("")}
+          </div>
+        </div>
+        <div style="flex:1;min-width:180px">
+          <div class="q-hint">Pronunciation B</div>
+          <span class="q-ipa">${b.ipa}</span>
+          <div class="options" style="margin-top:8px">
+            ${q.options.map(o => `<button class="opt match-b" data-v="${o}"><span class="tag">for B</span><span class="val">${o}</span></button>`).join("")}
+          </div>
+        </div>
+      </div>
+      <div class="feedback" id="fb"></div>
+      <div class="controls" id="ctrl"></div>
+    </div>`;
+}
+function handlePairSetup(q) {
+  let picked = { a: null, b: null };
+  document.querySelectorAll(".match-a").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".match-a").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected"); picked.a = btn.dataset.v;
+      checkBoth();
+    };
+  });
+  document.querySelectorAll(".match-b").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".match-b").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected"); picked.b = btn.dataset.v;
+      checkBoth();
+    };
+  });
+  function checkBoth() {
+    if (picked.a && picked.b && !state.answered) {
+      const correct = picked.a === q.answer[0] && picked.b === q.answer[1];
+      document.querySelectorAll(".match-a").forEach(b => {
+        b.classList.remove("selected");
+        if (b.dataset.v === q.answer[0]) b.classList.add("correct");
+        else if (b.dataset.v === picked.a) b.classList.add("wrong");
+        else b.classList.add("dim");
+      });
+      document.querySelectorAll(".match-b").forEach(b => {
+        b.classList.remove("selected");
+        if (b.dataset.v === q.answer[1]) b.classList.add("correct");
+        else if (b.dataset.v === picked.b) b.classList.add("wrong");
+        else b.classList.add("dim");
+      });
+      const exp = `<b>${q.pair[0].ipa}</b> → ${q.answer[0]} (${q.pair[0].feature})<br><b>${q.pair[1].ipa}</b> → ${q.answer[1]} (${q.pair[1].feature})<br><br>` +
+                  `<b>A:</b> ${richExplanation(q.pair[0], {skipAccepted:true})}<br>` +
+                  `<b>B:</b> ${richExplanation(q.pair[1], {skipAccepted:true})}`;
+      finalize(q, correct, exp);
+    }
+  }
+}
+
+/* ------------ Mode 4: Spot the Intruder ------------ */
+function makeIntruderQuestion() {
+  const targets = CORE_VARIETIES.filter(v => featuresForVariety(v).length >= 3);
+  const target = targets[Math.floor(Math.random()*targets.length)];
+  const own = shuffled(featuresForVariety(target)).slice(0,3);
+  const others = [...new Set(ITEMS.filter(it => it.variety !== target).map(it=>it.feature))];
+  const intruder = others[Math.floor(Math.random()*others.length)];
+  const opts = shuffled([...own.map(f=>({f, own:true})), {f:intruder, own:false}]);
+  return { target, opts, answer: intruder };
+}
+function renderIntruderQuestion(q) {
+  return `
+    <div class="q-card">
+      <div class="q-kicker">Spot the intruder — ${q.target}</div>
+      <div class="q-prompt">Three of these features belong to <b>${q.target}</b>. One does not.</div>
+      <div class="options">
+        ${q.opts.map(o => `<button class="opt" data-v="${o.f.replace(/"/g,'&quot;')}"><span class="tag">Feature</span><span class="val">${o.f}</span></button>`).join("")}
+      </div>
+      <div class="feedback" id="fb"></div>
+      <div class="controls" id="ctrl"></div>
+    </div>`;
+}
+function handleIntruderClick(q, chosen, chosenBtn) {
+  if (state.answered) return;
+  const correct = chosen === q.answer;
+  document.querySelectorAll(".opt").forEach(b => {
+    if (b.dataset.v === q.answer) b.classList.add("correct");
+    else if (b === chosenBtn) b.classList.add("wrong");
+    else b.classList.add("dim");
+  });
+  /* Build rich explanation: for each 'own' feature show an exemplar; for the intruder show where it really belongs */
+  const exemplars = q.opts.filter(o => o.own).map(o => {
+    const ex = ITEMS.find(it => it.variety === q.target && it.feature === o.f);
+    return ex ? `<b>${o.f}</b>: <i>${ex.word}</i>${ex.ipa?' <span class="ipa">'+ex.ipa+'</span>':''}` : `<b>${o.f}</b>`;
+  }).join("<br>");
+  const intruderHome = [...new Set(ITEMS.filter(it => it.feature === q.answer).map(it => it.variety))];
+  const intruderEx = ITEMS.find(it => it.feature === q.answer);
+  const intruderBit = `<b>Intruder:</b> ${q.answer} — belongs to <b>${intruderHome.join(", ")}</b>` +
+    (intruderEx && intruderEx.ipa ? ` (e.g. <i>${intruderEx.word}</i> <span class="ipa">${intruderEx.ipa}</span>)` : "") + ".";
+  finalize(q, correct, `Three ${q.target} signatures:<br>${exemplars}<br><br>${intruderBit}`);
+}
+
+/* ------------ Mode 5: Signature Assembly (multi-select) ------------ */
+function makeAssemblyQuestion() {
+  const targets = CORE_VARIETIES.filter(v => featuresForVariety(v).length >= 4);
+  const target = targets[Math.floor(Math.random()*targets.length)];
+  const own = shuffled(featuresForVariety(target)).slice(0,4);
+  const others = shuffled([...new Set(ITEMS.filter(it => it.variety !== target).map(it=>it.feature))]).slice(0,4);
+  const opts = shuffled([...own.map(f=>({f, own:true})), ...others.map(f=>({f, own:false}))]);
+  return { target, opts, answer: own };
+}
+function renderAssemblyQuestion(q) {
+  return `
+    <div class="q-card multi-select">
+      <div class="q-kicker">Signature assembly — ${q.target}</div>
+      <div class="q-prompt">Select every feature that belongs to <b>${q.target}</b>. (Usually 4 of 8.)</div>
+      <div class="options" id="asm-opts">
+        ${q.opts.map(o => `<button class="opt" data-v="${o.f.replace(/"/g,'&quot;')}"><span class="check"></span><span class="val">${o.f}</span></button>`).join("")}
+      </div>
+      <button class="btn" id="asm-submit" style="margin-top:10px">Submit answer</button>
+      <div class="feedback" id="fb"></div>
+      <div class="controls" id="ctrl"></div>
+    </div>`;
+}
+function handleAssemblySetup(q) {
+  const selected = new Set();
+  document.querySelectorAll("#asm-opts .opt").forEach(btn => {
+    btn.onclick = () => {
+      if (state.answered) return;
+      const v = btn.dataset.v;
+      if (selected.has(v)) { selected.delete(v); btn.classList.remove("selected"); }
+      else { selected.add(v); btn.classList.add("selected"); }
+    };
+  });
+  document.getElementById("asm-submit").onclick = () => {
+    if (state.answered) return;
+    const ans = new Set(q.answer);
+    const sel = selected;
+    const tp = [...sel].filter(x => ans.has(x)).length;
+    const fp = [...sel].filter(x => !ans.has(x)).length;
+    const fn = [...ans].filter(x => !sel.has(x)).length;
+    const correct = fp === 0 && fn === 0;
+    const partial = tp > 0 && !correct;
+    document.querySelectorAll("#asm-opts .opt").forEach(btn => {
+      const v = btn.dataset.v;
+      btn.classList.remove("selected");
+      if (ans.has(v) && sel.has(v)) btn.classList.add("correct");
+      else if (ans.has(v) && !sel.has(v)) btn.classList.add("wrong");
+      else if (!ans.has(v) && sel.has(v)) btn.classList.add("wrong");
+    });
+    document.getElementById("asm-submit").style.display = "none";
+    const exemplars = q.answer.map(f => {
+      const ex = ITEMS.find(it => it.variety === q.target && it.feature === f);
+      return ex ? `• <b>${f}</b>: <i>${ex.word}</i>${ex.ipa?' <span class="ipa">'+ex.ipa+'</span>':''}${ex.note?' — <em>'+ex.note+'</em>':''}` : `• <b>${f}</b>`;
+    }).join("<br>");
+    finalize(q, correct, `<b>${q.target}</b> signature features:<br>${exemplars}<br><br>Your score: ${tp} hits, ${fp} false positives, ${fn} missed.${partial ? " Partial credit." : ""}`);
+  };
+}
+
+/* ============================================================
+   SHARED: finalize answer, update stats/boxes/mistakes
+   ============================================================ */
+
+function finalize(q, correct, explanation) {
+  if (state.answered) return;
+  state.answered = true;
+  state.stats.session++;
+  if (correct) {
+    state.stats.correct++;
+    state.stats.streak++;
+    if (state.stats.streak > state.stats.best) state.stats.best = state.stats.streak;
+    if (q.idx !== undefined) moveItem(q.idx, +1);
+    if (q.idx2 !== undefined) moveItem(q.idx2, +1);
+  } else {
+    state.stats.wrong++;
+    state.stats.streak = 0;
+    if (q.idx !== undefined) { moveItem(q.idx, -1); pushMistake(q.idx); }
+    if (q.idx2 !== undefined) { moveItem(q.idx2, -1); pushMistake(q.idx2); }
+  }
+  updateStats();
+  renderProgressBoxes();
+  const fb = document.getElementById("fb");
+  fb.classList.add("show", correct ? "ok" : "err");
+  const verdict = correct ? "✓ Correct" : "✗ Not quite";
+  fb.innerHTML = `<div class="verdict">${verdict}</div>${explanation}<div class="chap">Source: Ihsane 2026 ${q.it?.chap || q.pair?.[0]?.chap || ""}</div>`;
+  const ctrl = document.getElementById("ctrl");
+  ctrl.innerHTML = `<button class="btn big" id="next-btn">Next question →</button>`;
+  document.getElementById("next-btn").onclick = nextQuestion;
+}
+
+function pushMistake(idx) {
+  state.mistakes.unshift(idx);
+  state.mistakes = state.mistakes.slice(0, 10);
+}
+
+/* ============================================================
+   RENDER / FLOW
+   ============================================================ */
+
+function updateStats() {
+  const s = state.stats;
+  document.getElementById("s-session").textContent = s.session;
+  document.getElementById("s-correct").textContent = s.correct;
+  document.getElementById("s-wrong").textContent = s.wrong;
+  document.getElementById("s-acc").textContent = s.session ? Math.round(100*s.correct/s.session)+"%" : "–";
+  document.getElementById("s-streak").textContent = s.streak;
+  document.getElementById("s-best").textContent = s.best;
+}
+
+function renderProgressBoxes() {
+  const el = document.getElementById("pboxes");
+  if (!el) return;
+  el.innerHTML = [1,2,3].map(b => {
+    const n = state.boxes[b].length;
+    const lbl = b === 1 ? "daily" : b === 2 ? "every 3 days" : "weekly";
+    return `<div class="pbox"><div class="pn">Box ${b}</div><div class="pv">${n}</div><div class="pl">${lbl}</div></div>`;
+  }).join("");
+}
+
+function renderModePicker() {
+  const el = document.getElementById("mode-picker");
+  el.innerHTML = MODES.map(m => `
+    <button class="mode-btn" data-mode="${m.id}">
+      <div class="mt">${m.name}</div>
+      <div class="md">${m.desc}</div>
+    </button>`).join("");
+  el.querySelectorAll(".mode-btn").forEach(b => {
+    b.onclick = () => startMode(b.dataset.mode);
+  });
+}
+
+function startMode(id) {
+  state.mode = id;
+  document.getElementById("welcome").style.display = "none";
+  document.getElementById("game").style.display = "block";
+  document.getElementById("mode-label").textContent = MODES.find(m=>m.id===id).name;
+  document.getElementById("mode-back").onclick = () => {
+    state.mode = null;
+    document.getElementById("welcome").style.display = "block";
+    document.getElementById("game").style.display = "none";
+    renderProgressBoxes();
+  };
+  renderFilters();
+  nextQuestion();
+}
+
+function renderFilters() {
+  const el = document.getElementById("tag-filters");
+  const tags = [["phon","phonology"],["syn","morphosyntax"],["lex","lexicon"]];
+  el.innerHTML = tags.map(([k,label])=>
+    `<span class="chip ${state.filter[k]?"on":""}" data-k="${k}">${label}</span>`
+  ).join("");
+  el.querySelectorAll(".chip").forEach(c => {
+    c.onclick = () => {
+      state.filter[c.dataset.k] = !state.filter[c.dataset.k];
+      /* require at least one */
+      if (!Object.values(state.filter).some(v=>v)) state.filter[c.dataset.k] = true;
+      renderFilters();
+    };
+  });
+}
+
+function nextQuestion() {
+  state.answered = false;
+  let q;
+  switch (state.mode) {
+    case "variety": q = makeVarietyQuestion(); state.current = q;
+      document.getElementById("q-container").innerHTML = renderVarietyQuestion(q);
+      if (q.isMulti) handleVarietyMultiSetup(q);
+      else document.querySelectorAll(".opt").forEach(b => b.onclick = () => handleVarietyClick(q, b.dataset.v, b));
+      break;
+    case "feature": q = makeFeatureQuestion(); state.current = q;
+      document.getElementById("q-container").innerHTML = renderFeatureQuestion(q);
+      document.querySelectorAll(".opt").forEach(b => b.onclick = () => handleFeatureClick(q, b.dataset.v, b));
+      break;
+    case "pair": q = makePairQuestion(); state.current = q;
+      document.getElementById("q-container").innerHTML = renderPairQuestion(q);
+      handlePairSetup(q);
+      break;
+    case "intruder": q = makeIntruderQuestion(); state.current = q;
+      document.getElementById("q-container").innerHTML = renderIntruderQuestion(q);
+      document.querySelectorAll(".opt").forEach(b => b.onclick = () => handleIntruderClick(q, b.dataset.v, b));
+      break;
+    case "assembly": q = makeAssemblyQuestion(); state.current = q;
+      document.getElementById("q-container").innerHTML = renderAssemblyQuestion(q);
+      handleAssemblySetup(q);
+      break;
+  }
+}
+
+/* ============================================================
+   UTILS
+   ============================================================ */
+
+function shuffled(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* Reset everything */
+document.getElementById("reset-all-btn").onclick = () => {
+  if (!confirm("Reset all progress? (stats, Leitner boxes, mistakes)")) return;
+  state.stats = {session:0, correct:0, wrong:0, streak:0, best:0};
+  state.boxes = {1:[], 2:[], 3:[]};
+  state.mistakes = [];
+  ITEMS.forEach((_, idx) => state.boxes[1].push(idx));
+  updateStats(); renderProgressBoxes();
+  state.mode = null;
+  document.getElementById("welcome").style.display = "block";
+  document.getElementById("game").style.display = "none";
+};
+
+/* Init */
+updateStats();
+renderProgressBoxes();
+renderModePicker();
+</script>
+</body>
+</html>

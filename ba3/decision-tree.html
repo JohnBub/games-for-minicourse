@@ -2,7 +2,6 @@
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Variety Identification — BA3 Decision Tree</title>
 <style>
   :root {
@@ -151,6 +150,41 @@
     nav.tabs, .controls, .lookup-wrap input, .card-wrap { display: none !important; }
     body { font-size: 11pt; }
     .wrap { max-width: 100%; padding: 0; }
+  }
+</style>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<style id="ba3-responsive-shim">
+  /* BA3 responsive shim — non-invasive mobile fixes */
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  img, svg, video, canvas { max-width: 100%; height: auto; }
+  @media (max-width: 720px) {
+    html, body { font-size: 16px; }
+    body, .container, .wrap, main, .game, .panel, .board, #app,
+    [class*="container"], [id*="container"] {
+      max-width: 100vw !important;
+      min-width: 0 !important;
+      box-sizing: border-box;
+    }
+    body { padding: 10px !important; margin: 0 !important; }
+    button, .btn, .chip, .opt, .stmt, .card, [role="button"],
+    input[type="button"], input[type="submit"] {
+      min-height: 44px;
+      font-size: 1rem;
+      touch-action: manipulation;
+    }
+    table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
+    pre, code { white-space: pre-wrap; word-break: break-word; }
+    .row, .cols, .columns,
+    [class*="grid-2"], [class*="grid-3"], [class*="grid-4"],
+    [class*="two-col"], [class*="three-col"] {
+      grid-template-columns: 1fr !important;
+      flex-direction: column !important;
+    }
+    h1 { font-size: 1.4rem !important; line-height: 1.2; }
+    h2 { font-size: 1.2rem !important; }
+    h3 { font-size: 1.05rem !important; }
   }
 </style>
 </head>

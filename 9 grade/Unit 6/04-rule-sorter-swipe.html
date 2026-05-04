@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Rule Sorter — Swipe! · Unit 6</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rust:#BF5A24; --forest:#1F4D3C; --navy:#1E2A4D;
+  --gold:#B8893A;
+  --paper:#F5EFDE; --paper-warm:#FBF6E8;
+  --ink:#1A1A1A; --text-mid:#5A4E3E; --text-light:#8A7E68;
+  --border:#E8DDC0; --border-strong:#D4C5A0;
+  --shadow:0 2px 12px rgba(0,0,0,.10);
+  --rule-short:#3B6FB6; --rule-short-bg:#D9E5F4;
+  --rule-long:#D67A2E; --rule-long-bg:#FBE4CC;
+  --rule-irreg:#C4452F; --rule-irreg-bg:#F4D6CF;
+  --serif:'Lora',Georgia,serif; --sans:'Inter',-apple-system,sans-serif;
+}
+html,body{height:100%;font-family:var(--sans);background:var(--paper);color:var(--ink);overflow:hidden;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+body{min-height:100vh;display:flex;flex-direction:column;background:radial-gradient(ellipse at top,var(--paper-warm) 0%,var(--paper) 60%)}
+
+.app-header{background:var(--rust);padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:3px solid #994418}
+.app-header-icon{width:42px;height:42px;border-radius:10px;background:var(--paper-warm);display:flex;align-items:center;justify-content:center;font-size:22px}
+.app-header-title{font-family:var(--serif);font-size:16px;font-weight:700;color:var(--paper-warm);line-height:1.2}
+.app-header-sub{font-size:11px;color:#E6B694;margin-top:2px;letter-spacing:.04em}
+
+.scoreboard{background:var(--paper-warm);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:14px}
+.score-block{display:flex;flex-direction:column}
+.score-lbl{font-size:9.5px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.1em}
+.score-val{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--ink);line-height:1}
+.score-val.streak{color:var(--gold)}
+.score-block.right{margin-left:auto;text-align:right}
+
+.arena{flex:1;position:relative;padding:14px;overflow:hidden;display:flex;flex-direction:column}
+.legend-row{display:flex;justify-content:space-between;gap:8px;margin-bottom:8px}
+.zone-hint{flex:1;background:var(--paper-warm);border:1.5px dashed var(--border-strong);border-radius:10px;padding:10px 8px;text-align:center;font-size:11.5px;font-weight:700;line-height:1.3;color:var(--text-mid)}
+.zone-hint .arr{display:block;font-size:18px;margin-bottom:2px}
+.zone-hint.left{border-color:var(--rule-short);color:var(--rule-short);background:var(--rule-short-bg)}
+.zone-hint.right{border-color:var(--rule-long);color:var(--rule-long);background:var(--rule-long-bg)}
+.zone-hint.up{border-color:var(--rule-irreg);color:var(--rule-irreg);background:var(--rule-irreg-bg)}
+
+.deck{flex:1;position:relative;display:flex;align-items:center;justify-content:center;perspective:1200px}
+.card{position:absolute;width:min(85vw,340px);height:min(58vh,420px);background:var(--paper-warm);border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.16),0 4px 12px rgba(0,0,0,.08);border:1.5px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;cursor:grab;user-select:none;touch-action:none;transition:transform .25s cubic-bezier(.4,0,.2,1),opacity .25s ease}
+.card.dragging{cursor:grabbing;transition:none}
+.card.gone{pointer-events:none}
+.card .word{font-family:var(--serif);font-size:38px;font-weight:700;color:var(--ink);text-align:center;letter-spacing:-.01em;line-height:1.1}
+.card .hint{margin-top:10px;font-size:13px;color:var(--text-mid);font-style:italic;font-family:var(--serif)}
+.card .syll{margin-top:14px;display:flex;gap:5px}
+.card .syll-dot{width:10px;height:10px;border-radius:50%;background:var(--border-strong)}
+.card .syll-dot.on{background:var(--gold)}
+
+.card .badge{position:absolute;top:18px;font-size:14px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;border-radius:8px;opacity:0;border:2.5px solid currentColor;font-family:var(--sans);transition:opacity .15s}
+.card .badge.left{left:18px;color:var(--rule-short);transform:rotate(-12deg)}
+.card .badge.right{right:18px;color:var(--rule-long);transform:rotate(12deg)}
+.card .badge.up{top:14px;left:50%;transform:translateX(-50%);color:var(--rule-irreg)}
+
+.card.fly-left{transform:translateX(-130%) rotate(-22deg) !important;opacity:0}
+.card.fly-right{transform:translateX(130%) rotate(22deg) !important;opacity:0}
+.card.fly-up{transform:translateY(-130%) scale(.9) !important;opacity:0}
+.card.fly-snap{transition:transform .35s cubic-bezier(.4,1.4,.5,1);transform:translate(0,0) rotate(0)}
+
+.feedback-toast{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;font-family:var(--serif);font-size:24px;font-weight:700;padding:14px 22px;border-radius:14px;opacity:0;transition:opacity .2s,transform .4s;z-index:50}
+.feedback-toast.show{opacity:1;transform:translate(-50%,-65%) scale(1.05)}
+.feedback-toast.ok{background:#E1EEDC;color:var(--forest);border:2px solid var(--forest)}
+.feedback-toast.err{background:#F2E0D4;color:var(--rust);border:2px solid var(--rust)}
+
+.controls{display:flex;justify-content:space-around;padding:12px 18px 16px;gap:10px}
+.ctl{flex:1;background:var(--paper-warm);border:2px solid;border-radius:14px;padding:12px;font-family:var(--sans);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px}
+.ctl:active{transform:scale(.95)}
+.ctl.left{border-color:var(--rule-short);color:var(--rule-short)}
+.ctl.right{border-color:var(--rule-long);color:var(--rule-long)}
+.ctl.up{border-color:var(--rule-irreg);color:var(--rule-irreg)}
+.ctl-arr{font-size:20px}
+
+.win{position:absolute;inset:0;background:rgba(245,239,222,.96);display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;gap:12px;z-index:100}
+.win.show{display:flex}
+.win-icon{font-size:64px}
+.win-title{font-family:var(--serif);font-size:28px;font-weight:700;color:var(--ink)}
+.win-sub{font-size:14px;color:var(--text-mid);max-width:300px;line-height:1.5}
+.win-stats{display:flex;gap:16px;margin:8px 0}
+.win-stat{background:var(--paper-warm);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;display:flex;flex-direction:column;align-items:center}
+.win-stat-val{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--rust)}
+.win-stat-lbl{font-size:10px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+.win .btn{padding:14px 22px;background:var(--rust);color:var(--paper-warm);border:none;border-radius:10px;font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase}
+
+@media(min-width:640px){.arena{max-width:520px;width:100%;margin:0 auto}}
+</style>
+</head>
+<body>
+<header class="app-header">
+  <div class="app-header-icon">⚡</div>
+  <div>
+    <div class="app-header-title">Rule Sorter — Swipe!</div>
+    <div class="app-header-sub">UNIT 6 · ADJECTIVES → COMPARATIVE RULE</div>
+  </div>
+</header>
+
+<div class="scoreboard">
+  <div class="score-block"><span class="score-lbl">Score</span><span class="score-val" id="scoreVal">0</span></div>
+  <div class="score-block"><span class="score-lbl">Streak 🔥</span><span class="score-val streak" id="streakVal">0</span></div>
+  <div class="score-block right"><span class="score-lbl">Cards left</span><span class="score-val" id="leftVal">0</span></div>
+</div>
+
+<main class="arena">
+  <div class="legend-row">
+    <div class="zone-hint left"><span class="arr">⬅️</span>+ER<br>(short)</div>
+    <div class="zone-hint up"><span class="arr">⬆️</span>IRREG<br>(by heart)</div>
+    <div class="zone-hint right">MORE+<br>(long)<span class="arr">➡️</span></div>
+  </div>
+
+  <div class="deck" id="deck"></div>
+
+  <div class="feedback-toast" id="toast"></div>
+
+  <div class="win" id="win">
+    <div class="win-icon" id="winIcon">🏆</div>
+    <div class="win-title" id="winTitle">All done!</div>
+    <div class="win-sub" id="winSub"></div>
+    <div class="win-stats">
+      <div class="win-stat"><span class="win-stat-val" id="winScore">0</span><span class="win-stat-lbl">Correct</span></div>
+      <div class="win-stat"><span class="win-stat-val" id="winBest">0</span><span class="win-stat-lbl">Best streak</span></div>
+    </div>
+    <button class="btn" id="winBtn">🔄 Play again</button>
+  </div>
+
+  <div class="controls">
+    <button class="ctl left" data-dir="left"><span class="ctl-arr">⬅</span>+ER</button>
+    <button class="ctl up" data-dir="up"><span class="ctl-arr">⬆</span>IRREG</button>
+    <button class="ctl right" data-dir="right">MORE+<span class="ctl-arr">➡</span></button>
+  </div>
+</main>
+
+<script>
+// rule: 'short' (left, +er) | 'long' (right, more+) | 'irreg' (up)
+const ADJ = [
+  {w:"big", rule:"short", hint:"1 syllable → +er (double consonant)"},
+  {w:"crowded", rule:"long", hint:"3 syllables → use 'more'"},
+  {w:"good", rule:"irreg", hint:"good → better (memorize!)"},
+  {w:"happy", rule:"short", hint:"2 syllables ending in -y → -ier"},
+  {w:"expensive", rule:"long", hint:"3 syllables → 'more expensive'"},
+  {w:"bad", rule:"irreg", hint:"bad → worse (memorize!)"},
+  {w:"hot", rule:"short", hint:"1 syllable → hotter (double t)"},
+  {w:"interesting", rule:"long", hint:"4 syllables → 'more interesting'"},
+  {w:"far", rule:"irreg", hint:"far → further (memorize!)"},
+  {w:"easy", rule:"short", hint:"y → ier (easier)"},
+  {w:"dangerous", rule:"long", hint:"3 syllables → 'more dangerous'"},
+  {w:"tall", rule:"short", hint:"1 syllable → taller"},
+  {w:"modern", rule:"long", hint:"2 syllables, NOT in -y → 'more modern'"},
+  {w:"large", rule:"short", hint:"ends in -e → just add -r (larger)"},
+  {w:"comfortable", rule:"long", hint:"4 syllables → 'more comfortable'"},
+  {w:"funny", rule:"short", hint:"y → ier (funnier)"},
+  {w:"nice", rule:"short", hint:"ends in -e → +r (nicer)"},
+  {w:"beautiful", rule:"long", hint:"3 syllables → 'more beautiful'"},
+];
+
+const SYLL = (w)=>{
+  // simple syllable estimate for vowel groups
+  const m = w.toLowerCase().match(/[aeiouy]+/g);
+  return Math.max(1, m ? m.length : 1);
+};
+
+let queue = [];
+let score = 0;
+let streak = 0;
+let bestStreak = 0;
+let wrongs = 0;
+
+const deckEl = document.getElementById('deck');
+const scoreVal = document.getElementById('scoreVal');
+const streakVal = document.getElementById('streakVal');
+const leftVal = document.getElementById('leftVal');
+const toastEl = document.getElementById('toast');
+const winEl = document.getElementById('win');
+
+function el(tag, cls, txt){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(txt !== undefined) e.textContent = txt;
+  return e;
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1; i>0; i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function renderDeck(){
+  deckEl.replaceChildren();
+  // render top 3 cards stacked
+  const top = queue.slice(0,3).reverse();
+  top.forEach((adj, i)=>{
+    const isTop = i === top.length-1;
+    const card = el('div','card');
+    card.style.zIndex = i;
+    card.style.transform = `translateY(${(top.length-1-i)*-6}px) scale(${1 - (top.length-1-i)*0.04})`;
+    if(!isTop) card.style.opacity = .85;
+
+    const word = el('div','word', adj.w);
+    card.appendChild(word);
+
+    // syllable dots
+    const syllRow = el('div','syll');
+    const n = SYLL(adj.w);
+    for(let s=0; s<Math.max(n,3); s++){
+      const dot = el('span','syll-dot');
+      if(s<n) dot.classList.add('on');
+      syllRow.appendChild(dot);
+    }
+    card.appendChild(syllRow);
+
+    const hint = el('div','hint', n + (n===1?' syllable':' syllables'));
+    card.appendChild(hint);
+
+    // badges
+    card.appendChild(el('div','badge left', '+ER'));
+    card.appendChild(el('div','badge right', 'MORE+'));
+    card.appendChild(el('div','badge up', 'IRREG'));
+
+    if(isTop){
+      attachSwipe(card, adj);
+    }
+    deckEl.appendChild(card);
+  });
+  leftVal.textContent = queue.length;
+  if(queue.length === 0) finish();
+}
+
+function attachSwipe(card, adj){
+  let startX=0, startY=0, dx=0, dy=0, dragging=false;
+  const leftBadge = card.querySelector('.badge.left');
+  const rightBadge = card.querySelector('.badge.right');
+  const upBadge = card.querySelector('.badge.up');
+
+  function onStart(e){
+    dragging = true;
+    card.classList.add('dragging');
+    const p = e.touches ? e.touches[0] : e;
+    startX = p.clientX; startY = p.clientY;
+    dx = 0; dy = 0;
+  }
+  function onMove(e){
+    if(!dragging) return;
+    e.preventDefault();
+    const p = e.touches ? e.touches[0] : e;
+    dx = p.clientX - startX;
+    dy = p.clientY - startY;
+    const rot = dx / 16;
+    card.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg)`;
+    // show badges
+    leftBadge.style.opacity = Math.max(0, Math.min(1, -dx/100));
+    rightBadge.style.opacity = Math.max(0, Math.min(1, dx/100));
+    upBadge.style.opacity = Math.max(0, Math.min(1, -dy/100));
+  }
+  function onEnd(){
+    if(!dragging) return;
+    dragging = false;
+    card.classList.remove('dragging');
+    const TH = 90;
+    if(dx < -TH && Math.abs(dx) > Math.abs(dy)){
+      decide('left', adj, card);
+    } else if(dx > TH && Math.abs(dx) > Math.abs(dy)){
+      decide('right', adj, card);
+    } else if(dy < -TH){
+      decide('up', adj, card);
+    } else {
+      // snap back
+      card.classList.add('fly-snap');
+      card.style.transform = '';
+      leftBadge.style.opacity = 0;
+      rightBadge.style.opacity = 0;
+      upBadge.style.opacity = 0;
+      setTimeout(()=>card.classList.remove('fly-snap'), 350);
+    }
+  }
+  card.addEventListener('touchstart', onStart, {passive:true});
+  card.addEventListener('touchmove', onMove, {passive:false});
+  card.addEventListener('touchend', onEnd);
+  card.addEventListener('mousedown', onStart);
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onEnd);
+}
+
+function decide(dir, adj, card){
+  const map = { left:'short', right:'long', up:'irreg' };
+  const chosen = map[dir];
+  const correct = chosen === adj.rule;
+
+  // Animate
+  card.classList.add('gone');
+  if(dir === 'left') card.classList.add('fly-left');
+  else if(dir === 'right') card.classList.add('fly-right');
+  else card.classList.add('fly-up');
+
+  if(correct){
+    score++;
+    streak++;
+    bestStreak = Math.max(bestStreak, streak);
+    showToast('+1 ✓ ' + (streak>=3 ? `${streak}× streak!` : adj.hint), true);
+  } else {
+    streak = 0;
+    wrongs++;
+    showToast('❌ ' + adj.hint, false);
+  }
+  scoreVal.textContent = score;
+  streakVal.textContent = streak;
+
+  // Pop the answered adj from queue
+  setTimeout(()=>{
+    queue.shift();
+    renderDeck();
+  }, 280);
+}
+
+function showToast(msg, ok){
+  toastEl.textContent = msg;
+  toastEl.classList.remove('ok','err','show');
+  toastEl.classList.add(ok?'ok':'err','show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=>toastEl.classList.remove('show'), 1100);
+}
+
+document.querySelectorAll('.ctl').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    const top = deckEl.lastChild;
+    if(!top || top.classList.contains('gone')) return;
+    const dir = b.dataset.dir;
+    decide(dir, queue[0], top);
+  });
+});
+
+function finish(){
+  document.getElementById('winScore').textContent = score;
+  document.getElementById('winBest').textContent = bestStreak;
+  const winIcon = document.getElementById('winIcon');
+  const winTitle = document.getElementById('winTitle');
+  const winSub = document.getElementById('winSub');
+  if(score === ADJ.length){
+    winIcon.textContent = '🏆';
+    winTitle.textContent = 'Perfect score!';
+    winSub.textContent = 'You nailed every rule. You are a comparative master!';
+  } else if(score >= ADJ.length-3){
+    winIcon.textContent = '⭐';
+    winTitle.textContent = 'Great job!';
+    winSub.textContent = 'Almost perfect — just review the ones you missed.';
+  } else {
+    winIcon.textContent = '📚';
+    winTitle.textContent = 'Keep practising!';
+    winSub.textContent = 'Re-read the rules and try the deck again.';
+  }
+  winEl.classList.add('show');
+}
+
+document.getElementById('winBtn').addEventListener('click', start);
+
+function start(){
+  queue = shuffle(ADJ);
+  score = 0; streak = 0; bestStreak = 0; wrongs = 0;
+  scoreVal.textContent = '0';
+  streakVal.textContent = '0';
+  winEl.classList.remove('show');
+  renderDeck();
+}
+
+start();
+</script>
+</body>
+</html>

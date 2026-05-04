@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Comparative Builder · Unit 6</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rust:#BF5A24; --rust-deep:#994418;
+  --forest:#1F4D3C; --forest-soft:#D7E2D6;
+  --navy:#1E2A4D; --gold:#B8893A; --ochre:#D4A85E;
+  --paper:#F5EFDE; --paper-warm:#FBF6E8;
+  --ink:#1A1A1A; --text-mid:#5A4E3E; --text-light:#8A7E68;
+  --border:#E8DDC0; --border-strong:#D4C5A0;
+  --ok:var(--forest); --ok-bg:#E1EEDC; --err:#C97B54; --err-bg:#F2E0D4;
+  --shadow:0 2px 12px rgba(191,90,36,.10);
+  /* Rule colors */
+  --rule-short:#3B6FB6;       /* Rule 1 - blue */
+  --rule-short-bg:#D9E5F4;
+  --rule-long:#D67A2E;        /* Rule 2 - orange */
+  --rule-long-bg:#FBE4CC;
+  --rule-irreg:#C4452F;       /* Rule 3 - red */
+  --rule-irreg-bg:#F4D6CF;
+  --serif:'Lora',Georgia,serif; --sans:'Inter',-apple-system,sans-serif;
+}
+html,body{height:100%;font-family:var(--sans);background:var(--paper);color:var(--ink);overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;display:flex;flex-direction:column;background:radial-gradient(ellipse at top,var(--paper-warm) 0%,var(--paper) 60%)}
+
+.app-header{background:var(--navy);padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:3px solid #131c36}
+.app-header-icon{width:42px;height:42px;border-radius:10px;background:var(--paper-warm);display:flex;align-items:center;justify-content:center;font-size:22px}
+.app-header-title{font-family:var(--serif);font-size:16px;font-weight:700;color:var(--paper-warm);line-height:1.2}
+.app-header-sub{font-size:11px;color:#A0AAC4;margin-top:2px;letter-spacing:.04em}
+
+.main{flex:1;padding:14px 12px 22px;display:flex;flex-direction:column;gap:14px}
+
+.prompt-card{background:var(--paper-warm);border-radius:14px;padding:16px 14px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.prompt-eyebrow{font-size:10.5px;font-weight:700;color:var(--navy);letter-spacing:.14em;text-transform:uppercase}
+.prompt-text{font-family:var(--serif);font-size:16px;font-weight:600;line-height:1.5;color:var(--ink);margin-top:6px}
+.prompt-fr{font-size:12.5px;color:var(--text-mid);margin-top:4px;font-style:italic;font-family:var(--serif)}
+.prompt-meta{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:.04em}
+.chip.rule-short{background:var(--rule-short-bg);color:var(--rule-short)}
+.chip.rule-long{background:var(--rule-long-bg);color:var(--rule-long)}
+.chip.rule-irreg{background:var(--rule-irreg-bg);color:var(--rule-irreg)}
+
+.target-area{background:var(--paper-warm);border-radius:14px;padding:18px 14px;box-shadow:var(--shadow);border:2px dashed var(--border-strong);min-height:80px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;align-content:center;justify-content:center}
+.target-area.complete-ok{border-color:var(--ok);background:var(--ok-bg);border-style:solid}
+.target-area.complete-err{border-color:var(--err);background:var(--err-bg);border-style:solid;animation:shake .5s ease}
+.slot{min-width:60px;height:38px;border-bottom:2px dashed var(--border-strong);opacity:.5}
+
+.pool{background:var(--paper-warm);border-radius:14px;padding:14px;box-shadow:var(--shadow);border:1px solid var(--border);display:flex;flex-wrap:wrap;gap:8px;justify-content:center;min-height:96px}
+
+.tile{background:var(--paper);border:1.5px solid var(--border-strong);border-radius:8px;padding:9px 14px;font-family:var(--sans);font-size:14.5px;font-weight:600;color:var(--ink);cursor:pointer;user-select:none;transition:all .15s ease;display:inline-flex;align-items:center;gap:6px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.tile:active{transform:scale(.94)}
+.tile.placed{transform:scale(.95)}
+.tile.rule-short{background:var(--rule-short-bg);border-color:var(--rule-short);color:var(--rule-short)}
+.tile.rule-long{background:var(--rule-long-bg);border-color:var(--rule-long);color:var(--rule-long)}
+.tile.rule-irreg{background:var(--rule-irreg-bg);border-color:var(--rule-irreg);color:var(--rule-irreg)}
+.tile.than{background:#FBE9C2;border-color:var(--gold);color:#7E5C20;font-style:italic}
+.tile.gone{display:none}
+.tile-tag{font-size:9px;font-weight:800;letter-spacing:.05em;opacity:.85}
+
+.actions{display:flex;gap:8px}
+.btn{flex:1;padding:12px 18px;background:var(--navy);color:var(--paper-warm);border:none;border-radius:8px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.secondary{background:var(--paper-warm);color:var(--navy);border:1.5px solid var(--navy)}
+.btn.success{background:var(--forest)}
+
+.feedback{padding:13px 14px;border-radius:10px;font-size:13.5px;line-height:1.55;font-family:var(--serif);display:none}
+.feedback.visible{display:block}
+.feedback.ok{background:var(--ok-bg);color:#1F4A37;border-left:3px solid var(--ok)}
+.feedback.err{background:var(--err-bg);color:#6E2816;border-left:3px solid var(--err)}
+
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+
+.legend{font-size:11px;color:var(--text-light);text-align:center;line-height:1.6;padding:0 4px}
+.legend-row{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:6px}
+.legend-item{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600}
+.legend-dot{width:12px;height:12px;border-radius:3px}
+
+.score-bar{position:sticky;bottom:0;background:var(--paper-warm);border-top:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 -2px 12px rgba(0,0,0,.06)}
+.score-bar .lbl{font-size:11px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.1em}
+.score-bar .val{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--navy)}
+.score-bar .track{flex:1;height:6px;background:var(--border);border-radius:10px;overflow:hidden}
+.score-bar .fill{height:100%;background:linear-gradient(90deg,var(--navy),var(--rust));border-radius:10px;transition:width .4s ease;width:0%}
+
+@media(min-width:640px){.main{max-width:680px;width:100%;margin:0 auto}}
+</style>
+</head>
+<body>
+<header class="app-header">
+  <div class="app-header-icon">🧱</div>
+  <div>
+    <div class="app-header-title">Comparative Builder</div>
+    <div class="app-header-sub">UNIT 6 · TAP TILES TO BUILD A SENTENCE</div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="prompt-card">
+    <div class="prompt-eyebrow">📝 Build the sentence</div>
+    <div class="prompt-text" id="promptText"></div>
+    <div class="prompt-fr" id="promptFr"></div>
+    <div class="prompt-meta" id="promptMeta"></div>
+  </div>
+
+  <div class="target-area" id="target"></div>
+  <div class="pool" id="pool"></div>
+
+  <div class="actions">
+    <button class="btn secondary" id="resetBtn">↺ Reset</button>
+    <button class="btn" id="checkBtn">Check ✓</button>
+  </div>
+
+  <div class="feedback" id="feedback"></div>
+
+  <div class="legend">
+    💡 Tile colors show the rule:
+    <div class="legend-row">
+      <span class="legend-item"><span class="legend-dot" style="background:var(--rule-short)"></span> Short (+er)</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--rule-long)"></span> Long (more...)</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--rule-irreg)"></span> Irregular</span>
+    </div>
+  </div>
+</main>
+
+<div class="score-bar">
+  <span class="lbl">Score</span>
+  <span class="val"><span id="scoreN">0</span>/<span id="scoreT">8</span></span>
+  <div class="track"><div class="fill" id="scoreFill"></div></div>
+</div>
+
+<script>
+// Each puzzle: a target sentence as ordered array of tiles.
+// Each tile = {text, type: 'word'|'comp'|'than', rule: 'short'|'long'|'irreg' (only for comp)}
+// Decoy tiles = wrong forms (added to pool, not in target)
+const PUZZLES = [
+  {
+    fr:"Construis : « Mon frère est plus grand que moi. »",
+    target:[
+      {text:"My brother",type:"word"},
+      {text:"is",type:"word"},
+      {text:"taller",type:"comp",rule:"short"},
+      {text:"than",type:"than"},
+      {text:"me",type:"word"},
+    ],
+    decoys:[
+      {text:"more tall",type:"comp",rule:"long"},
+      {text:"the tallest",type:"comp",rule:"short"},
+    ],
+    explain:"Short adjective ➜ tall + er. Always 'than' before the second thing."
+  },
+  {
+    fr:"Construis : « Cet exercice est plus difficile que le dernier. »",
+    target:[
+      {text:"This exercise",type:"word"},
+      {text:"is",type:"word"},
+      {text:"more difficult",type:"comp",rule:"long"},
+      {text:"than",type:"than"},
+      {text:"the last one",type:"word"},
+    ],
+    decoys:[
+      {text:"difficulter",type:"comp",rule:"short"},
+      {text:"more difficulter",type:"comp",rule:"long"},
+    ],
+    explain:"'Difficult' has 3 syllables → use 'more' + adjective. NEVER combine 'more' + -er."
+  },
+  {
+    fr:"Construis : « Aujourd'hui, le temps est pire qu'hier. »",
+    target:[
+      {text:"Today",type:"word"},
+      {text:"the weather",type:"word"},
+      {text:"is",type:"word"},
+      {text:"worse",type:"comp",rule:"irreg"},
+      {text:"than",type:"than"},
+      {text:"yesterday",type:"word"},
+    ],
+    decoys:[
+      {text:"badder",type:"comp",rule:"short"},
+      {text:"more bad",type:"comp",rule:"long"},
+    ],
+    explain:"Irregular: bad → worse (NOT 'badder' or 'more bad')."
+  },
+  {
+    fr:"Construis : « Mon nouveau téléphone est plus rapide que mon ancien. »",
+    target:[
+      {text:"My new phone",type:"word"},
+      {text:"is",type:"word"},
+      {text:"faster",type:"comp",rule:"short"},
+      {text:"than",type:"than"},
+      {text:"my old one",type:"word"},
+    ],
+    decoys:[
+      {text:"more fast",type:"comp",rule:"long"},
+      {text:"fastest",type:"comp",rule:"short"},
+    ],
+    explain:"Short adjective ➜ fast + er. Don't forget 'than'!"
+  },
+  {
+    fr:"Construis : « L'espagnol est plus facile que l'allemand pour moi. »",
+    target:[
+      {text:"Spanish",type:"word"},
+      {text:"is",type:"word"},
+      {text:"easier",type:"comp",rule:"short"},
+      {text:"than",type:"than"},
+      {text:"German",type:"word"},
+      {text:"for me",type:"word"},
+    ],
+    decoys:[
+      {text:"more easy",type:"comp",rule:"long"},
+      {text:"easyer",type:"comp",rule:"short"},
+    ],
+    explain:"'Easy' ends in -y → change to -ier (easy → easier). Spelling rule!"
+  },
+  {
+    fr:"Construis : « Le restaurant est plus cher que celui près de chez moi. »",
+    target:[
+      {text:"The restaurant",type:"word"},
+      {text:"is",type:"word"},
+      {text:"more expensive",type:"comp",rule:"long"},
+      {text:"than",type:"than"},
+      {text:"the one near my house",type:"word"},
+    ],
+    decoys:[
+      {text:"expensiver",type:"comp",rule:"short"},
+      {text:"the most expensive",type:"comp",rule:"long"},
+    ],
+    explain:"'Expensive' = long adjective → use 'more expensive'. 'expensiver' does not exist!"
+  },
+  {
+    fr:"Construis : « Ma sœur est plus heureuse que mon frère aujourd'hui. »",
+    target:[
+      {text:"My sister",type:"word"},
+      {text:"is",type:"word"},
+      {text:"happier",type:"comp",rule:"short"},
+      {text:"than",type:"than"},
+      {text:"my brother",type:"word"},
+      {text:"today",type:"word"},
+    ],
+    decoys:[
+      {text:"more happy",type:"comp",rule:"long"},
+      {text:"happyer",type:"comp",rule:"short"},
+    ],
+    explain:"happy → happier (consonant + y → -ier). Watch the spelling!"
+  },
+  {
+    fr:"Construis : « Les magasins sont plus loin que l'école. »",
+    target:[
+      {text:"The shops",type:"word"},
+      {text:"are",type:"word"},
+      {text:"further",type:"comp",rule:"irreg"},
+      {text:"than",type:"than"},
+      {text:"the school",type:"word"},
+    ],
+    decoys:[
+      {text:"farer",type:"comp",rule:"short"},
+      {text:"more far",type:"comp",rule:"long"},
+    ],
+    explain:"Irregular: far → further (or farther). 'farer' / 'more far' = wrong!"
+  }
+];
+
+let current = 0;
+let score = 0;
+let placed = []; // ordered list of tile indices
+const promptTextEl = document.getElementById('promptText');
+const promptFrEl = document.getElementById('promptFr');
+const promptMetaEl = document.getElementById('promptMeta');
+const targetEl = document.getElementById('target');
+const poolEl = document.getElementById('pool');
+const feedbackEl = document.getElementById('feedback');
+const checkBtn = document.getElementById('checkBtn');
+const resetBtn = document.getElementById('resetBtn');
+const scoreNEl = document.getElementById('scoreN');
+const scoreTEl = document.getElementById('scoreT');
+const scoreFill = document.getElementById('scoreFill');
+
+scoreTEl.textContent = PUZZLES.length;
+
+function el(tag, cls, txt){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(txt !== undefined) e.textContent = txt;
+  return e;
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1; i>0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function renderPrompt(){
+  const p = PUZZLES[current];
+  promptTextEl.textContent = "Question " + (current+1) + " of " + PUZZLES.length;
+  promptFrEl.textContent = p.fr;
+  promptMetaEl.replaceChildren();
+  const ruleTile = p.target.find(t=>t.type==='comp');
+  if(ruleTile){
+    const cls = 'chip rule-'+ruleTile.rule;
+    const lbl = ruleTile.rule==='short' ? 'Short adj.' : ruleTile.rule==='long' ? 'Long adj.' : 'Irregular';
+    promptMetaEl.appendChild(el('span', cls, '◼ '+lbl));
+  }
+}
+
+function renderPuzzle(){
+  const p = PUZZLES[current];
+  placed = [];
+  feedbackEl.classList.remove('visible','ok','err');
+  feedbackEl.textContent = '';
+  targetEl.classList.remove('complete-ok','complete-err');
+  checkBtn.disabled = false;
+
+  // build pool: target + decoys, shuffled
+  const allTiles = p.target.concat(p.decoys);
+  const order = shuffle(allTiles.map((_,i)=>i));
+
+  poolEl.replaceChildren();
+  order.forEach(idx=>{
+    const t = allTiles[idx];
+    const tile = el('button','tile');
+    tile.dataset.idx = idx;
+    if(t.type==='comp'){
+      tile.classList.add('rule-'+t.rule);
+      const tag = el('span','tile-tag', t.rule==='short'?'+ER':t.rule==='long'?'MORE+':'IRREG');
+      tile.appendChild(tag);
+    } else if(t.type==='than'){
+      tile.classList.add('than');
+    }
+    tile.appendChild(document.createTextNode(t.text));
+    tile.addEventListener('click', ()=>placeTile(idx, allTiles));
+    poolEl.appendChild(tile);
+  });
+
+  renderTarget(p.target.length);
+}
+
+function renderTarget(slotCount){
+  targetEl.replaceChildren();
+  // Render slots first
+  for(let i=0; i<slotCount; i++) targetEl.appendChild(el('div','slot'));
+  refreshTarget();
+}
+
+function refreshTarget(){
+  // remove all current children, redraw
+  const slotCount = PUZZLES[current].target.length;
+  targetEl.replaceChildren();
+  if(placed.length === 0){
+    for(let i=0; i<slotCount; i++) targetEl.appendChild(el('div','slot'));
+    return;
+  }
+  const allTiles = PUZZLES[current].target.concat(PUZZLES[current].decoys);
+  placed.forEach(idx=>{
+    const t = allTiles[idx];
+    const tile = el('button','tile placed');
+    if(t.type==='comp') tile.classList.add('rule-'+t.rule);
+    if(t.type==='than') tile.classList.add('than');
+    tile.dataset.idx = idx;
+    if(t.type==='comp'){
+      const tag = el('span','tile-tag', t.rule==='short'?'+ER':t.rule==='long'?'MORE+':'IRREG');
+      tile.appendChild(tag);
+    }
+    tile.appendChild(document.createTextNode(t.text));
+    tile.addEventListener('click', ()=>removeTile(idx));
+    targetEl.appendChild(tile);
+  });
+  // pad remaining slots
+  for(let i=placed.length; i<slotCount; i++) targetEl.appendChild(el('div','slot'));
+}
+
+function placeTile(idx, allTiles){
+  if(placed.includes(idx)) return;
+  if(placed.length >= PUZZLES[current].target.length) return;
+  placed.push(idx);
+  // hide tile in pool
+  const poolTile = poolEl.querySelector('button[data-idx="'+idx+'"]');
+  if(poolTile) poolTile.classList.add('gone');
+  refreshTarget();
+}
+
+function removeTile(idx){
+  placed = placed.filter(x=>x!==idx);
+  const poolTile = poolEl.querySelector('button[data-idx="'+idx+'"]');
+  if(poolTile) poolTile.classList.remove('gone');
+  refreshTarget();
+  feedbackEl.classList.remove('visible');
+  targetEl.classList.remove('complete-ok','complete-err');
+}
+
+resetBtn.addEventListener('click', ()=>{
+  placed = [];
+  poolEl.querySelectorAll('.tile').forEach(t=>t.classList.remove('gone'));
+  refreshTarget();
+  feedbackEl.classList.remove('visible');
+  targetEl.classList.remove('complete-ok','complete-err');
+});
+
+checkBtn.addEventListener('click', ()=>{
+  const p = PUZZLES[current];
+  if(placed.length !== p.target.length){
+    feedbackEl.textContent = '⚠️ Use all the slots before checking!';
+    feedbackEl.classList.add('visible','err');
+    targetEl.classList.add('complete-err');
+    setTimeout(()=>targetEl.classList.remove('complete-err'), 600);
+    return;
+  }
+  // Compare placed tile texts to target tiles in order
+  let ok = true;
+  for(let i=0; i<p.target.length; i++){
+    const placedTile = (p.target.concat(p.decoys))[placed[i]];
+    if(placedTile.text !== p.target[i].text){ ok = false; break; }
+  }
+  if(ok){
+    score++;
+    scoreNEl.textContent = score;
+    scoreFill.style.width = (score / PUZZLES.length * 100) + '%';
+    targetEl.classList.add('complete-ok');
+    feedbackEl.classList.remove('err');
+    feedbackEl.classList.add('visible','ok');
+    feedbackEl.textContent = '✅ Perfect! ' + p.explain;
+    checkBtn.disabled = true;
+    setTimeout(nextPuzzle, 1800);
+  } else {
+    targetEl.classList.add('complete-err');
+    feedbackEl.classList.remove('ok');
+    feedbackEl.classList.add('visible','err');
+    feedbackEl.textContent = '❌ Not quite — check the comparative form, the order, and don\'t forget THAN!';
+    setTimeout(()=>targetEl.classList.remove('complete-err'), 600);
+  }
+});
+
+function nextPuzzle(){
+  if(current+1 >= PUZZLES.length){
+    showFinal();
+    return;
+  }
+  current++;
+  renderPrompt();
+  renderPuzzle();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function showFinal(){
+  promptTextEl.textContent = '🎉 All sentences built!';
+  promptFrEl.textContent = 'Final score: ' + score + ' / ' + PUZZLES.length;
+  promptMetaEl.replaceChildren();
+  targetEl.replaceChildren();
+  const msg = el('div', '', score===PUZZLES.length ? '🏆 Perfect score!' : score>=6 ? '⭐ Great job!' : '📚 Try again to build them all!');
+  msg.style.fontFamily = 'var(--serif)';
+  msg.style.fontSize = '20px';
+  msg.style.fontWeight = '700';
+  msg.style.color = 'var(--navy)';
+  targetEl.appendChild(msg);
+  poolEl.replaceChildren();
+  const btn = el('button','btn success', '🔄 Play again');
+  btn.addEventListener('click', ()=>{
+    current = 0;
+    score = 0;
+    scoreNEl.textContent = '0';
+    scoreFill.style.width = '0%';
+    renderPrompt();
+    renderPuzzle();
+  });
+  poolEl.appendChild(btn);
+  checkBtn.disabled = true;
+  resetBtn.disabled = true;
+  feedbackEl.classList.remove('visible');
+}
+
+renderPrompt();
+renderPuzzle();
+</script>
+</body>
+</html>

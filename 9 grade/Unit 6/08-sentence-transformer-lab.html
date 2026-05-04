@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sentence Transformer Lab — Past Simple · Unit 6</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rust:#BF5A24; --rust-deep:#994418;
+  --forest:#1F4D3C; --forest-soft:#D7E2D6;
+  --navy:#1E2A4D; --gold:#B8893A;
+  --paper:#F5EFDE; --paper-warm:#FBF6E8;
+  --ink:#1A1A1A; --text-mid:#5A4E3E; --text-light:#8A7E68;
+  --border:#E8DDC0; --border-strong:#D4C5A0;
+  --ok:var(--forest); --ok-bg:#E1EEDC; --err:#C97B54; --err-bg:#F2E0D4;
+  --shadow:0 2px 12px rgba(0,0,0,.10);
+  /* Tile colors by part-of-speech / form */
+  --c-subj:#7A5C3E;       /* subject - brown */
+  --c-subj-bg:#EFE2D0;
+  --c-aux:#6E6E6E;        /* didn't / Did - gray */
+  --c-aux-bg:#E2E2E2;
+  --c-inf:#3B6FB6;        /* infinitive after did/didn't - blue */
+  --c-inf-bg:#D9E5F4;
+  --c-past:#C4452F;       /* past form - red */
+  --c-past-bg:#F4D6CF;
+  --c-rest:#2E5F4A;       /* object/etc - green */
+  --c-rest-bg:#D7E5DD;
+  --c-q:#7A3FA3;          /* question word - purple */
+  --c-q-bg:#E5D7F0;
+  --serif:'Lora',Georgia,serif; --sans:'Inter',-apple-system,sans-serif;
+}
+html,body{height:100%;font-family:var(--sans);background:var(--paper);color:var(--ink);overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;display:flex;flex-direction:column;background:radial-gradient(ellipse at top,var(--paper-warm) 0%,var(--paper) 60%)}
+
+.app-header{background:var(--forest);padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:3px solid #163528}
+.app-header-icon{width:42px;height:42px;border-radius:10px;background:var(--paper-warm);display:flex;align-items:center;justify-content:center;font-size:22px}
+.app-header-title{font-family:var(--serif);font-size:16px;font-weight:700;color:var(--paper-warm);line-height:1.2}
+.app-header-sub{font-size:11px;color:#A4BCB1;margin-top:2px;letter-spacing:.04em}
+
+.main{flex:1;padding:14px 12px 22px;display:flex;flex-direction:column;gap:14px}
+
+.task{background:var(--paper-warm);border-radius:14px;padding:16px 14px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.task-eyebrow{font-size:10.5px;font-weight:700;color:var(--forest);letter-spacing:.14em;text-transform:uppercase}
+.task-original{font-family:var(--serif);font-size:16px;font-weight:600;line-height:1.45;color:var(--ink);margin-top:8px;padding:10px 12px;background:var(--paper);border-radius:8px;border-left:3px solid var(--forest)}
+.task-arrow{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--rust);letter-spacing:.14em;text-transform:uppercase;margin-top:10px}
+.task-arrow .arr{font-size:18px}
+.task-fr{font-size:12.5px;color:var(--text-mid);margin-top:6px;font-style:italic;font-family:var(--serif)}
+
+.target-area{background:var(--paper-warm);border-radius:14px;padding:18px 12px;box-shadow:var(--shadow);border:2px dashed var(--border-strong);min-height:84px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;align-content:center;justify-content:center}
+.target-area.complete-ok{border-color:var(--ok);background:var(--ok-bg);border-style:solid}
+.target-area.complete-err{border-color:var(--err);background:var(--err-bg);border-style:solid;animation:shake .5s ease}
+.slot{min-width:54px;height:34px;border-bottom:2px dashed var(--border-strong);opacity:.5}
+
+.pool{background:var(--paper-warm);border-radius:14px;padding:12px;box-shadow:var(--shadow);border:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:90px}
+
+.tile{background:var(--paper);border:1.5px solid var(--border-strong);border-radius:8px;padding:8px 12px;font-family:var(--sans);font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer;user-select:none;transition:transform .12s ease;display:inline-flex;flex-direction:column;align-items:center;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,.06);min-height:36px;justify-content:center}
+.tile:active{transform:scale(.93)}
+.tile.gone{display:none}
+.tile.placed{transform:scale(.96)}
+.tile-tag{font-size:8px;font-weight:800;letter-spacing:.05em;opacity:.8;margin-top:2px;text-transform:uppercase}
+.tile.subj{background:var(--c-subj-bg);border-color:var(--c-subj);color:var(--c-subj)}
+.tile.aux{background:var(--c-aux-bg);border-color:var(--c-aux);color:var(--c-aux)}
+.tile.inf{background:var(--c-inf-bg);border-color:var(--c-inf);color:var(--c-inf)}
+.tile.past{background:var(--c-past-bg);border-color:var(--c-past);color:var(--c-past)}
+.tile.rest{background:var(--c-rest-bg);border-color:var(--c-rest);color:var(--c-rest)}
+.tile.q{background:var(--c-q-bg);border-color:var(--c-q);color:var(--c-q)}
+
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+
+.actions{display:flex;gap:8px}
+.btn{flex:1;padding:12px 18px;background:var(--forest);color:var(--paper-warm);border:none;border-radius:10px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.outline{background:var(--paper-warm);color:var(--forest);border:1.5px solid var(--forest)}
+
+.feedback{padding:13px 14px;border-radius:10px;font-size:13px;line-height:1.55;font-family:var(--serif);display:none}
+.feedback.visible{display:block}
+.feedback.ok{background:var(--ok-bg);color:#1F4A37;border-left:3px solid var(--ok)}
+.feedback.err{background:var(--err-bg);color:#6E2816;border-left:3px solid var(--err)}
+
+.legend-row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:4px;padding:0 4px}
+.legend-item{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700}
+.legend-dot{width:10px;height:10px;border-radius:3px}
+
+.score-bar{position:sticky;bottom:0;background:var(--paper-warm);border-top:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 -2px 12px rgba(0,0,0,.06)}
+.score-bar .lbl{font-size:11px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.1em}
+.score-bar .val{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--forest)}
+.score-bar .track{flex:1;height:6px;background:var(--border);border-radius:10px;overflow:hidden}
+.score-bar .fill{height:100%;background:linear-gradient(90deg,var(--forest),var(--gold));border-radius:10px;transition:width .4s ease;width:0%}
+
+.win{background:var(--paper-warm);border-radius:14px;padding:24px 18px;box-shadow:var(--shadow);border:2px solid var(--gold);text-align:center;display:none}
+.win.show{display:block}
+.win-icon{font-size:60px;margin-bottom:6px}
+.win-title{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--forest);margin-bottom:6px}
+.win-sub{font-size:14px;color:var(--text-mid);line-height:1.5;margin-bottom:14px}
+.win-score{display:inline-block;background:var(--gold);color:#fff;padding:8px 18px;border-radius:20px;font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:14px}
+
+@media(min-width:640px){.main{max-width:680px;width:100%;margin:0 auto}}
+</style>
+</head>
+<body>
+<header class="app-header">
+  <div class="app-header-icon">🧪</div>
+  <div>
+    <div class="app-header-title">Sentence Transformer Lab</div>
+    <div class="app-header-sub">UNIT 6 · AFFIRMATIVE → NEGATIVE → INTERROGATIVE</div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="task">
+    <div class="task-eyebrow" id="taskEyebrow">Question 1 / 7</div>
+    <div class="task-original" id="origSent"></div>
+    <div class="task-arrow">
+      <span class="arr">↓</span>
+      <span id="taskGoal"></span>
+    </div>
+    <div class="task-fr" id="taskFr"></div>
+  </div>
+
+  <div class="target-area" id="target"></div>
+  <div class="pool" id="pool"></div>
+
+  <div class="legend-row">
+    <span class="legend-item"><span class="legend-dot" style="background:var(--c-subj)"></span>Subject</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--c-aux)"></span>Did/Didn't</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--c-inf)"></span>Infinitive</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--c-past)"></span>Past form</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--c-rest)"></span>Rest</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--c-q)"></span>Q-word</span>
+  </div>
+
+  <div class="actions">
+    <button class="btn outline" id="resetBtn">↺ Reset</button>
+    <button class="btn" id="checkBtn">Check ✓</button>
+  </div>
+
+  <div class="feedback" id="feedback"></div>
+
+  <div class="win" id="win">
+    <div class="win-icon" id="winIcon">🏆</div>
+    <div class="win-title" id="winTitle">Lab complete!</div>
+    <div class="win-sub" id="winSub"></div>
+    <div class="win-score"><span id="winScore">0</span>/7</div>
+    <br>
+    <button class="btn" id="winBtn">🔄 Play again</button>
+  </div>
+</main>
+
+<div class="score-bar">
+  <span class="lbl">Score</span>
+  <span class="val"><span id="scoreN">0</span>/<span id="scoreT">7</span></span>
+  <div class="track"><div class="fill" id="scoreFill"></div></div>
+</div>
+
+<script>
+// type: subj, aux, inf, past, rest, q
+// Each puzzle: original sentence, goal (negative/interrogative/q-word), target tiles in order, decoys
+const PUZZLES = [
+  {
+    orig:"Tom went to the cinema.",
+    goal:"Make it NEGATIVE",
+    fr:"Mets cette phrase à la forme NÉGATIVE.",
+    target:[
+      {t:"Tom",type:"subj"},
+      {t:"didn't",type:"aux"},
+      {t:"go",type:"inf"},
+      {t:"to the cinema",type:"rest"},
+    ],
+    decoys:[
+      {t:"went",type:"past"},
+      {t:"didn't went",type:"aux"},
+      {t:"don't",type:"aux"},
+    ],
+    rule:"After didn't, ALWAYS use the infinitive (go, NOT went)."
+  },
+  {
+    orig:"They built a new house.",
+    goal:"Make it NEGATIVE",
+    fr:"Mets à la forme NÉGATIVE.",
+    target:[
+      {t:"They",type:"subj"},
+      {t:"didn't",type:"aux"},
+      {t:"build",type:"inf"},
+      {t:"a new house",type:"rest"},
+    ],
+    decoys:[
+      {t:"built",type:"past"},
+      {t:"didn't built",type:"aux"},
+      {t:"weren't",type:"aux"},
+    ],
+    rule:"build is irregular: built (past) → infinitive 'build' after didn't."
+  },
+  {
+    orig:"She ate the chocolate cake.",
+    goal:"Make it INTERROGATIVE (yes/no question)",
+    fr:"Mets à la forme INTERROGATIVE (question oui/non).",
+    target:[
+      {t:"Did",type:"aux"},
+      {t:"she",type:"subj"},
+      {t:"eat",type:"inf"},
+      {t:"the chocolate cake",type:"rest"},
+      {t:"?",type:"rest"},
+    ],
+    decoys:[
+      {t:"ate",type:"past"},
+      {t:"Did ate",type:"aux"},
+      {t:"Was",type:"aux"},
+    ],
+    rule:"Did + subject + INFINITIVE? (Did she EAT, NOT 'Did she ate')."
+  },
+  {
+    orig:"I drank coffee this morning.",
+    goal:"Make it NEGATIVE",
+    fr:"Mets à la forme NÉGATIVE.",
+    target:[
+      {t:"I",type:"subj"},
+      {t:"didn't",type:"aux"},
+      {t:"drink",type:"inf"},
+      {t:"coffee",type:"rest"},
+      {t:"this morning",type:"rest"},
+    ],
+    decoys:[
+      {t:"drank",type:"past"},
+      {t:"don't drink",type:"aux"},
+      {t:"wasn't",type:"aux"},
+    ],
+    rule:"drank → drink after didn't. The verb returns to its base form."
+  },
+  {
+    orig:"They went on holiday last summer.",
+    goal:"Build a question with WHERE",
+    fr:"Construis la question avec OÙ.",
+    target:[
+      {t:"Where",type:"q"},
+      {t:"did",type:"aux"},
+      {t:"they",type:"subj"},
+      {t:"go",type:"inf"},
+      {t:"on holiday last summer",type:"rest"},
+      {t:"?",type:"rest"},
+    ],
+    decoys:[
+      {t:"went",type:"past"},
+      {t:"did went",type:"aux"},
+      {t:"What",type:"q"},
+    ],
+    rule:"Wh-word + did + subject + INFINITIVE. Where DID they GO."
+  },
+  {
+    orig:"Sarah came to the meeting.",
+    goal:"Make it INTERROGATIVE (yes/no question)",
+    fr:"Mets à la forme INTERROGATIVE.",
+    target:[
+      {t:"Did",type:"aux"},
+      {t:"Sarah",type:"subj"},
+      {t:"come",type:"inf"},
+      {t:"to the meeting",type:"rest"},
+      {t:"?",type:"rest"},
+    ],
+    decoys:[
+      {t:"came",type:"past"},
+      {t:"Did came",type:"aux"},
+      {t:"Comes",type:"inf"},
+    ],
+    rule:"come → came (past) → 'come' after Did. Did Sarah COME."
+  },
+  {
+    orig:"He fell off his skateboard.",
+    goal:"Build a question with WHY",
+    fr:"Construis la question avec POURQUOI.",
+    target:[
+      {t:"Why",type:"q"},
+      {t:"did",type:"aux"},
+      {t:"he",type:"subj"},
+      {t:"fall",type:"inf"},
+      {t:"off his skateboard",type:"rest"},
+      {t:"?",type:"rest"},
+    ],
+    decoys:[
+      {t:"fell",type:"past"},
+      {t:"did fell",type:"aux"},
+      {t:"Where",type:"q"},
+    ],
+    rule:"fall → fell (past) → 'fall' after did. Why did he FALL."
+  }
+];
+
+let current = 0;
+let score = 0;
+let placed = []; // indices into combined array
+const taskEyebrow = document.getElementById('taskEyebrow');
+const origSent = document.getElementById('origSent');
+const taskGoal = document.getElementById('taskGoal');
+const taskFr = document.getElementById('taskFr');
+const targetEl = document.getElementById('target');
+const poolEl = document.getElementById('pool');
+const feedbackEl = document.getElementById('feedback');
+const checkBtn = document.getElementById('checkBtn');
+const resetBtn = document.getElementById('resetBtn');
+const scoreNEl = document.getElementById('scoreN');
+const scoreTEl = document.getElementById('scoreT');
+const scoreFill = document.getElementById('scoreFill');
+const winEl = document.getElementById('win');
+
+scoreTEl.textContent = PUZZLES.length;
+document.getElementById('winScore').textContent = '0';
+
+function el(tag, cls, txt){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(txt !== undefined) e.textContent = txt;
+  return e;
+}
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function tagFor(type){
+  return type==='subj'?'subj':type==='aux'?'aux':type==='inf'?'inf!':type==='past'?'past':type==='q'?'wh-':'';
+}
+
+function renderTask(){
+  const p = PUZZLES[current];
+  taskEyebrow.textContent = 'Question ' + (current+1) + ' / ' + PUZZLES.length;
+  origSent.textContent = p.orig;
+  taskGoal.textContent = p.goal;
+  taskFr.textContent = p.fr;
+}
+
+function renderPuzzle(){
+  const p = PUZZLES[current];
+  placed = [];
+  feedbackEl.classList.remove('visible','ok','err');
+  feedbackEl.textContent = '';
+  targetEl.classList.remove('complete-ok','complete-err');
+  checkBtn.disabled = false;
+
+  const all = p.target.concat(p.decoys);
+  const order = shuffle(all.map((_,i)=>i));
+
+  poolEl.replaceChildren();
+  order.forEach(idx=>{
+    const t = all[idx];
+    const tile = el('button','tile ' + t.type);
+    tile.dataset.idx = idx;
+    tile.appendChild(document.createTextNode(t.t));
+    const tag = tagFor(t.type);
+    if(tag) tile.appendChild(el('span','tile-tag', tag));
+    tile.addEventListener('click', ()=>placeTile(idx));
+    poolEl.appendChild(tile);
+  });
+
+  refreshTarget();
+}
+
+function refreshTarget(){
+  targetEl.replaceChildren();
+  const p = PUZZLES[current];
+  const all = p.target.concat(p.decoys);
+  const slotCount = p.target.length;
+
+  if(placed.length === 0){
+    for(let i=0; i<slotCount; i++) targetEl.appendChild(el('div','slot'));
+    return;
+  }
+  placed.forEach(idx=>{
+    const t = all[idx];
+    const tile = el('button','tile placed ' + t.type);
+    tile.dataset.idx = idx;
+    tile.appendChild(document.createTextNode(t.t));
+    const tag = tagFor(t.type);
+    if(tag) tile.appendChild(el('span','tile-tag', tag));
+    tile.addEventListener('click', ()=>removeTile(idx));
+    targetEl.appendChild(tile);
+  });
+  for(let i=placed.length; i<slotCount; i++) targetEl.appendChild(el('div','slot'));
+}
+
+function placeTile(idx){
+  if(placed.includes(idx)) return;
+  if(placed.length >= PUZZLES[current].target.length) return;
+  placed.push(idx);
+  const poolTile = poolEl.querySelector('button[data-idx="'+idx+'"]');
+  if(poolTile) poolTile.classList.add('gone');
+  refreshTarget();
+}
+
+function removeTile(idx){
+  placed = placed.filter(x=>x!==idx);
+  const poolTile = poolEl.querySelector('button[data-idx="'+idx+'"]');
+  if(poolTile) poolTile.classList.remove('gone');
+  refreshTarget();
+  feedbackEl.classList.remove('visible');
+  targetEl.classList.remove('complete-ok','complete-err');
+}
+
+resetBtn.addEventListener('click', ()=>{
+  placed = [];
+  poolEl.querySelectorAll('.tile').forEach(t=>t.classList.remove('gone'));
+  refreshTarget();
+  feedbackEl.classList.remove('visible');
+  targetEl.classList.remove('complete-ok','complete-err');
+});
+
+checkBtn.addEventListener('click', ()=>{
+  const p = PUZZLES[current];
+  if(placed.length !== p.target.length){
+    feedbackEl.textContent = '⚠️ Use ALL slots before checking!';
+    feedbackEl.classList.add('visible','err');
+    targetEl.classList.add('complete-err');
+    setTimeout(()=>targetEl.classList.remove('complete-err'), 600);
+    return;
+  }
+  const all = p.target.concat(p.decoys);
+  let ok = true;
+  for(let i=0; i<p.target.length; i++){
+    if(all[placed[i]].t !== p.target[i].t){ ok = false; break; }
+  }
+  if(ok){
+    score++;
+    scoreNEl.textContent = score;
+    scoreFill.style.width = (score / PUZZLES.length * 100) + '%';
+    targetEl.classList.add('complete-ok');
+    feedbackEl.classList.remove('err');
+    feedbackEl.classList.add('visible','ok');
+    feedbackEl.textContent = '✅ ' + p.rule;
+    checkBtn.disabled = true;
+    setTimeout(nextPuzzle, 1900);
+  } else {
+    targetEl.classList.add('complete-err');
+    feedbackEl.classList.remove('ok');
+    feedbackEl.classList.add('visible','err');
+    feedbackEl.textContent = '❌ Look at the rule: did/didn\'t + INFINITIVE form (NOT past). Check your verb!';
+    setTimeout(()=>targetEl.classList.remove('complete-err'), 600);
+  }
+});
+
+function nextPuzzle(){
+  if(current+1 >= PUZZLES.length){
+    showFinal();
+    return;
+  }
+  current++;
+  renderTask();
+  renderPuzzle();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function showFinal(){
+  document.querySelector('.task').style.display = 'none';
+  targetEl.style.display = 'none';
+  poolEl.style.display = 'none';
+  document.querySelector('.legend-row').style.display = 'none';
+  document.querySelector('.actions').style.display = 'none';
+  feedbackEl.classList.remove('visible');
+  document.getElementById('winScore').textContent = score;
+  const wt = document.getElementById('winTitle');
+  const ws = document.getElementById('winSub');
+  const wi = document.getElementById('winIcon');
+  if(score === PUZZLES.length){
+    wi.textContent = '🏆';
+    wt.textContent = 'Perfect lab work!';
+    ws.textContent = 'You\'ve mastered the rule: did/didn\'t + INFINITIVE. Test-ready!';
+  } else if(score >= 5){
+    wi.textContent = '⭐';
+    wt.textContent = 'Strong work!';
+    ws.textContent = 'Almost perfect — review the questions you missed and you\'ll be unstoppable.';
+  } else {
+    wi.textContent = '🧪';
+    wt.textContent = 'Keep experimenting!';
+    ws.textContent = 'Re-read the rule cards: after did/didn\'t, the verb returns to the infinitive.';
+  }
+  winEl.classList.add('show');
+}
+
+document.getElementById('winBtn').addEventListener('click', ()=>{
+  current = 0; score = 0;
+  scoreNEl.textContent = '0';
+  scoreFill.style.width = '0%';
+  document.querySelector('.task').style.display = '';
+  targetEl.style.display = '';
+  poolEl.style.display = '';
+  document.querySelector('.legend-row').style.display = '';
+  document.querySelector('.actions').style.display = '';
+  winEl.classList.remove('show');
+  renderTask();
+  renderPuzzle();
+});
+
+renderTask();
+renderPuzzle();
+</script>
+</body>
+</html>

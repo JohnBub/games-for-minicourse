@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Verb Memory Match — Past Simple · Unit 6</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rust:#BF5A24; --rust-deep:#994418;
+  --forest:#1F4D3C; --forest-deep:#163528; --forest-soft:#D7E2D6;
+  --navy:#1E2A4D; --gold:#B8893A;
+  --paper:#F5EFDE; --paper-warm:#FBF6E8;
+  --ink:#1A1A1A; --text-mid:#5A4E3E; --text-light:#8A7E68;
+  --border:#E8DDC0; --border-strong:#D4C5A0;
+  --ok:var(--forest); --err:#C97B54;
+  --shadow:0 2px 12px rgba(0,0,0,.10);
+  /* Card colors */
+  --inf-bg:#D9E5F4; --inf-fg:#3B6FB6;     /* infinitive = blue */
+  --past-bg:#F4D6CF; --past-fg:#C4452F;   /* past = red */
+  --serif:'Lora',Georgia,serif; --sans:'Inter',-apple-system,sans-serif;
+}
+html,body{height:100%;font-family:var(--sans);background:var(--paper);color:var(--ink);overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;display:flex;flex-direction:column;background:radial-gradient(ellipse at top,var(--paper-warm) 0%,var(--paper) 60%)}
+
+.app-header{background:var(--rust);padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:3px solid var(--rust-deep)}
+.app-header-icon{width:42px;height:42px;border-radius:10px;background:var(--paper-warm);display:flex;align-items:center;justify-content:center;font-size:22px}
+.app-header-title{font-family:var(--serif);font-size:16px;font-weight:700;color:var(--paper-warm);line-height:1.2}
+.app-header-sub{font-size:11px;color:#E6B694;margin-top:2px;letter-spacing:.04em}
+
+.scoreboard{background:var(--paper-warm);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:14px;justify-content:space-around}
+.score-block{display:flex;flex-direction:column;align-items:center}
+.score-val{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--ink);line-height:1}
+.score-lbl{font-size:9.5px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
+
+.main{flex:1;padding:14px 12px;display:flex;flex-direction:column;gap:14px}
+
+.intro{background:var(--paper-warm);border-radius:14px;padding:18px 14px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.intro-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.intro-sub{font-size:13.5px;color:var(--text-mid);line-height:1.55}
+.intro-legend{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.intro-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;font-size:12px;font-weight:700}
+.intro-chip.inf{background:var(--inf-bg);color:var(--inf-fg)}
+.intro-chip.past{background:var(--past-bg);color:var(--past-fg)}
+
+.grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:8px;padding:0 2px}
+.tile{aspect-ratio:0.7;perspective:800px;cursor:pointer}
+.tile-inner{position:relative;width:100%;height:100%;transition:transform .45s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d}
+.tile.flipped .tile-inner{transform:rotateY(180deg)}
+.tile.matched .tile-inner{transform:rotateY(180deg)}
+.tile-face{position:absolute;inset:0;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;backface-visibility:hidden;-webkit-backface-visibility:hidden;padding:6px;text-align:center;line-height:1.1;box-shadow:var(--shadow)}
+.tile-front{background:var(--rust);color:var(--paper-warm);font-size:24px;border:2px solid var(--rust-deep)}
+.tile-front-pattern{font-size:36px;opacity:.15}
+.tile-back{transform:rotateY(180deg);font-size:14px;border:2px solid}
+.tile-back.inf{background:var(--inf-bg);color:var(--inf-fg);border-color:var(--inf-fg)}
+.tile-back.past{background:var(--past-bg);color:var(--past-fg);border-color:var(--past-fg)}
+.tile.matched .tile-back{box-shadow:0 0 0 3px var(--ok), var(--shadow);animation:pop .4s ease}
+.tile.miss .tile-inner{animation:shake .4s ease}
+@keyframes pop{0%{transform:rotateY(180deg) scale(1)}40%{transform:rotateY(180deg) scale(1.08)}100%{transform:rotateY(180deg) scale(1)}}
+@keyframes shake{0%,100%{transform:rotateY(180deg)}25%{transform:rotateY(180deg) translateX(-6px)}75%{transform:rotateY(180deg) translateX(6px)}}
+
+.controls{display:flex;gap:10px;justify-content:center}
+.btn{padding:11px 18px;background:var(--rust);color:var(--paper-warm);border:none;border-radius:10px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase}
+.btn:active{transform:scale(.97)}
+.btn.outline{background:var(--paper-warm);color:var(--rust);border:1.5px solid var(--rust)}
+
+.win{background:var(--paper-warm);border-radius:14px;padding:24px 18px;box-shadow:var(--shadow);border:2px solid var(--gold);text-align:center;display:none}
+.win.show{display:block}
+.win-icon{font-size:60px;margin-bottom:6px}
+.win-title{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--rust);margin-bottom:6px}
+.win-sub{font-size:14px;color:var(--text-mid);line-height:1.5;margin-bottom:14px}
+.win-stats{display:flex;gap:10px;justify-content:center;margin-bottom:14px}
+.win-stat{background:var(--paper);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;display:flex;flex-direction:column;min-width:80px}
+.win-stat-val{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--rust)}
+.win-stat-lbl{font-size:9.5px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
+
+.last-match{background:var(--forest-soft);border-radius:10px;padding:8px 12px;font-family:var(--serif);font-size:13px;color:var(--forest-deep);text-align:center;border-left:3px solid var(--forest);min-height:32px;display:flex;align-items:center;justify-content:center}
+
+@media(max-width:380px){.grid{grid-template-columns:repeat(4, 1fr);gap:6px}.tile-back{font-size:12px}.tile-front{font-size:20px}}
+@media(min-width:640px){.main{max-width:560px;width:100%;margin:0 auto}}
+</style>
+</head>
+<body>
+<header class="app-header">
+  <div class="app-header-icon">🃏</div>
+  <div>
+    <div class="app-header-title">Verb Memory Match</div>
+    <div class="app-header-sub">UNIT 6 · IRREGULAR VERBS · PAGE 82</div>
+  </div>
+</header>
+
+<div class="scoreboard">
+  <div class="score-block"><span class="score-val" id="movesVal">0</span><span class="score-lbl">Moves</span></div>
+  <div class="score-block"><span class="score-val" id="matchVal">0</span><span class="score-lbl">Matches</span></div>
+  <div class="score-block"><span class="score-val" id="totalVal">8</span><span class="score-lbl">Of pairs</span></div>
+</div>
+
+<main class="main">
+  <div class="intro">
+    <div class="intro-title">🃏 Match infinitive ↔ past simple</div>
+    <div class="intro-sub">Tap two cards to flip. Match the infinitive with its past simple form. All 8 verbs are from page 82 of your Language Builder.</div>
+    <div class="intro-legend">
+      <span class="intro-chip inf">🔵 Infinitive (blue)</span>
+      <span class="intro-chip past">🔴 Past simple (red)</span>
+    </div>
+  </div>
+
+  <div class="last-match" id="lastMatch">Tap a card to start! / Tape une carte pour commencer !</div>
+  <div class="grid" id="grid"></div>
+
+  <div class="controls">
+    <button class="btn outline" id="restartBtn">↺ Restart</button>
+  </div>
+
+  <div class="win" id="win">
+    <div class="win-icon" id="winIcon">🏆</div>
+    <div class="win-title" id="winTitle">All matched!</div>
+    <div class="win-sub" id="winSub"></div>
+    <div class="win-stats">
+      <div class="win-stat"><span class="win-stat-val" id="winMoves">0</span><span class="win-stat-lbl">Moves</span></div>
+      <div class="win-stat"><span class="win-stat-val" id="winRating">⭐⭐⭐</span><span class="win-stat-lbl">Rating</span></div>
+    </div>
+    <button class="btn" id="winBtn">🔄 Play again</button>
+  </div>
+</main>
+
+<script>
+// 8 pairs from page 82
+const PAIRS = [
+  {inf:"be", past:"was/were", fr:"être"},
+  {inf:"buy", past:"bought", fr:"acheter"},
+  {inf:"catch", past:"caught", fr:"attraper"},
+  {inf:"come", past:"came", fr:"venir"},
+  {inf:"drink", past:"drank", fr:"boire"},
+  {inf:"eat", past:"ate", fr:"manger"},
+  {inf:"break", past:"broke", fr:"casser"},
+  {inf:"choose", past:"chose", fr:"choisir"},
+];
+
+const ICONS = ['🔥','⚡','🌟','🎯','💎','🚀','🎨','🌈'];
+
+const gridEl = document.getElementById('grid');
+const movesVal = document.getElementById('movesVal');
+const matchVal = document.getElementById('matchVal');
+const totalVal = document.getElementById('totalVal');
+const lastMatch = document.getElementById('lastMatch');
+const winEl = document.getElementById('win');
+
+let cards = [];
+let firstCard = null;
+let lock = false;
+let moves = 0;
+let matches = 0;
+
+totalVal.textContent = PAIRS.length;
+
+function el(tag, cls, txt){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(txt !== undefined) e.textContent = txt;
+  return e;
+}
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function buildDeck(){
+  const deck = [];
+  PAIRS.forEach((p, i)=>{
+    deck.push({pairId:i, side:'inf', text:p.inf, fr:p.fr, partner:p.past});
+    deck.push({pairId:i, side:'past', text:p.past, fr:p.fr, partner:p.inf});
+  });
+  return shuffle(deck);
+}
+
+function renderDeck(){
+  cards = buildDeck();
+  gridEl.replaceChildren();
+  cards.forEach((c, i)=>{
+    const tile = el('div','tile');
+    tile.dataset.idx = i;
+    const inner = el('div','tile-inner');
+    const front = el('div','tile-face tile-front');
+    front.appendChild(el('span','tile-front-pattern', ICONS[c.pairId % ICONS.length]));
+    inner.appendChild(front);
+    const back = el('div','tile-face tile-back ' + c.side, c.text);
+    inner.appendChild(back);
+    tile.appendChild(inner);
+    tile.addEventListener('click', ()=>handleTap(tile, c));
+    gridEl.appendChild(tile);
+  });
+}
+
+function handleTap(tile, c){
+  if(lock) return;
+  if(tile.classList.contains('flipped') || tile.classList.contains('matched')) return;
+  tile.classList.add('flipped');
+  if(!firstCard){
+    firstCard = {tile, c};
+    return;
+  }
+  // second card
+  moves++;
+  movesVal.textContent = moves;
+  if(firstCard.c.pairId === c.pairId && firstCard.c.side !== c.side){
+    // match
+    setTimeout(()=>{
+      firstCard.tile.classList.add('matched');
+      tile.classList.add('matched');
+      matches++;
+      matchVal.textContent = matches;
+      const pair = PAIRS[c.pairId];
+      lastMatch.textContent = `✅ ${pair.inf} → ${pair.past} (${pair.fr})`;
+      firstCard = null;
+      lock = false;
+      if(matches === PAIRS.length) setTimeout(showWin, 600);
+    }, 250);
+    lock = true;
+  } else {
+    // miss
+    lock = true;
+    const pair1 = PAIRS[firstCard.c.pairId];
+    const pair2 = PAIRS[c.pairId];
+    lastMatch.textContent = `❌ ${firstCard.c.text} ✗ ${c.text} — try again!`;
+    setTimeout(()=>{
+      firstCard.tile.classList.remove('flipped');
+      tile.classList.remove('flipped');
+      tile.classList.add('miss');
+      setTimeout(()=>tile.classList.remove('miss'), 400);
+      firstCard = null;
+      lock = false;
+    }, 1100);
+  }
+}
+
+function showWin(){
+  document.getElementById('winMoves').textContent = moves;
+  const wt = document.getElementById('winTitle');
+  const ws = document.getElementById('winSub');
+  const wi = document.getElementById('winIcon');
+  const wr = document.getElementById('winRating');
+  // Min 8 moves for perfect (one match per move)
+  if(moves <= 12){
+    wi.textContent = '🏆'; wt.textContent = 'Memory master!';
+    ws.textContent = 'Incredible! You knew every pair. You\'re ready for the test!';
+    wr.textContent = '⭐⭐⭐';
+  } else if(moves <= 20){
+    wi.textContent = '⭐'; wt.textContent = 'Great memory!';
+    ws.textContent = 'Solid performance. Practice the verbs you missed and try for a top score.';
+    wr.textContent = '⭐⭐';
+  } else {
+    wi.textContent = '📚'; wt.textContent = 'Keep practising!';
+    ws.textContent = 'Re-read page 82 and play again. The more you see them, the easier they get.';
+    wr.textContent = '⭐';
+  }
+  winEl.classList.add('show');
+}
+
+document.getElementById('winBtn').addEventListener('click', restart);
+document.getElementById('restartBtn').addEventListener('click', restart);
+
+function restart(){
+  moves = 0; matches = 0; firstCard = null; lock = false;
+  movesVal.textContent = '0';
+  matchVal.textContent = '0';
+  lastMatch.textContent = 'Tap a card to start! / Tape une carte pour commencer !';
+  winEl.classList.remove('show');
+  renderDeck();
+}
+
+renderDeck();
+</script>
+</body>
+</html>

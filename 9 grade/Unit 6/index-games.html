@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Unit 6 — Games · 9e</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rust:#BF5A24; --rust-deep:#994418;
+  --forest:#1F4D3C; --navy:#1E2A4D; --gold:#B8893A;
+  --paper:#F5EFDE; --paper-warm:#FBF6E8;
+  --ink:#1A1A1A; --text-mid:#5A4E3E; --text-light:#8A7E68;
+  --border:#E8DDC0; --border-strong:#D4C5A0;
+  --shadow:0 2px 12px rgba(191,90,36,.10);
+  --serif:'Lora',Georgia,serif; --sans:'Inter',-apple-system,sans-serif;
+}
+html,body{height:100%;font-family:var(--sans);background:var(--paper);color:var(--ink);-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;display:flex;flex-direction:column;background:radial-gradient(ellipse at top,var(--paper-warm) 0%,var(--paper) 60%)}
+
+.app-header{background:var(--rust);padding:18px 16px;display:flex;align-items:center;gap:12px;border-bottom:3px solid var(--rust-deep)}
+.app-header-icon{width:46px;height:46px;border-radius:10px;background:var(--paper-warm);display:flex;align-items:center;justify-content:center;font-size:24px}
+.app-header-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper-warm);line-height:1.2}
+.app-header-sub{font-size:11.5px;color:#E6B694;margin-top:2px;letter-spacing:.04em}
+
+.main{flex:1;padding:18px 14px 24px;display:flex;flex-direction:column;gap:18px}
+
+.section{display:flex;flex-direction:column;gap:10px}
+.section-title{font-family:var(--serif);font-size:16px;font-weight:700;color:var(--rust);letter-spacing:.02em;display:flex;align-items:center;gap:8px}
+.section-title .dot{width:10px;height:10px;border-radius:50%;background:var(--rust)}
+.section-title .dot.forest{background:var(--forest)}
+.section-title .dot.navy{background:var(--navy)}
+.section-title .dot.gold{background:var(--gold)}
+.section-fr{font-size:11.5px;color:var(--text-light);font-style:italic;font-family:var(--serif);margin-top:-4px}
+
+.game-card{display:block;background:var(--paper-warm);border-radius:14px;padding:14px 14px;box-shadow:var(--shadow);border:1px solid var(--border);text-decoration:none;color:inherit;display:flex;align-items:center;gap:12px;transition:transform .12s ease,border-color .15s}
+.game-card:active{transform:scale(.98)}
+.game-card:hover{border-color:var(--rust)}
+.game-icon{width:52px;height:52px;border-radius:12px;background:var(--paper);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;border:1.5px solid var(--border-strong)}
+.game-text{flex:1;min-width:0}
+.game-name{font-family:var(--serif);font-size:15.5px;font-weight:700;color:var(--ink);line-height:1.25}
+.game-desc{font-size:12.5px;color:var(--text-mid);margin-top:3px;line-height:1.45}
+.game-tag{display:inline-block;background:var(--rust-deep);color:var(--paper-warm);font-size:9px;font-weight:800;letter-spacing:.08em;padding:2px 6px;border-radius:3px;margin-top:5px;text-transform:uppercase}
+.game-tag.forest{background:var(--forest)}
+.game-tag.navy{background:var(--navy)}
+.game-tag.gold{background:var(--gold)}
+.game-arrow{font-size:18px;color:var(--rust);flex-shrink:0;font-weight:700}
+
+.intro{background:var(--paper-warm);border-radius:14px;padding:18px 16px;box-shadow:var(--shadow);border:1px solid var(--border);text-align:center}
+.intro-title{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.intro-sub{font-size:13.5px;color:var(--text-mid);line-height:1.55}
+
+.footer-note{padding:10px;text-align:center;font-size:11px;color:var(--text-light);font-style:italic;font-family:var(--serif)}
+
+@media(min-width:640px){.main{max-width:680px;width:100%;margin:0 auto}}
+</style>
+</head>
+<body>
+<header class="app-header">
+  <div class="app-header-icon">🎮</div>
+  <div>
+    <div class="app-header-title">9e · Unit 6 — Games</div>
+    <div class="app-header-sub">READING · COMPARATIVES · SUPERLATIVES · PAST SIMPLE</div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="intro">
+    <div class="intro-title">🎯 8 games for Unit 6</div>
+    <div class="intro-sub">Each game replaces a written exercise with something interactive. Tap a game to play. <i>Pick whichever section you want to practise!</i></div>
+  </div>
+
+  <section class="section">
+    <h2 class="section-title"><span class="dot"></span>📖 Reading</h2>
+    <div class="section-fr">Lecture — corrections interactives</div>
+    <a class="game-card" href="01-marco-tap-to-reveal.html">
+      <div class="game-icon">📍</div>
+      <div class="game-text">
+        <div class="game-name">Marco's Brighton — Tap to Reveal</div>
+        <div class="game-desc">Tap a question and watch the answer line glow in the text. 3 levels (A/B/C).</div>
+        <span class="game-tag">QCM · TRUE/FALSE · OPEN</span>
+      </div>
+      <span class="game-arrow">→</span>
+    </a>
+    <a class="game-card" href="02-lucas-synonym-hunter.html">
+      <div class="game-icon">🦊</div>
+      <div class="game-text">
+        <div class="game-name">Lucas's Nyon — Synonym Hunter</div>
+        <div class="game-desc">Tap WORDS in the text to match clues. Comparatives + irregulars hidden in Lucas's blog.</div>
+        <span class="game-tag">VOCAB · TAP-IN-TEXT</span>
+      </div>
+      <span class="game-arrow">→</span>
+    </a>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title"><span class="dot navy"></span>⚖️ Comparative</h2>
+    <div class="section-fr">Comparatif — règles courtes/longues/irrégulières</div>
+    <a class="game-card" href="03-comparative-builder.html">
+      <div class="game-icon">🧱</div>
+      <div class="game-text">
+        <div class="game-name">Comparative Builder</div>
+        <div class="game-desc">Tap colour-coded tiles to build sentences. Decoy tiles trap "more taller", "easyer"…</div>
+        <span class="game-tag navy">SENTENCE BUILDER</span>
+      </div>
+      <span class="game-arrow">→</span>
+    </a>
+    <a class="game-card" href="04-rule-sorter-swipe.html">
+      <div class="game-icon">⚡</div>
+      <div class="game-text">
+        <div class="game-name">Rule Sorter — Swipe!</div>
+        <div class="game-desc">Tinder-style: swipe ⬅ +ER, ➡ MORE+, ⬆ IRREG. 18 adjectives, combo streaks.</div>
+        <span class="game-tag navy">SWIPE · STREAK</span>
+      </div>
+      <span class="game-arrow">→</span>
+    </a>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title"><span class="dot forest"></span>🏔️ Superlative</h2>
+    <div class="section-fr">Superlatif — comparer 3 choses ou plus</div>
+    <a class="game-card" href="05-superlative-mountain-climb.html">
+      <div class="game-icon">⛰️</div>
+      <div class="game-text">
+        <div class="game-name">Mountain Climb</div>
+        <div class="game-desc">Climb the mountain — every right answer moves you up. 10 questions to the summit.</div>
+        <span class="game-tag forest">CLIMBING · 10 Qs</span>
+      </div>
+      <span class="game-arrow">→</span>
+    </a>
+    <a class="game-card" href="06-comp-vs-super-speed-match.html">
+      <div class="game-icon">⚡</div>
+      <div class="game-text">
+        <div class="game-name">Speed Match — COMP or SUPER?</div>
+        <div class="game-desc">60-second timer. Tap COMP or SUPER. Streak bonuses. Look for "than" / "the".</div>
+        <span class="game-tag navy">⏱ TIME-PRESSURE</span>
+      </div>
+      <span class="game-arrow">→</span>
+    </a>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title"><span class="dot gold"></span>📅 Past Simple</h2>
+    <div class="section-fr">Past Simple — verbes irréguliers (page 82)</div>
+    <a class="game-card" href="07-verb-memory-match.html">
+      <div class="game-icon">🃏</div>
+      <div class="game-text">
+        <div class="game-name">Verb Memory Match</div>
+        <div class="game-desc">Flip pairs to match infinitive ↔ past simple. 8 verbs from page 82.</div>
+        <span class="game-tag gold">MEMORY · PAIRS</span>
+      </div>
+      <span class="game-arrow">→</span>
+    </a>
+    <a class="game-card" href="08-sentence-transformer-lab.html">
+      <div class="game-icon">🧪</div>
+      <div class="game-text">
+        <div class="game-name">Sentence Transformer Lab</div>
+        <div class="game-desc">Drag tiles to transform AFFIRMATIVE → NEGATIVE / INTERROGATIVE. Colour-coded by verb form.</div>
+        <span class="game-tag gold">TRANSFORM · DID + INF</span>
+      </div>
+      <span class="game-arrow">→</span>
+    </a>
+  </section>
+
+  <div class="footer-note">📱 Built for phones. Tap, swipe, drag — works offline.<br>9e · Cycle d'orientation de Cayla · Unit 6</div>
+</main>
+</body>
+</html>

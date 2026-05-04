@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Comparative vs Superlative — Speed Match · Unit 6</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rust:#BF5A24; --rust-deep:#994418; --rust-soft:#F3DDCB;
+  --forest:#1F4D3C; --forest-soft:#D7E2D6;
+  --navy:#1E2A4D; --gold:#B8893A; --ochre:#D4A85E;
+  --paper:#F5EFDE; --paper-warm:#FBF6E8;
+  --ink:#1A1A1A; --text-mid:#5A4E3E; --text-light:#8A7E68;
+  --border:#E8DDC0; --border-strong:#D4C5A0;
+  --ok:var(--forest); --ok-bg:#E1EEDC; --err:#C97B54; --err-bg:#F2E0D4;
+  --shadow:0 2px 12px rgba(0,0,0,.10);
+  --comp:#3B6FB6; --comp-bg:#D9E5F4;
+  --super:#7A3FA3; --super-bg:#E5D7F0;
+  --serif:'Lora',Georgia,serif; --sans:'Inter',-apple-system,sans-serif;
+}
+html,body{height:100%;font-family:var(--sans);background:var(--paper);color:var(--ink);overflow:hidden;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;display:flex;flex-direction:column}
+
+.app-header{background:var(--navy);padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:3px solid #131c36}
+.app-header-icon{width:42px;height:42px;border-radius:10px;background:var(--paper-warm);display:flex;align-items:center;justify-content:center;font-size:22px}
+.app-header-title{font-family:var(--serif);font-size:16px;font-weight:700;color:var(--paper-warm);line-height:1.2}
+.app-header-sub{font-size:11px;color:#A0AAC4;margin-top:2px;letter-spacing:.04em}
+
+.scoreboard{background:var(--paper-warm);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:12px}
+.timer-wrap{flex:1}
+.timer-bar{width:100%;height:8px;background:var(--border);border-radius:10px;overflow:hidden;margin-top:4px}
+.timer-fill{height:100%;width:100%;background:linear-gradient(90deg,var(--forest),var(--gold),var(--rust));border-radius:10px;transition:width .1s linear}
+.timer-fill.warn{background:var(--rust)}
+.timer-lbl{font-size:9.5px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.1em}
+.score-block{display:flex;flex-direction:column;align-items:center}
+.score-val{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);line-height:1}
+.score-val.streak{color:var(--gold)}
+.score-lbl{font-size:9.5px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
+
+.main{flex:1;padding:20px 14px;display:flex;flex-direction:column;justify-content:center;gap:18px;position:relative}
+
+.intro{background:var(--paper-warm);border-radius:16px;padding:24px 18px;box-shadow:var(--shadow);border:1px solid var(--border);text-align:center}
+.intro-title{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--ink);margin-bottom:8px}
+.intro-sub{font-size:14px;color:var(--text-mid);line-height:1.55;margin-bottom:18px}
+.intro-rule{display:flex;flex-direction:column;gap:6px;margin-bottom:18px;text-align:left;background:var(--paper);padding:12px 14px;border-radius:10px;border:1px solid var(--border)}
+.intro-rule-row{display:flex;gap:8px;font-size:13px;line-height:1.5}
+.intro-rule-key{font-weight:700}
+.intro-rule-key.comp{color:var(--comp)}
+.intro-rule-key.super{color:var(--super)}
+.intro-btn{padding:14px 28px;background:var(--rust);color:var(--paper-warm);border:none;border-radius:12px;font-family:var(--sans);font-size:15px;font-weight:800;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;width:100%}
+
+.q-card{background:var(--paper-warm);border-radius:16px;padding:24px 20px;box-shadow:var(--shadow);border:1.5px solid var(--border);text-align:center;position:relative;animation:slide-in .3s ease}
+@keyframes slide-in{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.q-num{font-size:11px;font-weight:700;color:var(--text-light);letter-spacing:.14em;text-transform:uppercase}
+.q-sentence{font-family:var(--serif);font-size:22px;font-weight:600;line-height:1.45;color:var(--ink);margin-top:12px}
+.q-fr{font-size:12.5px;color:var(--text-mid);margin-top:10px;font-style:italic;font-family:var(--serif)}
+
+.choice-row{display:flex;gap:10px}
+.choice{flex:1;padding:22px 14px;border:none;border-radius:16px;font-family:var(--sans);font-size:15px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .15s;box-shadow:var(--shadow)}
+.choice:active{transform:scale(.96)}
+.choice.comp{background:var(--comp-bg);color:var(--comp);border:2.5px solid var(--comp)}
+.choice.super{background:var(--super-bg);color:var(--super);border:2.5px solid var(--super)}
+.choice-icon{font-size:26px}
+.choice-sub{font-size:10px;font-weight:600;opacity:.8;letter-spacing:.04em;text-transform:none;font-style:italic}
+
+.flash{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:50px;font-weight:800;pointer-events:none;opacity:0;transition:opacity .15s}
+.flash.show{opacity:1}
+.flash.ok{color:var(--ok)}
+.flash.err{color:var(--err)}
+
+.win{background:var(--paper-warm);border-radius:16px;padding:28px 20px;box-shadow:var(--shadow);border:2px solid var(--gold);text-align:center;display:none}
+.win.show{display:block}
+.win-icon{font-size:64px;margin-bottom:6px}
+.win-title{font-family:var(--serif);font-size:26px;font-weight:700;color:var(--navy);margin-bottom:6px}
+.win-sub{font-size:13.5px;color:var(--text-mid);line-height:1.5;margin-bottom:14px}
+.win-stats{display:flex;gap:10px;margin:12px 0 18px;justify-content:center}
+.win-stat{background:var(--paper);border:1.5px solid var(--border);border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;min-width:80px}
+.win-stat-val{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--rust)}
+.win-stat-lbl{font-size:9.5px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
+.btn{padding:14px 22px;background:var(--rust);color:var(--paper-warm);border:none;border-radius:12px;font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;width:100%}
+
+@media(min-width:640px){.main{max-width:520px;width:100%;margin:0 auto}}
+</style>
+</head>
+<body>
+<header class="app-header">
+  <div class="app-header-icon">⚡</div>
+  <div>
+    <div class="app-header-title">Speed Match</div>
+    <div class="app-header-sub">UNIT 6 · COMPARATIVE OR SUPERLATIVE — TAP FAST!</div>
+  </div>
+</header>
+
+<div class="scoreboard">
+  <div class="timer-wrap">
+    <span class="timer-lbl">⏱ Time</span>
+    <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+  </div>
+  <div class="score-block"><span class="score-val" id="scoreVal">0</span><span class="score-lbl">Score</span></div>
+  <div class="score-block"><span class="score-val streak" id="streakVal">0</span><span class="score-lbl">🔥 Streak</span></div>
+</div>
+
+<main class="main">
+  <div class="intro" id="intro">
+    <div class="intro-title">⚡ Speed Match</div>
+    <div class="intro-sub">Read each sentence and tap COMPARATIVE or SUPERLATIVE — fast! 60 seconds, +1 per right answer, +2 with a streak of 3.</div>
+    <div class="intro-rule">
+      <div class="intro-rule-row"><span class="intro-rule-key comp">COMP →</span> 2 things compared. Look for <b>"than"</b>.</div>
+      <div class="intro-rule-row"><span class="intro-rule-key super">SUPER →</span> 3+ things. Look for <b>"the"</b>, <b>"in the world"</b>, <b>"of the year"</b>.</div>
+    </div>
+    <button class="intro-btn" id="startBtn">▶ Start the timer!</button>
+  </div>
+
+  <div class="q-card" id="qCard" style="display:none">
+    <div class="q-num" id="qNum">Q1</div>
+    <div class="q-sentence" id="qSent"></div>
+    <div class="q-fr" id="qFr"></div>
+    <div class="flash" id="flash"></div>
+  </div>
+
+  <div class="choice-row" id="choiceRow" style="display:none">
+    <button class="choice comp" data-type="comp">
+      <span class="choice-icon">⚖️</span>
+      Comparative
+      <span class="choice-sub">2 things · than</span>
+    </button>
+    <button class="choice super" data-type="super">
+      <span class="choice-icon">🏆</span>
+      Superlative
+      <span class="choice-sub">3+ things · the most</span>
+    </button>
+  </div>
+
+  <div class="win" id="win">
+    <div class="win-icon" id="winIcon">⚡</div>
+    <div class="win-title" id="winTitle">Time's up!</div>
+    <div class="win-sub" id="winSub"></div>
+    <div class="win-stats">
+      <div class="win-stat"><span class="win-stat-val" id="winScore">0</span><span class="win-stat-lbl">Final score</span></div>
+      <div class="win-stat"><span class="win-stat-val" id="winBest">0</span><span class="win-stat-lbl">Best 🔥</span></div>
+      <div class="win-stat"><span class="win-stat-val" id="winRight">0</span><span class="win-stat-lbl">Correct</span></div>
+    </div>
+    <button class="btn" id="winBtn">🔄 Play again</button>
+  </div>
+</main>
+
+<script>
+// type: 'comp' or 'super'
+const SENTS = [
+  {s:"Mount Everest is the highest mountain in the world.", t:"super", fr:"L'Everest est la plus haute montagne du monde."},
+  {s:"My new bike is faster than my old one.", t:"comp", fr:"Mon nouveau vélo est plus rapide que l'ancien."},
+  {s:"Spanish is easier than German for me.", t:"comp", fr:"L'espagnol est plus facile que l'allemand."},
+  {s:"It's the best day of my life!", t:"super", fr:"C'est le plus beau jour de ma vie."},
+  {s:"My sister is taller than my brother.", t:"comp", fr:"Ma sœur est plus grande que mon frère."},
+  {s:"Russia is the biggest country in the world.", t:"super", fr:"La Russie est le plus grand pays du monde."},
+  {s:"This restaurant is more expensive than the one near my house.", t:"comp", fr:"Ce restaurant est plus cher que celui près de chez moi."},
+  {s:"February is the shortest month of the year.", t:"super", fr:"Février est le mois le plus court de l'année."},
+  {s:"The film was worse than the book.", t:"comp", fr:"Le film était pire que le livre."},
+  {s:"He is the most intelligent student in our class.", t:"super", fr:"Il est l'élève le plus intelligent de la classe."},
+  {s:"Switzerland is smaller than France.", t:"comp", fr:"La Suisse est plus petite que la France."},
+  {s:"Tokyo is the most crowded city in Japan.", t:"super", fr:"Tokyo est la ville la plus peuplée du Japon."},
+  {s:"Today is hotter than yesterday.", t:"comp", fr:"Il fait plus chaud aujourd'hui qu'hier."},
+  {s:"Iceland is the coldest country I have visited.", t:"super", fr:"L'Islande est le pays le plus froid que j'aie visité."},
+  {s:"The library is further than the supermarket.", t:"comp", fr:"La bibliothèque est plus loin que le supermarché."},
+  {s:"That was the worst film I have ever seen.", t:"super", fr:"C'était le pire film que j'aie jamais vu."},
+  {s:"Lake Geneva is larger than Lake Lucerne.", t:"comp", fr:"Le lac Léman est plus grand que le lac des Quatre-Cantons."},
+  {s:"This is the most exciting film of the year.", t:"super", fr:"C'est le film le plus excitant de l'année."},
+  {s:"My grandmother is older than my mother.", t:"comp", fr:"Ma grand-mère est plus âgée que ma mère."},
+  {s:"He is the tallest player on the basketball team.", t:"super", fr:"Il est le joueur le plus grand de l'équipe."},
+];
+
+let idx = 0;
+let score = 0;
+let streak = 0;
+let bestStreak = 0;
+let correctCount = 0;
+let timer = null;
+let timeLeft = 60;
+let queue = [];
+let running = false;
+
+const introEl = document.getElementById('intro');
+const qCard = document.getElementById('qCard');
+const qNum = document.getElementById('qNum');
+const qSent = document.getElementById('qSent');
+const qFr = document.getElementById('qFr');
+const choiceRow = document.getElementById('choiceRow');
+const flash = document.getElementById('flash');
+const timerFill = document.getElementById('timerFill');
+const scoreVal = document.getElementById('scoreVal');
+const streakVal = document.getElementById('streakVal');
+const winEl = document.getElementById('win');
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function startGame(){
+  score = 0; streak = 0; bestStreak = 0; correctCount = 0; idx = 0;
+  scoreVal.textContent = '0';
+  streakVal.textContent = '0';
+  timeLeft = 60;
+  queue = shuffle(SENTS);
+  running = true;
+  introEl.style.display = 'none';
+  qCard.style.display = '';
+  choiceRow.style.display = 'flex';
+  winEl.classList.remove('show');
+  showQ();
+  startTimer();
+}
+
+function startTimer(){
+  if(timer) clearInterval(timer);
+  const start = Date.now();
+  const total = timeLeft * 1000;
+  timer = setInterval(()=>{
+    const elapsed = Date.now() - start;
+    const remain = Math.max(0, total - elapsed);
+    timerFill.style.width = (remain / total * 100) + '%';
+    if(remain < 10000) timerFill.classList.add('warn'); else timerFill.classList.remove('warn');
+    if(remain <= 0){
+      clearInterval(timer);
+      finish();
+    }
+  }, 100);
+}
+
+function showQ(){
+  if(idx >= queue.length){ // wrap-around if they go through all
+    queue = shuffle(SENTS);
+    idx = 0;
+  }
+  const q = queue[idx];
+  qNum.textContent = 'Q' + (idx+1);
+  qSent.textContent = q.s;
+  qFr.textContent = q.fr;
+}
+
+function flashFb(ok, msg){
+  flash.classList.remove('ok','err','show');
+  flash.classList.add(ok?'ok':'err','show');
+  flash.textContent = msg;
+  setTimeout(()=>flash.classList.remove('show'), 350);
+}
+
+choiceRow.querySelectorAll('.choice').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    if(!running) return;
+    const t = b.dataset.type;
+    const q = queue[idx];
+    const ok = (t === q.t);
+    if(ok){
+      streak++;
+      bestStreak = Math.max(bestStreak, streak);
+      correctCount++;
+      const bonus = (streak>=3) ? 2 : 1;
+      score += bonus;
+      flashFb(true, '+'+bonus);
+    } else {
+      streak = 0;
+      flashFb(false, '✗ ' + q.t.toUpperCase());
+    }
+    scoreVal.textContent = score;
+    streakVal.textContent = streak;
+    idx++;
+    setTimeout(showQ, 280);
+  });
+});
+
+function finish(){
+  running = false;
+  qCard.style.display = 'none';
+  choiceRow.style.display = 'none';
+  document.getElementById('winScore').textContent = score;
+  document.getElementById('winBest').textContent = bestStreak;
+  document.getElementById('winRight').textContent = correctCount;
+  const wt = document.getElementById('winTitle');
+  const ws = document.getElementById('winSub');
+  const wi = document.getElementById('winIcon');
+  if(score >= 25){
+    wi.textContent = '🚀';
+    wt.textContent = 'Lightning fast!';
+    ws.textContent = 'Outstanding! You really know the difference between comparative and superlative.';
+  } else if(score >= 15){
+    wi.textContent = '⭐';
+    wt.textContent = 'Nice work!';
+    ws.textContent = 'Solid score. Look for "than" (COMP) and "the" + "in/of" (SUPER) to go faster.';
+  } else {
+    wi.textContent = '🐢';
+    wt.textContent = 'Slow & steady';
+    ws.textContent = 'Re-read the rule cards: COMP needs THAN, SUPER needs THE.';
+  }
+  winEl.classList.add('show');
+}
+
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('winBtn').addEventListener('click', startGame);
+</script>
+</body>
+</html>

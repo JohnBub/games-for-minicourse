@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Marco's Brighton — Tap to Reveal · Unit 6</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rust:#BF5A24; --rust-deep:#994418; --rust-soft:#F3DDCB; --rust-line:#E6B694;
+  --forest:#1F4D3C; --forest-soft:#D7E2D6;
+  --navy:#1E2A4D; --gold:#B8893A; --ochre:#D4A85E; --terracotta:#C97B54;
+  --paper:#F5EFDE; --paper-warm:#FBF6E8;
+  --ink:#1A1A1A; --text-mid:#5A4E3E; --text-light:#8A7E68;
+  --border:#E8DDC0; --border-strong:#D4C5A0;
+  --ok:var(--forest); --ok-bg:#E1EEDC; --err:#C97B54; --err-bg:#F2E0D4;
+  --shadow:0 2px 12px rgba(191,90,36,.10);
+  --serif:'Lora',Georgia,serif; --sans:'Inter',-apple-system,sans-serif;
+}
+html,body{height:100%;font-family:var(--sans);background:var(--paper);color:var(--ink);overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;display:flex;flex-direction:column;background:radial-gradient(ellipse at top,var(--paper-warm) 0%,var(--paper) 60%)}
+
+.app-header{background:var(--rust);padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:3px solid var(--rust-deep)}
+.app-header-icon{width:42px;height:42px;border-radius:10px;background:var(--paper-warm);display:flex;align-items:center;justify-content:center;font-size:22px}
+.app-header-title{font-family:var(--serif);font-size:16px;font-weight:700;color:var(--paper-warm);line-height:1.2}
+.app-header-sub{font-size:11px;color:var(--rust-line);margin-top:2px;letter-spacing:.04em}
+
+.tabs{display:flex;background:var(--paper-warm);border-bottom:1px solid var(--border);padding:0 8px;gap:4px}
+.tab{flex:1;padding:12px 6px;background:none;border:none;font-family:var(--sans);font-size:12.5px;font-weight:700;color:var(--text-light);cursor:pointer;border-bottom:3px solid transparent;letter-spacing:.04em;text-transform:uppercase;transition:all .15s}
+.tab.active{color:var(--rust);border-bottom-color:var(--rust)}
+
+.main{flex:1;padding:14px 12px 22px;display:flex;flex-direction:column;gap:14px}
+
+.text-card{background:var(--paper-warm);border-radius:14px;padding:18px 16px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.text-title{font-family:var(--serif);font-size:14px;font-weight:700;color:var(--rust);margin-bottom:12px;letter-spacing:.02em}
+.text-body{font-family:var(--serif);font-size:14.5px;line-height:1.85;color:var(--ink)}
+.text-line{display:flex;gap:10px;padding:2px 6px;border-radius:6px;transition:all .4s ease;position:relative}
+.text-line .ln{font-family:var(--sans);font-size:10.5px;font-weight:700;color:var(--text-light);min-width:22px;text-align:right;padding-top:4px;letter-spacing:.05em}
+.text-line .lt{flex:1}
+.text-line.glow-rust{background:var(--rust-soft);box-shadow:0 0 0 2px var(--rust);animation:pulse 1.2s ease}
+.text-line.glow-forest{background:var(--forest-soft);box-shadow:0 0 0 2px var(--forest);animation:pulse 1.2s ease}
+.text-line.glow-gold{background:#FBE9C2;box-shadow:0 0 0 2px var(--gold);animation:pulse 1.2s ease}
+.text-line.glow-navy{background:#D5DAE8;box-shadow:0 0 0 2px var(--navy);animation:pulse 1.2s ease}
+@keyframes pulse{0%{transform:scale(1)}40%{transform:scale(1.015)}100%{transform:scale(1)}}
+.text-line .ln.badge{background:var(--rust);color:var(--paper-warm);border-radius:4px;padding:2px 5px;animation:bounce 1s ease}
+.text-line .ln.badge.forest{background:var(--forest)} .text-line .ln.badge.gold{background:var(--gold)} .text-line .ln.badge.navy{background:var(--navy)}
+@keyframes bounce{0%{transform:scale(1)}30%{transform:scale(1.4)}60%{transform:scale(.95)}100%{transform:scale(1)}}
+
+.qcard{background:var(--paper-warm);border-radius:14px;padding:16px 14px;box-shadow:var(--shadow);border:1px solid var(--border);display:flex;flex-direction:column;gap:10px}
+.qcard.done{border-color:var(--ok);background:var(--ok-bg)}
+.qrow{display:flex;align-items:flex-start;gap:10px}
+.qnum{font-family:var(--serif);font-size:14px;font-weight:700;color:var(--rust);min-width:24px;flex-shrink:0;padding-top:2px}
+.qcard.done .qnum{color:var(--ok)}
+.qtext{flex:1;font-size:14px;line-height:1.5;font-weight:500;color:var(--ink)}
+.qopts{display:flex;flex-direction:column;gap:6px;padding-left:34px}
+.qopt{background:var(--paper);border:1.5px solid var(--border-strong);border-radius:8px;padding:10px 12px;font-size:13.5px;font-weight:500;color:var(--ink);cursor:pointer;text-align:left;transition:all .15s;display:flex;align-items:center;gap:8px;font-family:var(--sans)}
+.qopt:active{transform:scale(.98)}
+.qopt.right{border-color:var(--ok);background:var(--ok-bg);color:var(--ok);font-weight:600}
+.qopt.wrong{border-color:var(--err);background:var(--err-bg);color:var(--err)}
+.qopt-mark{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border-strong);flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--text-mid);background:var(--paper-warm)}
+.qopt.right .qopt-mark{background:var(--ok);color:var(--paper-warm);border-color:var(--ok)}
+.qopt.wrong .qopt-mark{background:var(--err);color:var(--paper-warm);border-color:var(--err)}
+.qexpl{padding:6px 10px 6px 34px;font-size:12.5px;line-height:1.55;color:var(--text-mid);font-style:italic;font-family:var(--serif);display:none;border-left:2px solid var(--ok);margin-left:10px}
+.qexpl.visible{display:block}
+
+.input-row{padding-left:34px;display:flex;gap:8px;flex-wrap:wrap}
+.tinput{flex:1;min-width:160px;padding:10px 12px;border:1.5px solid var(--border-strong);border-radius:8px;font-family:var(--sans);font-size:14px;background:var(--paper);color:var(--ink);outline:none}
+.tinput:focus{border-color:var(--rust);background:var(--paper-warm)}
+.tinput.right{border-color:var(--ok);background:var(--ok-bg);color:var(--ok);font-weight:600}
+.tinput.wrong{border-color:var(--err);background:var(--err-bg)}
+.btn{padding:10px 16px;background:var(--rust);color:var(--paper-warm);border:none;border-radius:8px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.5;cursor:default}
+
+.score-bar{position:sticky;bottom:0;background:var(--paper-warm);border-top:1px solid var(--border);padding:12px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 -2px 12px rgba(0,0,0,.06)}
+.score-bar .lbl{font-size:11px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.1em}
+.score-bar .val{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--rust)}
+.score-bar .track{flex:1;height:6px;background:var(--border);border-radius:10px;overflow:hidden}
+.score-bar .fill{height:100%;background:linear-gradient(90deg,var(--rust),var(--ochre));border-radius:10px;transition:width .4s ease;width:0%}
+
+.legend{font-size:11.5px;color:var(--text-light);padding:0 4px;line-height:1.5;text-align:center;font-style:italic;margin-top:10px}
+
+@media(min-width:640px){.main{max-width:680px;width:100%;margin:0 auto}}
+</style>
+</head>
+<body>
+<header class="app-header">
+  <div class="app-header-icon">📍</div>
+  <div>
+    <div class="app-header-title">Marco's Brighton</div>
+    <div class="app-header-sub">READING · TAP TO REVEAL · UNIT 6</div>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-level="A">Level A</button>
+  <button class="tab" data-level="B">Level B</button>
+  <button class="tab" data-level="C">Level C</button>
+</nav>
+
+<main class="main">
+  <div class="text-card">
+    <div class="text-title">📧 From: Marco — To: Sophie — Subject: My new town</div>
+    <div class="text-body" id="text"></div>
+    <div class="legend">💡 Tap a question or option below — the answer line will glow in the text above!</div>
+  </div>
+  <div id="qlist"></div>
+</main>
+
+<div class="score-bar">
+  <span class="lbl">Score</span>
+  <span class="val"><span id="scoreN">0</span>/<span id="scoreT">0</span></span>
+  <div class="track"><div class="fill" id="scoreFill"></div></div>
+</div>
+
+<script>
+const TEXT = [
+  "Hi Sophie!",
+  "How are you? I hope school is going well in Lyon. I'm writing",
+  "from my new home in Brighton, on the south coast of England.",
+  "We moved here last month because my mum got a new job at the",
+  "university. It was difficult to leave my friends in France, but",
+  "Brighton is a really cool city.",
+  "Brighton is smaller than Lyon but it's much busier. There are",
+  "lots of young people because of the university. The streets near",
+  "the sea are more crowded than the streets in our old neighbourhood,",
+  "but they are also more exciting. There are colourful shops, music,",
+  "and street artists everywhere.",
+  "The beach is amazing! It's not the cleanest beach in England, but",
+  "it's the most famous one. The water is colder than in the south",
+  "of France, but in summer it's perfect for swimming.",
+  "My new school is bigger than my old one in Lyon. The teachers are",
+  "nicer, but the homework is harder! I miss French food the most —",
+  "the bread here is terrible.",
+  "When are you coming to visit? Write back soon!",
+  "Love, Marco"
+];
+
+const LEVELS = {
+  A: [
+    {q:"Marco moved to Brighton because:",type:"mc",opts:["his school changed","his mother got a new job","he wanted to learn English"],correct:1,line:4,color:"rust",expl:"Line 4: 'because my mum got a new job at the university.'"},
+    {q:"Brighton is:",type:"mc",opts:["bigger than Lyon","smaller than Lyon","the same size as Lyon"],correct:1,line:7,color:"rust",expl:"Line 7: 'Brighton is smaller than Lyon but it's much busier.'"},
+    {q:"The water in Brighton is:",type:"mc",opts:["warmer than in France","the same as in France","colder than in France"],correct:2,line:13,color:"rust",expl:"Line 13: 'The water is colder than in the south of France.'"},
+    {q:"Marco thinks the bread in England is:",type:"mc",opts:["delicious","terrible","the best"],correct:1,line:17,color:"rust",expl:"Line 17: 'the bread here is terrible.'"},
+    {q:"Brighton is on the north coast of England.",type:"tf",correct:false,line:3,color:"forest",expl:"Line 3: SOUTH coast, not north."},
+    {q:"Marco moved to Brighton last month.",type:"tf",correct:true,line:4,color:"forest",expl:"Line 4 confirms it."},
+    {q:"Brighton is a quiet city.",type:"tf",correct:false,line:7,color:"forest",expl:"Line 7: 'much busier' — the opposite of quiet."},
+    {q:"The beach in Brighton is very famous.",type:"tf",correct:true,line:12,color:"forest",expl:"Lines 12-13: 'it's the most famous one.'"},
+    {q:"Marco's new school is smaller than his old one.",type:"tf",correct:false,line:15,color:"forest",expl:"Line 15: 'My new school is bigger than my old one.'"},
+    {q:"The homework is easier in Brighton.",type:"tf",correct:false,line:16,color:"forest",expl:"Line 16: 'the homework is harder!'"}
+  ],
+  B: [
+    {q:"Marco's mother is a university teacher.",type:"tf",correct:true,line:4,color:"rust",expl:"Lines 4-5: 'a new job at the university.'"},
+    {q:"Marco was happy to leave France.",type:"tf",correct:false,line:5,color:"rust",expl:"Line 5: 'It was difficult to leave my friends in France.'"},
+    {q:"There are many young people in Brighton.",type:"tf",correct:true,line:8,color:"rust",expl:"Line 8: 'There are lots of young people.'"},
+    {q:"The beach in Brighton is the cleanest in England.",type:"tf",correct:false,line:12,color:"rust",expl:"Line 12: 'not the cleanest beach in England.'"},
+    {q:"Marco's old school in Lyon was bigger than his new school.",type:"tf",correct:false,line:15,color:"rust",expl:"Line 15: 'My new school is bigger than my old one.'"},
+    {q:"Marco likes the food in England.",type:"tf",correct:false,line:17,color:"rust",expl:"Line 17: 'the bread here is terrible.'"},
+    {q:"Where is Brighton located in England? (one or two words)",type:"text",accept:["south coast","on the south coast","south","the south coast"],line:3,color:"gold",expl:"Line 3: 'on the south coast of England.'"},
+    {q:"What season is best for swimming in Brighton?",type:"text",accept:["summer","in summer"],line:14,color:"gold",expl:"Line 14: 'in summer it's perfect for swimming.'"},
+    {q:"What does Marco miss the most? (one word)",type:"text",accept:["bread","french food","food"],line:16,color:"gold",expl:"Lines 16-17: 'I miss French food the most — the bread here is terrible.'"}
+  ],
+  C: [
+    {q:"Why did Marco's family move to Brighton? (key idea: a new job at the...)",type:"text",accept:["mother got a new job","mum got a new job","new job","university","new job at the university","a new job at the university"],line:4,color:"navy",expl:"Lines 4-5. Sample: 'Marco's family moved to Brighton because his mother got a new job at the university.'"},
+    {q:"The streets near the sea are more crowded but also _____. (2 words)",type:"text",accept:["more exciting","exciting"],line:10,color:"navy",expl:"Line 10: 'but they are also more exciting.'"},
+    {q:"Name ONE difference between Marco's new and old school.",type:"text",accept:["bigger","nicer","harder","new school is bigger","teachers are nicer","homework is harder"],line:15,color:"navy",expl:"Lines 15-16: bigger / nicer teachers / harder homework."},
+    {q:"Find a synonym in the text for 'very big and impressive' (about the beach).",type:"text",accept:["amazing"],line:12,color:"gold",expl:"Line 12: 'The beach is amazing!'"},
+    {q:"Find ONE word in the text meaning 'opposite of boring'.",type:"text",accept:["exciting","more exciting"],line:10,color:"gold",expl:"'exciting' (line 6 or 10)."},
+    {q:"Synonym of 'kinder' used about teachers?",type:"text",accept:["nicer"],line:15,color:"gold",expl:"Lines 15-16: 'The teachers are nicer.'"},
+    {q:"Word meaning 'streets full of people'?",type:"text",accept:["crowded","more crowded"],line:9,color:"gold",expl:"Line 9: 'more crowded than the streets...'"}
+  ]
+};
+
+const textEl = document.getElementById('text');
+const qlistEl = document.getElementById('qlist');
+const tabsEl = document.getElementById('tabs');
+const scoreNEl = document.getElementById('scoreN');
+const scoreTEl = document.getElementById('scoreT');
+const scoreFill = document.getElementById('scoreFill');
+
+let currentLevel = 'A';
+let answered = {};
+let score = 0;
+
+function el(tag, cls, txt){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(txt !== undefined) e.textContent = txt;
+  return e;
+}
+
+function renderText(){
+  textEl.replaceChildren();
+  TEXT.forEach((t,i)=>{
+    const line = el('div','text-line');
+    line.dataset.line = i+1;
+    line.appendChild(el('span','ln', String(i+1)));
+    line.appendChild(el('span','lt', t));
+    textEl.appendChild(line);
+  });
+}
+
+function highlightLine(lineNum,color){
+  document.querySelectorAll('.text-line').forEach(elx=>{
+    elx.className='text-line';
+    const ln = elx.querySelector('.ln');
+    ln.className = 'ln';
+  });
+  const target = document.querySelector('.text-line[data-line="'+lineNum+'"]');
+  if(!target) return;
+  target.classList.add('glow-'+color);
+  const ln = target.querySelector('.ln');
+  ln.classList.add('badge');
+  if(color==='forest') ln.classList.add('forest');
+  if(color==='gold') ln.classList.add('gold');
+  if(color==='navy') ln.classList.add('navy');
+  const top = target.getBoundingClientRect().top + window.scrollY - 80;
+  window.scrollTo({top, behavior:'smooth'});
+}
+
+function normalize(s){return s.toLowerCase().trim().replace(/[.,!?;:'"]/g,'').replace(/\s+/g,' ')}
+
+function buildQuestionCard(q, i){
+  const id = currentLevel+i;
+  const card = el('div','qcard');
+  card.id = 'qc-'+id;
+  const row = el('div','qrow');
+  row.appendChild(el('span','qnum', (i+1)+'.'));
+  row.appendChild(el('span','qtext', q.q));
+  card.appendChild(row);
+
+  if(q.type==='mc'){
+    const opts = el('div','qopts');
+    q.opts.forEach((o,j)=>{
+      const b = el('button','qopt');
+      b.dataset.q = i; b.dataset.opt = j;
+      const m = el('span','qopt-mark', String.fromCharCode(97+j));
+      b.appendChild(m);
+      b.appendChild(document.createTextNode(o));
+      opts.appendChild(b);
+      b.addEventListener('click', ()=>handleMC(b, q, i));
+    });
+    card.appendChild(opts);
+  } else if(q.type==='tf'){
+    const opts = el('div','qopts');
+    ['true','false'].forEach(v=>{
+      const b = el('button','qopt');
+      b.dataset.q = i; b.dataset.opt = v;
+      const m = el('span','qopt-mark', v==='true'?'T':'F');
+      b.appendChild(m);
+      b.appendChild(document.createTextNode(v==='true'?'True':'False'));
+      opts.appendChild(b);
+      b.addEventListener('click', ()=>handleTF(b, q, i));
+    });
+    card.appendChild(opts);
+  } else if(q.type==='text'){
+    const row2 = el('div','input-row');
+    const inp = el('input','tinput');
+    inp.type='text'; inp.autocomplete='off'; inp.autocapitalize='off';
+    inp.placeholder = 'Type your answer...';
+    inp.dataset.q = i;
+    const btn = el('button','btn', 'Check');
+    btn.dataset.q = i;
+    row2.appendChild(inp);
+    row2.appendChild(btn);
+    card.appendChild(row2);
+    btn.addEventListener('click', ()=>handleText(inp, btn, q, i));
+    inp.addEventListener('keydown', e=>{ if(e.key==='Enter') btn.click(); });
+  }
+
+  const exp = el('div','qexpl');
+  exp.id = 'exp-'+id;
+  card.appendChild(exp);
+  return card;
+}
+
+function lockCard(card, q, isRight, btnEl){
+  card.querySelectorAll('.qopt').forEach(opt=>{
+    opt.disabled = true;
+    const optVal = opt.dataset.opt;
+    let isCorrectOpt = false;
+    if(q.type==='mc') isCorrectOpt = (+optVal === q.correct);
+    else if(q.type==='tf') isCorrectOpt = ((optVal==='true') === q.correct);
+    if(isCorrectOpt) opt.classList.add('right');
+    else if(opt===btnEl && !isRight) opt.classList.add('wrong');
+  });
+}
+
+function showExpl(qid, q, isRight){
+  const exp = document.getElementById('exp-'+qid);
+  exp.textContent = (isRight?'✅ ':'💡 ') + q.expl;
+  exp.classList.add('visible');
+}
+
+function handleMC(b, q, i){
+  const id = currentLevel+i;
+  if(answered[id]) return;
+  const isRight = (+b.dataset.opt === q.correct);
+  lockCard(document.getElementById('qc-'+id), q, isRight, b);
+  answered[id] = isRight;
+  if(isRight) score++;
+  updateScore();
+  showExpl(id, q, isRight);
+  document.getElementById('qc-'+id).classList.add('done');
+  highlightLine(q.line, q.color);
+}
+
+function handleTF(b, q, i){
+  const id = currentLevel+i;
+  if(answered[id]) return;
+  const isRight = ((b.dataset.opt==='true') === q.correct);
+  lockCard(document.getElementById('qc-'+id), q, isRight, b);
+  answered[id] = isRight;
+  if(isRight) score++;
+  updateScore();
+  showExpl(id, q, isRight);
+  document.getElementById('qc-'+id).classList.add('done');
+  highlightLine(q.line, q.color);
+}
+
+function handleText(inp, btn, q, i){
+  const id = currentLevel+i;
+  if(answered[id]) return;
+  const val = normalize(inp.value);
+  if(!val) return;
+  const isRight = q.accept.some(a=>{
+    const an = normalize(a);
+    return an===val || (val.length>2 && (an.includes(val) || val.includes(an)));
+  });
+  inp.classList.add(isRight?'right':'wrong');
+  inp.disabled = true;
+  btn.disabled = true;
+  answered[id] = isRight;
+  if(isRight) score++;
+  updateScore();
+  showExpl(id, q, isRight);
+  document.getElementById('qc-'+id).classList.add('done');
+  highlightLine(q.line, q.color);
+}
+
+function renderQuestions(){
+  const qs = LEVELS[currentLevel];
+  scoreTEl.textContent = qs.length;
+  qlistEl.replaceChildren();
+  qs.forEach((q,i)=>qlistEl.appendChild(buildQuestionCard(q,i)));
+}
+
+function updateScore(){
+  scoreNEl.textContent = score;
+  const pct = (score / LEVELS[currentLevel].length) * 100;
+  scoreFill.style.width = pct + '%';
+}
+
+tabsEl.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    tabsEl.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    currentLevel = t.dataset.level;
+    score = 0;
+    answered = {};
+    updateScore();
+    renderQuestions();
+    renderText();
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+
+renderText();
+renderQuestions();
+updateScore();
+</script>
+</body>
+</html>

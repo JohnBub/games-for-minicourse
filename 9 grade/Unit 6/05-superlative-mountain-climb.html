@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mountain Climb — Superlatives · Unit 6</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rust:#BF5A24; --forest:#1F4D3C; --forest-deep:#163528;
+  --navy:#1E2A4D; --gold:#B8893A; --ochre:#D4A85E;
+  --paper:#F5EFDE; --paper-warm:#FBF6E8;
+  --ink:#1A1A1A; --text-mid:#5A4E3E; --text-light:#8A7E68;
+  --border:#E8DDC0; --border-strong:#D4C5A0;
+  --ok:var(--forest); --ok-bg:#E1EEDC; --err:#C97B54; --err-bg:#F2E0D4;
+  --shadow:0 2px 12px rgba(0,0,0,.10);
+  --sky-1:#A8C8E1; --sky-2:#7FB0D5; --snow:#F4F8FC;
+  --serif:'Lora',Georgia,serif; --sans:'Inter',-apple-system,sans-serif;
+}
+html,body{height:100%;font-family:var(--sans);background:var(--paper);color:var(--ink);overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;display:flex;flex-direction:column}
+
+.app-header{background:var(--forest);padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:3px solid var(--forest-deep)}
+.app-header-icon{width:42px;height:42px;border-radius:10px;background:var(--paper-warm);display:flex;align-items:center;justify-content:center;font-size:22px}
+.app-header-title{font-family:var(--serif);font-size:16px;font-weight:700;color:var(--paper-warm);line-height:1.2}
+.app-header-sub{font-size:11px;color:#A4BCB1;margin-top:2px;letter-spacing:.04em}
+
+.main{flex:1;display:flex;flex-direction:column}
+
+.mountain-area{position:relative;height:340px;background:linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 60%, #5A8FB0 100%);overflow:hidden;flex-shrink:0;border-bottom:3px solid var(--forest-deep)}
+/* Mountain SVG silhouette */
+.mountain-svg{position:absolute;bottom:0;left:0;width:100%;height:100%}
+/* Climber */
+.climber{position:absolute;left:50%;font-size:32px;transition:bottom 1s cubic-bezier(.4,1.4,.5,1), left 1s cubic-bezier(.4,1.4,.5,1);transform:translateX(-50%);z-index:10;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
+.climber.cheer{animation:cheer 1s ease infinite}
+@keyframes cheer{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-10px)}}
+/* Altitude badge */
+.altitude{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.92);padding:6px 12px;border-radius:8px;font-family:var(--serif);font-size:14px;font-weight:700;color:var(--forest);box-shadow:0 2px 8px rgba(0,0,0,.15);z-index:5}
+.altitude .alt-num{font-size:20px;color:var(--rust)}
+/* Cloud */
+.cloud{position:absolute;font-size:32px;opacity:.7;animation:drift 30s linear infinite}
+.cloud.c1{top:20px;left:-40px;font-size:36px}
+.cloud.c2{top:60px;left:-40px;font-size:28px;animation-delay:-10s;animation-duration:40s}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(calc(100vw + 80px))}}
+
+.q-section{flex:1;padding:16px 14px 22px;display:flex;flex-direction:column;gap:14px}
+
+.q-card{background:var(--paper-warm);border-radius:14px;padding:18px 16px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.q-eyebrow{font-size:10.5px;font-weight:700;color:var(--forest);letter-spacing:.14em;text-transform:uppercase}
+.q-text{font-family:var(--serif);font-size:18px;font-weight:600;line-height:1.45;color:var(--ink);margin-top:8px}
+.q-blank{display:inline-block;min-width:80px;border-bottom:2.5px dashed var(--rust);padding:0 4px;color:var(--rust);font-weight:700}
+.q-fr{font-size:12.5px;color:var(--text-mid);margin-top:6px;font-style:italic;font-family:var(--serif)}
+.q-meta{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:center}
+.q-syll{display:inline-flex;gap:3px}
+.q-syll-dot{width:8px;height:8px;border-radius:50%;background:var(--border-strong)}
+.q-syll-dot.on{background:var(--gold)}
+.q-tag{font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--ochre);color:#fff;letter-spacing:.04em}
+
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{background:var(--paper-warm);border:1.5px solid var(--border-strong);border-radius:10px;padding:12px 14px;font-size:14.5px;font-weight:600;color:var(--ink);cursor:pointer;text-align:left;font-family:var(--sans);transition:all .15s;display:flex;align-items:center;gap:10px}
+.opt:active{transform:scale(.98)}
+.opt-mark{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border-strong);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:12px;font-weight:700;color:var(--text-mid);background:var(--paper);flex-shrink:0}
+.opt.right{border-color:var(--ok);background:var(--ok-bg);color:var(--ok)}
+.opt.right .opt-mark{background:var(--ok);color:var(--paper-warm);border-color:var(--ok)}
+.opt.wrong{border-color:var(--err);background:var(--err-bg);color:var(--err)}
+.opt.wrong .opt-mark{background:var(--err);color:var(--paper-warm);border-color:var(--err)}
+
+.feedback{padding:12px 14px;border-radius:10px;font-size:13.5px;line-height:1.55;font-family:var(--serif);font-style:italic;display:none}
+.feedback.visible{display:block}
+.feedback.ok{background:var(--ok-bg);color:#1F4A37;border-left:3px solid var(--ok)}
+.feedback.err{background:var(--err-bg);color:#6E2816;border-left:3px solid var(--err)}
+
+.next-btn{padding:13px;background:var(--forest);color:var(--paper-warm);border:none;border-radius:10px;font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;display:none}
+.next-btn.show{display:block}
+.next-btn:active{transform:scale(.98)}
+
+.win{background:var(--paper-warm);border-radius:14px;padding:24px 18px;box-shadow:var(--shadow);border:2px solid var(--gold);text-align:center;display:none}
+.win.show{display:block}
+.win-icon{font-size:64px;margin-bottom:8px}
+.win-title{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--forest);margin-bottom:8px}
+.win-sub{font-size:14px;color:var(--text-mid);line-height:1.5;margin-bottom:14px}
+.win-score{display:inline-block;background:var(--gold);color:#fff;padding:8px 18px;border-radius:20px;font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:14px}
+
+.btn{padding:13px 22px;background:var(--rust);color:var(--paper-warm);border:none;border-radius:10px;font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase}
+
+@media(min-width:640px){.main{max-width:680px;width:100%;margin:0 auto}}
+</style>
+</head>
+<body>
+<header class="app-header">
+  <div class="app-header-icon">⛰️</div>
+  <div>
+    <div class="app-header-title">Mountain Climb</div>
+    <div class="app-header-sub">UNIT 6 · ANSWER → CLIMB → REACH THE SUMMIT</div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="mountain-area">
+    <div class="cloud c1">☁️</div>
+    <div class="cloud c2">☁️</div>
+    <svg class="mountain-svg" viewBox="0 0 400 340" preserveAspectRatio="none">
+      <!-- Distant mountains -->
+      <polygon points="0,260 80,200 150,240 220,180 300,230 400,200 400,340 0,340" fill="#5A7B95"/>
+      <!-- Mid mountain -->
+      <polygon points="0,290 90,230 180,270 280,210 380,260 400,250 400,340 0,340" fill="#4A6B83"/>
+      <!-- Main summit -->
+      <polygon points="60,340 200,40 340,340" fill="#456B5A"/>
+      <!-- Snow cap -->
+      <polygon points="160,110 200,40 240,110 230,135 215,120 200,140 185,120 170,135" fill="#F4F8FC"/>
+      <!-- Path -->
+      <path d="M200,335 Q210,280 195,235 Q180,190 205,150 Q220,115 200,80 Q195,60 200,45" stroke="#7C5A3A" stroke-width="3" stroke-dasharray="5,4" fill="none" opacity="0.6"/>
+      <!-- Flag at summit -->
+      <line x1="200" y1="40" x2="200" y2="20" stroke="#1A1A1A" stroke-width="1.5"/>
+      <polygon points="200,20 220,26 200,32" fill="#BF5A24"/>
+    </svg>
+    <div class="climber" id="climber" style="bottom:8px;left:50%">🧗</div>
+    <div class="altitude">⛰ <span class="alt-num" id="alt">0</span><small>/10</small></div>
+  </div>
+
+  <section class="q-section">
+    <div class="q-card" id="qCard">
+      <div class="q-eyebrow" id="qEyebrow">Question 1 / 10</div>
+      <div class="q-text" id="qText"></div>
+      <div class="q-fr" id="qFr"></div>
+      <div class="q-meta" id="qMeta"></div>
+    </div>
+
+    <div class="opts" id="opts"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="nextBtn">Next ↑</button>
+
+    <div class="win" id="win">
+      <div class="win-icon" id="winIcon">🏔️</div>
+      <div class="win-title" id="winTitle">You reached the summit!</div>
+      <div class="win-sub" id="winSub"></div>
+      <div class="win-score"><span id="winScore">0</span>/10</div>
+      <br>
+      <button class="btn" id="winBtn">🔄 Climb again</button>
+    </div>
+  </section>
+</main>
+
+<script>
+// Each question: a sentence with a blank, options for the missing superlative
+const QUESTIONS = [
+  {sent:"Mount Everest is ___ mountain in the world.", adj:"high", correct:"the highest", opts:["the highest","the most high","highest","the most highest"], fr:"L'Everest est la plus haute montagne du monde.", rule:"Short adj. → the + adj + est. NEVER 'most' + short adj.", syll:1, type:"short"},
+  {sent:"Tokyo is ___ city in Japan.", adj:"crowded", correct:"the most crowded", opts:["the crowdedest","the most crowded","most crowded","crowdedest"], fr:"Tokyo est la ville la plus peuplée du Japon.", rule:"2+ syllables → 'the most' + adj. Don't forget THE!", syll:2, type:"long"},
+  {sent:"For me, summer is ___ season of the year.", adj:"good", correct:"the best", opts:["the goodest","the most good","the best","the better"], fr:"L'été est la meilleure saison de l'année.", rule:"IRREGULAR: good → better → the best (memorize!)", syll:1, type:"irreg"},
+  {sent:"Friday is ___ day of the week at our school.", adj:"busy", correct:"the busiest", opts:["the busyest","the most busy","the busiest","the busier"], fr:"Vendredi est le jour le plus chargé.", rule:"2 syllables ending in -y → y becomes -iest.", syll:2, type:"short"},
+  {sent:"My grandmother makes ___ cakes in the world.", adj:"delicious", correct:"the most delicious", opts:["the deliciousest","the most delicious","most delicious","delicious"], fr:"Ma grand-mère fait les meilleurs gâteaux.", rule:"Long adj. (3 syllables) → 'the most' + adj.", syll:3, type:"long"},
+  {sent:"That was ___ film I have ever seen.", adj:"bad", correct:"the worst", opts:["the baddest","the most bad","the worse","the worst"], fr:"C'était le pire film que j'aie jamais vu.", rule:"IRREGULAR: bad → worse → the worst (memorize!)", syll:1, type:"irreg"},
+  {sent:"He is ___ player on the basketball team.", adj:"tall", correct:"the tallest", opts:["the most tall","the tallest","the taller","tallest"], fr:"Il est le joueur le plus grand de l'équipe.", rule:"Short adj. → +est. Always use THE before a superlative!", syll:1, type:"short"},
+  {sent:"The Sahara is ___ desert on Earth.", adj:"hot", correct:"the hottest", opts:["the most hot","the hotest","the hottest","hottest"], fr:"Le Sahara est le désert le plus chaud du monde.", rule:"Short adj. with vowel+consonant → DOUBLE the consonant + est!", syll:1, type:"short"},
+  {sent:"Mathematics is ___ subject for me.", adj:"difficult", correct:"the most difficult", opts:["the most difficult","the difficultest","most difficult","the more difficult"], fr:"Les maths sont la matière la plus difficile.", rule:"Long adj. (3 syllables) → 'the most' + adj.", syll:3, type:"long"},
+  {sent:"He lives ___ from school.", adj:"far", correct:"the furthest", opts:["the farest","the most far","the furthest","the further"], fr:"Il vit le plus loin de l'école.", rule:"IRREGULAR: far → further → the furthest (memorize!)", syll:1, type:"irreg"}
+];
+
+let i = 0;
+let score = 0;
+let answered = false;
+
+const qEyebrow = document.getElementById('qEyebrow');
+const qText = document.getElementById('qText');
+const qFr = document.getElementById('qFr');
+const qMeta = document.getElementById('qMeta');
+const optsEl = document.getElementById('opts');
+const feedbackEl = document.getElementById('feedback');
+const nextBtn = document.getElementById('nextBtn');
+const climber = document.getElementById('climber');
+const altEl = document.getElementById('alt');
+const winEl = document.getElementById('win');
+const qCard = document.getElementById('qCard');
+
+function el(tag, cls, txt){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(txt !== undefined) e.textContent = txt;
+  return e;
+}
+
+function moveClimber(){
+  // 11 stops: bottom 8px → top ~50px ; horizontal slight zigzag
+  const totalSteps = 10;
+  const minBottom = 8;
+  const maxBottom = 280;
+  const step = score / totalSteps;
+  const bottom = minBottom + (maxBottom - minBottom) * step;
+  // zigzag slight left/right
+  const zig = (score % 2 === 0) ? 0 : 0;
+  const left = 50 + (Math.sin(score) * 6);
+  climber.style.bottom = bottom + 'px';
+  climber.style.left = left + '%';
+  altEl.textContent = score;
+  if(score === totalSteps){
+    climber.classList.add('cheer');
+    climber.textContent = '🏆';
+  }
+}
+
+function renderQuestion(){
+  answered = false;
+  feedbackEl.classList.remove('visible','ok','err');
+  feedbackEl.textContent = '';
+  nextBtn.classList.remove('show');
+  qCard.style.display = '';
+  optsEl.style.display = '';
+
+  const q = QUESTIONS[i];
+  qEyebrow.textContent = 'Question ' + (i+1) + ' / ' + QUESTIONS.length;
+  // build sentence with blank
+  qText.replaceChildren();
+  const parts = q.sent.split('___');
+  qText.appendChild(document.createTextNode(parts[0]));
+  const blank = el('span','q-blank', q.adj);
+  qText.appendChild(blank);
+  qText.appendChild(document.createTextNode(parts[1]));
+
+  qFr.textContent = q.fr;
+
+  // meta: syllable dots + tag
+  qMeta.replaceChildren();
+  const syl = el('span','q-syll');
+  for(let s=0; s<Math.max(q.syll,3); s++){
+    const dot = el('span','q-syll-dot');
+    if(s<q.syll) dot.classList.add('on');
+    syl.appendChild(dot);
+  }
+  qMeta.appendChild(syl);
+  qMeta.appendChild(el('span','q-tag', q.type==='short'?'+EST':q.type==='long'?'MOST+':'IRREGULAR'));
+
+  optsEl.replaceChildren();
+  // shuffle options
+  const order = q.opts.slice().sort(()=>Math.random()-.5);
+  order.forEach((o,j)=>{
+    const b = el('button','opt');
+    b.appendChild(el('span','opt-mark', String.fromCharCode(97+j)));
+    b.appendChild(document.createTextNode(o));
+    b.addEventListener('click', ()=>handleAnswer(b, o, q));
+    optsEl.appendChild(b);
+  });
+}
+
+function handleAnswer(btn, choice, q){
+  if(answered) return;
+  answered = true;
+  const isRight = (choice === q.correct);
+  // mark all
+  optsEl.querySelectorAll('.opt').forEach(o=>{
+    o.disabled = true;
+    if(o.textContent.includes(q.correct) && o.textContent.replace(/^[a-z]/,'').trim() === q.correct) o.classList.add('right');
+    else if(o === btn && !isRight) o.classList.add('wrong');
+  });
+  // simpler: mark correct based on text content match
+  optsEl.querySelectorAll('.opt').forEach(o=>{
+    const txt = o.lastChild.nodeValue || '';
+    if(txt === q.correct) o.classList.add('right');
+    else if(o === btn && !isRight) o.classList.add('wrong');
+  });
+
+  if(isRight){
+    score++;
+    feedbackEl.textContent = '✅ ' + q.rule;
+    feedbackEl.classList.add('visible','ok');
+    moveClimber();
+  } else {
+    feedbackEl.textContent = '💡 ' + q.rule + ' Correct: "' + q.correct + '"';
+    feedbackEl.classList.add('visible','err');
+  }
+  nextBtn.textContent = (i+1 < QUESTIONS.length) ? 'Climb higher ↑' : '🏔️ See summit';
+  nextBtn.classList.add('show');
+}
+
+nextBtn.addEventListener('click', ()=>{
+  i++;
+  if(i >= QUESTIONS.length){
+    showWin();
+    return;
+  }
+  renderQuestion();
+});
+
+function showWin(){
+  qCard.style.display = 'none';
+  optsEl.style.display = 'none';
+  feedbackEl.classList.remove('visible');
+  nextBtn.classList.remove('show');
+  document.getElementById('winScore').textContent = score;
+  const wt = document.getElementById('winTitle');
+  const ws = document.getElementById('winSub');
+  const wi = document.getElementById('winIcon');
+  if(score === 10){
+    wi.textContent = '🏆';
+    wt.textContent = 'Summit conquered!';
+    ws.textContent = 'Perfect 10/10 — you\'re a superlative champion!';
+  } else if(score >= 7){
+    wi.textContent = '⛰️';
+    wt.textContent = 'You reached the top!';
+    ws.textContent = 'Strong climb. Review the rules you missed and you\'ll be perfect.';
+  } else {
+    wi.textContent = '🥾';
+    wt.textContent = 'Halfway up the mountain';
+    ws.textContent = 'Re-read the superlative rules and try again. You can do it!';
+  }
+  winEl.classList.add('show');
+}
+
+document.getElementById('winBtn').addEventListener('click', ()=>{
+  i = 0; score = 0;
+  climber.classList.remove('cheer');
+  climber.textContent = '🧗';
+  moveClimber();
+  winEl.classList.remove('show');
+  renderQuestion();
+});
+
+renderQuestion();
+moveClimber();
+</script>
+</body>
+</html>

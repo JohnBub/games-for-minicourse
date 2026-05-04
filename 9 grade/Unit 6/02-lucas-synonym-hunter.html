@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Lucas's Nyon — Synonym Hunter · Unit 6</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rust:#BF5A24; --rust-deep:#994418; --rust-soft:#F3DDCB;
+  --forest:#1F4D3C; --forest-soft:#D7E2D6;
+  --gold:#B8893A; --ochre:#D4A85E;
+  --paper:#F5EFDE; --paper-warm:#FBF6E8;
+  --ink:#1A1A1A; --text-mid:#5A4E3E; --text-light:#8A7E68;
+  --border:#E8DDC0; --border-strong:#D4C5A0;
+  --ok:var(--forest); --ok-bg:#E1EEDC; --err:#C97B54; --err-bg:#F2E0D4;
+  --shadow:0 2px 12px rgba(191,90,36,.10);
+  --serif:'Lora',Georgia,serif; --sans:'Inter',-apple-system,sans-serif;
+}
+html,body{height:100%;font-family:var(--sans);background:var(--paper);color:var(--ink);overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;display:flex;flex-direction:column;background:radial-gradient(ellipse at top,var(--paper-warm) 0%,var(--paper) 60%)}
+
+.app-header{background:var(--forest);padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:3px solid #163528}
+.app-header-icon{width:42px;height:42px;border-radius:10px;background:var(--paper-warm);display:flex;align-items:center;justify-content:center;font-size:22px}
+.app-header-title{font-family:var(--serif);font-size:16px;font-weight:700;color:var(--paper-warm);line-height:1.2}
+.app-header-sub{font-size:11px;color:var(--forest-soft);margin-top:2px;letter-spacing:.04em}
+
+.main{flex:1;padding:14px 12px 22px;display:flex;flex-direction:column;gap:14px}
+
+.clue-card{background:var(--paper-warm);border-radius:14px;padding:16px 14px;box-shadow:var(--shadow);border:1px solid var(--border);position:sticky;top:0;z-index:10}
+.clue-eyebrow{font-size:10.5px;font-weight:700;color:var(--gold);letter-spacing:.14em;text-transform:uppercase}
+.clue-text{font-family:var(--serif);font-size:18px;font-weight:600;line-height:1.4;color:var(--ink);margin-top:6px}
+.clue-fr{font-size:12.5px;color:var(--text-mid);margin-top:4px;font-style:italic;font-family:var(--serif)}
+.clue-progress{display:flex;gap:4px;margin-top:10px}
+.clue-dot{flex:1;height:5px;border-radius:6px;background:var(--border)}
+.clue-dot.done{background:var(--forest)}
+.clue-dot.fail{background:var(--err)}
+
+.text-card{background:var(--paper-warm);border-radius:14px;padding:18px 14px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.text-title{font-family:var(--serif);font-size:14px;font-weight:700;color:var(--forest);margin-bottom:12px;letter-spacing:.02em}
+.text-body{font-family:var(--serif);font-size:15px;line-height:1.95;color:var(--ink);user-select:none;-webkit-user-select:none}
+.word{display:inline-block;padding:2px 4px;margin:0 1px;border-radius:5px;cursor:pointer;transition:all .2s ease;-webkit-tap-highlight-color:transparent}
+.word:active{transform:scale(.95)}
+.word.found{background:var(--gold);color:#fff;font-weight:700;animation:gold-pop .5s ease;box-shadow:0 2px 8px rgba(184,137,58,.4)}
+.word.shake{animation:shake .4s ease;background:var(--err-bg);color:var(--err)}
+@keyframes gold-pop{0%{transform:scale(1)}40%{transform:scale(1.25)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+
+.tray{background:var(--paper-warm);border-radius:14px;padding:14px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.tray-title{font-size:11px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.tray-words{display:flex;flex-wrap:wrap;gap:6px;min-height:36px}
+.tray-word{background:var(--gold);color:#fff;padding:6px 10px;border-radius:6px;font-size:13px;font-weight:600;animation:fly-in .4s ease}
+@keyframes fly-in{0%{transform:translateY(-12px) scale(.6);opacity:0}100%{transform:translateY(0) scale(1);opacity:1}}
+
+.btn{padding:11px 18px;background:var(--forest);color:var(--paper-warm);border:none;border-radius:8px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;width:100%;margin-top:8px}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.secondary{background:var(--rust)}
+
+.win{background:var(--paper-warm);border-radius:14px;padding:24px 18px;box-shadow:var(--shadow);border:2px solid var(--gold);text-align:center}
+.win-icon{font-size:48px;margin-bottom:8px}
+.win-title{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--forest);margin-bottom:8px}
+.win-sub{font-size:14px;color:var(--text-mid);line-height:1.5;margin-bottom:14px}
+.win-score{display:inline-block;background:var(--gold);color:#fff;padding:8px 18px;border-radius:20px;font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:14px}
+
+.score-bar{position:sticky;bottom:0;background:var(--paper-warm);border-top:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 -2px 12px rgba(0,0,0,.06)}
+.score-bar .lbl{font-size:11px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.1em}
+.score-bar .val{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--forest)}
+.score-bar .lives{margin-left:auto;display:flex;gap:4px}
+.heart{font-size:18px;transition:opacity .3s}
+.heart.lost{opacity:.2;filter:grayscale(1)}
+
+@media(min-width:640px){.main{max-width:680px;width:100%;margin:0 auto}}
+</style>
+</head>
+<body>
+<header class="app-header">
+  <div class="app-header-icon">🦊</div>
+  <div>
+    <div class="app-header-title">Lucas's Nyon — Synonym Hunter</div>
+    <div class="app-header-sub">READING · UNIT 6</div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="clue-card">
+    <div class="clue-eyebrow">🔍 Find this word in the text</div>
+    <div class="clue-text" id="clueText">…</div>
+    <div class="clue-fr" id="clueFr"></div>
+    <div class="clue-progress" id="progress"></div>
+  </div>
+
+  <div class="text-card">
+    <div class="text-title">📝 Living in Switzerland — by Lucas, age 14</div>
+    <div class="text-body" id="text"></div>
+  </div>
+
+  <div class="tray">
+    <div class="tray-title">🏆 Words found</div>
+    <div class="tray-words" id="tray"></div>
+  </div>
+
+  <div id="winBox"></div>
+</main>
+
+<div class="score-bar">
+  <span class="lbl">Score</span>
+  <span class="val"><span id="scoreN">0</span>/<span id="scoreT">8</span></span>
+  <div class="lives" id="lives">
+    <span class="heart">❤️</span><span class="heart">❤️</span><span class="heart">❤️</span>
+  </div>
+</div>
+
+<script>
+const TEXT = `Hi everyone! My name is Lucas and I live in a small town in Switzerland called Nyon. We moved here from Paris three years ago because of my dad's job. At first, I missed Paris a lot — it was bigger, more exciting and there were more things to do. But now I love Nyon! The lake is beautiful and the mountains are closer than in Paris. I can ski every weekend in winter, and in summer I swim in Lake Geneva. The air is cleaner and the streets are quieter. People are friendlier too. My new school is smaller than my old one, but the teachers are better, in my opinion. I have only 18 students in my class! The shopping is not as good as in Paris — there are fewer shops — but Geneva is only 25 minutes away by train. If you visit Switzerland, come to Nyon. It's the best place to live!`;
+
+// Clues — each must match exactly one word in the text (case-insensitive)
+const CLUES = [
+  {clue:"Find a word meaning 'opposite of bigger' (1 word).", fr:"« Le contraire de plus grand »", target:"smaller"},
+  {clue:"Find a comparative meaning 'more interesting' (2 words!).", fr:"« Plus excitant » — comparatif long", target:"more exciting"},
+  {clue:"Find a word meaning 'opposite of dirtier' (1 word).", fr:"« Le contraire de plus sale »", target:"cleaner"},
+  {clue:"Find a comparative for 'less noisy' (1 word).", fr:"« Moins bruyant » — comparatif court", target:"quieter"},
+  {clue:"Find a comparative meaning 'kinder / more nice' (1 word).", fr:"« Plus amical / plus sympathique »", target:"friendlier"},
+  {clue:"Find an IRREGULAR comparative meaning 'of higher quality' (1 word).", fr:"« Meilleur » — comparatif irrégulier", target:"better"},
+  {clue:"Find an IRREGULAR superlative meaning 'number one place' (2 words including 'the').", fr:"« Le meilleur » — superlatif irrégulier", target:"the best"},
+  {clue:"Find a comparative meaning 'moved nearer' (adjective form, 1 word).", fr:"« Plus proche »", target:"closer"}
+];
+
+const textEl = document.getElementById('text');
+const clueTextEl = document.getElementById('clueText');
+const clueFrEl = document.getElementById('clueFr');
+const progressEl = document.getElementById('progress');
+const trayEl = document.getElementById('tray');
+const scoreNEl = document.getElementById('scoreN');
+const scoreTEl = document.getElementById('scoreT');
+const livesEl = document.getElementById('lives');
+const winBox = document.getElementById('winBox');
+
+let currentClue = 0;
+let score = 0;
+let lives = 3;
+let consumed = new Set(); // indexes of used word-spans
+let progress = []; // {idx,status:'done'|'fail'}
+
+scoreTEl.textContent = CLUES.length;
+
+function el(tag, cls, txt){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(txt !== undefined) e.textContent = txt;
+  return e;
+}
+
+// tokenize into spans, preserve punctuation
+function renderText(){
+  textEl.replaceChildren();
+  // Split by whitespace, keep word + trailing punctuation grouping
+  const tokens = TEXT.split(/(\s+)/);
+  let wordIdx = 0;
+  tokens.forEach(tok=>{
+    if(/^\s+$/.test(tok)){
+      textEl.appendChild(document.createTextNode(tok));
+      return;
+    }
+    if(!tok) return;
+    // strip leading/trailing punctuation
+    const m = tok.match(/^([^\w]*)([\w'-]+)([^\w]*)$/);
+    if(!m){
+      textEl.appendChild(document.createTextNode(tok));
+      return;
+    }
+    if(m[1]) textEl.appendChild(document.createTextNode(m[1]));
+    const span = el('span','word', m[2]);
+    span.dataset.idx = wordIdx;
+    span.dataset.word = m[2].toLowerCase();
+    span.addEventListener('click', ()=>handleTap(span));
+    textEl.appendChild(span);
+    wordIdx++;
+    if(m[3]) textEl.appendChild(document.createTextNode(m[3]));
+  });
+}
+
+function renderProgress(){
+  progressEl.replaceChildren();
+  CLUES.forEach((_,i)=>{
+    const d = el('div','clue-dot');
+    if(progress[i]==='done') d.classList.add('done');
+    else if(progress[i]==='fail') d.classList.add('fail');
+    progressEl.appendChild(d);
+  });
+}
+
+function showClue(){
+  if(currentClue >= CLUES.length){
+    return finish();
+  }
+  const c = CLUES[currentClue];
+  clueTextEl.textContent = c.clue;
+  clueFrEl.textContent = c.fr;
+  renderProgress();
+}
+
+function getMatchingSpans(target){
+  const words = target.toLowerCase().split(/\s+/);
+  const spans = [...textEl.querySelectorAll('.word')];
+  const matches = [];
+  for(let i=0; i<=spans.length-words.length; i++){
+    let ok = true;
+    for(let j=0; j<words.length; j++){
+      if(consumed.has(+spans[i+j].dataset.idx)){ ok=false; break; }
+      if(spans[i+j].dataset.word !== words[j]){ ok=false; break; }
+    }
+    if(ok){
+      matches.push(spans.slice(i, i+words.length));
+    }
+  }
+  return matches;
+}
+
+function handleTap(span){
+  if(currentClue >= CLUES.length) return;
+  if(consumed.has(+span.dataset.idx)) return;
+
+  const target = CLUES[currentClue].target.toLowerCase();
+  const targetWords = target.split(/\s+/);
+
+  // For multi-word targets, we need to detect if user tapped first word and check sequence
+  // Find candidate match starting at this span
+  const spans = [...textEl.querySelectorAll('.word')];
+  const idx = spans.indexOf(span);
+  let matched = false;
+
+  // Try: this span starts a match
+  if(idx + targetWords.length <= spans.length){
+    let ok = true;
+    for(let j=0; j<targetWords.length; j++){
+      if(spans[idx+j].dataset.word !== targetWords[j]){ ok=false; break; }
+      if(consumed.has(+spans[idx+j].dataset.idx)){ ok=false; break; }
+    }
+    if(ok){
+      matched = true;
+      const matchedSpans = spans.slice(idx, idx+targetWords.length);
+      matchedSpans.forEach(s=>{
+        s.classList.add('found');
+        consumed.add(+s.dataset.idx);
+      });
+      score++;
+      progress[currentClue] = 'done';
+      addToTray(matchedSpans.map(s=>s.textContent).join(' '));
+      scoreNEl.textContent = score;
+      currentClue++;
+      setTimeout(showClue, 800);
+    }
+  }
+  if(!matched){
+    span.classList.add('shake');
+    setTimeout(()=>span.classList.remove('shake'), 500);
+    loseLife();
+  }
+}
+
+function loseLife(){
+  if(lives <= 0) return;
+  lives--;
+  livesEl.children[lives].classList.add('lost');
+  if(lives === 0){
+    // skip current clue, mark fail, reveal answer
+    revealCurrent();
+  }
+}
+
+function revealCurrent(){
+  const target = CLUES[currentClue].target.toLowerCase();
+  const targetWords = target.split(/\s+/);
+  const spans = [...textEl.querySelectorAll('.word')];
+  for(let i=0; i<=spans.length-targetWords.length; i++){
+    let ok = true;
+    for(let j=0; j<targetWords.length; j++){
+      if(consumed.has(+spans[i+j].dataset.idx)){ ok=false; break; }
+      if(spans[i+j].dataset.word !== targetWords[j]){ ok=false; break; }
+    }
+    if(ok){
+      const ms = spans.slice(i, i+targetWords.length);
+      ms.forEach(s=>{
+        s.classList.add('found');
+        s.style.background = 'var(--err)';
+        consumed.add(+s.dataset.idx);
+      });
+      addToTray('💔 ' + ms.map(s=>s.textContent).join(' '));
+      break;
+    }
+  }
+  progress[currentClue] = 'fail';
+  // restore lives for next round
+  lives = 3;
+  [...livesEl.children].forEach(h=>h.classList.remove('lost'));
+  currentClue++;
+  setTimeout(showClue, 1400);
+}
+
+function addToTray(word){
+  const w = el('span','tray-word', word);
+  trayEl.appendChild(w);
+}
+
+function finish(){
+  const wins = progress.filter(x=>x==='done').length;
+  clueTextEl.textContent = '🎉 Game complete!';
+  clueFrEl.textContent = '';
+  winBox.replaceChildren();
+  const w = el('div','win');
+  w.appendChild(el('div','win-icon', wins===CLUES.length?'🏆':wins>=5?'⭐':'📚'));
+  w.appendChild(el('div','win-title', wins===CLUES.length?'Perfect score!':wins>=5?'Well done!':'Keep practising!'));
+  const sub = wins===CLUES.length ? 'You found every synonym in the text!' :
+              wins>=5 ? 'You found most of the synonyms. Try again to get them all!' :
+              'Reading slowly is a skill. Re-read the text and try again.';
+  w.appendChild(el('div','win-sub', sub));
+  const sc = el('div','win-score', wins+' / '+CLUES.length);
+  w.appendChild(sc);
+  const btn = el('button','btn', '🔄 Play again');
+  btn.addEventListener('click', restart);
+  w.appendChild(btn);
+  winBox.appendChild(w);
+}
+
+function restart(){
+  currentClue = 0;
+  score = 0;
+  lives = 3;
+  consumed = new Set();
+  progress = [];
+  scoreNEl.textContent = '0';
+  [...livesEl.children].forEach(h=>h.classList.remove('lost'));
+  trayEl.replaceChildren();
+  winBox.replaceChildren();
+  renderText();
+  showClue();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+renderText();
+showClue();
+</script>
+</body>
+</html>

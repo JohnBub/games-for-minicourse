@@ -216,8 +216,7 @@ function highlightLine(lineNum,color){
   if(color==='forest') ln.classList.add('forest');
   if(color==='gold') ln.classList.add('gold');
   if(color==='navy') ln.classList.add('navy');
-  const top = target.getBoundingClientRect().top + window.scrollY - 80;
-  window.scrollTo({top, behavior:'smooth'});
+  try{ target.scrollIntoView({block:'nearest', behavior:'smooth'}); }catch(e){ target.scrollIntoView(); }
 }
 
 function normalize(s){return s.toLowerCase().trim().replace(/[.,!?;:'"]/g,'').replace(/\s+/g,' ')}

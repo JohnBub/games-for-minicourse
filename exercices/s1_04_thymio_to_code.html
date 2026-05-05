@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Du Thymio au pseudo-code</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F4F6F8;
+    --primary: #002E47;
+    --accent: #e91d63;
+    --accent2: #00b4d8;
+    --success: #16a34a;
+    --error: #dc2626;
+    --code-bg: #ffffff;
+    --code-border: #001c2e;
+    --kw: #7c3aed;
+    --fn: #1d4ed8;
+    --num: #ca8a04;
+    --str: #16a34a;
+    --op: #dc2626;
+    --slot-bg: #fffaf0;
+    --slot-border: #ca8a04;
+    --token-bg: #e8f4fd;
+    --token-border: #90caf9;
+    --shadow: 0 4px 16px rgba(0,46,71,0.08);
+  }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 0 32px 0; }
+  .app-header { width: 100%; background: var(--primary); padding: 16px 20px 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .app-header h1 { font-size: 1.05rem; font-weight: 800; color: white; text-align: center; letter-spacing: -0.2px; }
+  .app-header p { font-size: 0.75rem; color: #90caf9; font-weight: 400; }
+  .progress-container { width: 100%; max-width: 480px; padding: 16px 20px 0; }
+  .progress-label { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .progress-label span { font-size: 0.75rem; font-weight: 600; color: var(--primary); }
+  .round-badge { background: var(--primary); color: white; border-radius: 20px; padding: 2px 12px; font-size: 0.72rem; font-weight: 700; }
+  .progress-bar-wrap { background: #dde8f0; border-radius: 100px; height: 6px; overflow: hidden; }
+  .progress-bar-fill { background: linear-gradient(90deg, var(--accent2), var(--primary)); height: 100%; border-radius: 100px; transition: width 0.6s; }
+  .step-dots { display: flex; justify-content: center; gap: 8px; margin-top: 8px; }
+  .step-dot { width: 28px; height: 6px; border-radius: 100px; background: #dde8f0; transition: background 0.3s; }
+  .step-dot.active { background: var(--accent2); transform: scaleY(1.3); }
+  .step-dot.done { background: var(--success); }
+  .main-card { width: 100%; max-width: 480px; background: white; border-radius: 14px; box-shadow: var(--shadow); margin: 14px 20px 0; padding: 20px 18px 18px; }
+  .instruction-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
+  .instruction-icon { width: 32px; height: 32px; border-radius: 9px; background: linear-gradient(135deg, var(--primary), var(--accent2)); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1rem; }
+  .instruction-text h2 { font-size: 0.9rem; font-weight: 700; color: var(--primary); line-height: 1.3; margin-bottom: 2px; }
+  .instruction-text p { font-size: 0.78rem; color: #666; line-height: 1.45; }
+  .code-block { background: var(--code-bg); border: 2.5px solid var(--code-border); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; font-family: 'Courier New', monospace; font-size: 0.86rem; line-height: 2.0; color: #111; }
+  .code-line { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; min-height: 30px; }
+  .code-keyword { color: var(--kw); font-weight: 700; }
+  .code-fn      { color: var(--fn); font-weight: 600; }
+  .code-num     { color: var(--num); font-weight: 700; }
+  .code-str     { color: var(--str); font-weight: 600; }
+  .code-op      { color: var(--op); font-weight: 700; }
+  .code-var     { color: #111; }
+  .code-comment { color: #888; font-style: italic; font-size: 0.78rem; }
+  .drop-slot { display: inline-flex; align-items: center; justify-content: center; min-width: 90px; height: 30px; background: var(--slot-bg); border: 2px dashed var(--slot-border); border-radius: 6px; padding: 0 8px; font-family: 'Courier New', monospace; font-size: 0.85rem; font-weight: 700; color: transparent; cursor: pointer; user-select: none; transition: all 0.15s; }
+  .drop-slot.dragover { background: rgba(202,138,4,0.18); transform: scale(1.05); }
+  .drop-slot.filled { color: var(--num); border-style: solid; }
+  .drop-slot.correct { color: var(--success); border-color: var(--success); background: rgba(22,163,74,0.12); }
+  .drop-slot.incorrect { color: var(--error); border-color: var(--error); background: rgba(220,38,38,0.12); animation: shake 0.4s; }
+  .drop-slot--line { display: flex; width: 100%; min-height: 32px; height: auto; justify-content: flex-start; padding: 6px 10px; font-size: 0.82rem; }
+  .drop-slot--line.filled { color: #111; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+  .tokens-label { font-size: 0.72rem; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+  .tokens-area { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; min-height: 44px; }
+  .token { display: inline-flex; align-items: center; justify-content: center; padding: 6px 14px; background: var(--token-bg); border: 2px solid var(--token-border); border-radius: 8px; font-family: 'Courier New', monospace; font-size: 0.85rem; font-weight: 700; color: var(--primary); cursor: grab; user-select: none; touch-action: none; transition: all 0.15s; }
+  .token:hover { background: #d0eaf9; transform: translateY(-2px); }
+  .token.dragging { opacity: 0.4; }
+  .token.used { opacity: 0.3; pointer-events: none; }
+  .token--line { width: 100%; justify-content: flex-start; padding: 7px 12px; font-size: 0.82rem; }
+  .feedback-box { border-radius: 10px; padding: 11px 13px; font-size: 0.8rem; line-height: 1.5; margin-bottom: 12px; display: none; align-items: flex-start; gap: 8px; }
+  .feedback-box.show { display: flex; }
+  .feedback-box.success { background: #dcfce7; border: 1.5px solid #86efac; color: #166534; }
+  .feedback-box.error   { background: #fee2e2; border: 1.5px solid #fca5a5; color: #991b1b; }
+  .feedback-box .fb-strong { font-weight: 800; margin-right: 4px; }
+  .btn { width: 100%; padding: 12px; border: none; border-radius: 9px; font-family: 'Inter', sans-serif; font-size: 0.88rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .btn-check { background: var(--primary); color: white; }
+  .btn-check:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-next  { background: linear-gradient(135deg, var(--primary), var(--accent2)); color: white; display: none; margin-top: 8px; }
+  .btn-next.show { display: block; }
+  .completion { width: 100%; max-width: 480px; background: white; border-radius: 14px; box-shadow: var(--shadow); margin: 14px 20px 0; padding: 28px 22px; text-align: center; display: none; }
+  .completion.show { display: block; }
+  .trophy { font-size: 2.4rem; margin-bottom: 10px; }
+  .completion h2 { font-size: 1.15rem; color: var(--primary); margin-bottom: 6px; }
+  .completion p  { font-size: 0.82rem; color: #666; margin-bottom: 16px; }
+  .drag-ghost { position: fixed; pointer-events: none; z-index: 9999; padding: 6px 14px; background: var(--primary); color: white; border-radius: 8px; font-family: 'Courier New', monospace; font-weight: 700; transform: translate(-50%, -50%) rotate(2deg); display: none; max-width: 380px; }
+  /* Trace table (sec 5) */
+  .trace-table { width: 100%; border-collapse: collapse; margin-top: 12px; margin-bottom: 14px; }
+  .trace-table th, .trace-table td { border: 1.2px solid #555; padding: 8px 10px; font-size: 0.85rem; text-align: center; }
+  .trace-table th { background: var(--primary); color: white; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.4px; }
+  .trace-table td:first-child { font-family: 'Courier New', monospace; font-weight: 700; background: #fafafa; width: 38%; }
+  /* Construction zone (sec 6) */
+  .construction-zone { background: #fafafa; border: 2.5px dashed var(--code-border); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; min-height: 200px; display: flex; flex-direction: column; gap: 6px; font-family: 'Courier New', monospace; }
+  .construction-zone .order-label { font-family: 'Inter', sans-serif; font-size: 0.7rem; color: #666; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; }
+  .construction-row { display: flex; align-items: center; gap: 8px; }
+  .row-num { font-family: 'Inter', sans-serif; font-size: 0.72rem; color: #888; font-weight: 700; min-width: 18px; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>Traduire Thymio en code</h1>
+  <p>Evenements -> instructions</p>
+</div>
+
+<div class="progress-container">
+  <div class="progress-label">
+    <span>Ta progression</span>
+    <span class="round-badge" id="roundBadge">Manche 1 / 3</span>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+  <div class="step-dots">
+    <div class="step-dot active" id="dot0"></div>
+    <div class="step-dot" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+  </div>
+</div>
+
+<div class="main-card" id="mainCard">
+  <div class="instruction-row">
+    <div class="instruction-icon">🔁</div>
+    <div class="instruction-text">
+      <h2 id="roundTitle"></h2>
+      <p id="roundDesc"></p>
+    </div>
+  </div>
+  <div id="exerciseArea"></div>
+  <div class="tokens-label" id="tokensLabel">🎯 Glisse au bon endroit :</div>
+  <div class="tokens-area" id="tokensArea"></div>
+  <div class="feedback-box" id="feedbackBox">
+    <span id="feedbackIcon"></span>
+    <div id="feedbackText"></div>
+  </div>
+  <button class="btn btn-check" id="btnCheck" onclick="checkAnswer()" disabled>Verifier ma reponse</button>
+  <button class="btn btn-next"  id="btnNext"  onclick="nextRound()">Manche suivante &rarr;</button>
+</div>
+
+<div class="completion" id="completionScreen">
+  <div class="trophy">&#127942;</div>
+  <h2>Bravo, tu as termine !</h2>
+  <p id="completionMessage"></p>
+  <button class="btn btn-next show" onclick="restartGame()">&#128260; Recommencer</button>
+</div>
+
+<div class="drag-ghost" id="dragGhost"></div>
+
+<script>
+const rounds = [
+  {
+    "title": "Manche 1 : Bouton AVANT",
+    "description": "Quand on appuie sur le bouton AVANT, le robot doit avancer.",
+    "codeLines": [
+      {
+        "parts": [
+          {
+            "type": "comment",
+            "value": "# Quand on appuie sur AVANT"
+          }
+        ]
+      },
+      {
+        "parts": [
+          {
+            "type": "kw",
+            "value": "si"
+          },
+          {
+            "type": "text",
+            "value": " "
+          },
+          {
+            "type": "var",
+            "value": "bouton_avant"
+          },
+          {
+            "type": "text",
+            "value": " "
+          },
+          {
+            "type": "kw",
+            "value": "alors"
+          },
+          {
+            "type": "text",
+            "value": " :"
+          }
+        ]
+      },
+      {
+        "parts": [
+          {
+            "type": "text",
+            "value": "  "
+          },
+          {
+            "type": "slot",
+            "id": "slot1"
+          }
+        ]
+      }
+    ],
+    "slots": [
+      {
+        "id": "slot1",
+        "correct": "avancer()"
+      }
+    ],
+    "tokens": [
+      "avancer()",
+      "reculer()",
+      "s_arreter()",
+      "tourner_droite()"
+    ],
+    "feedbackOk": "Comme dans Thymio VPL : un evenement (bouton presse) declenche une action.",
+    "feedbackKo": "Quand on appuie sur AVANT, qu'attend-on logiquement du robot ?"
+  },
+  {
+    "title": "Manche 2 : Capteur d'obstacle",
+    "description": "Quand le capteur avant detecte un obstacle, le robot doit reculer.",
+    "codeLines": [
+      {
+        "parts": [
+          {
+            "type": "comment",
+            "value": "# Obstacle detecte devant"
+          }
+        ]
+      },
+      {
+        "parts": [
+          {
+            "type": "kw",
+            "value": "si"
+          },
+          {
+            "type": "text",
+            "value": " "
+          },
+          {
+            "type": "fn",
+            "value": "obstacle_devant()"
+          },
+          {
+            "type": "text",
+            "value": " "
+          },
+          {
+            "type": "kw",
+            "value": "alors"
+          },
+          {
+            "type": "text",
+            "value": " :"
+          }
+        ]
+      },
+      {
+        "parts": [
+          {
+            "type": "text",
+            "value": "  "
+          },
+          {
+            "type": "slot",
+            "id": "slot1"
+          }
+        ]
+      }
+    ],
+    "slots": [
+      {
+        "id": "slot1",
+        "correct": "reculer()"
+      }
+    ],
+    "tokens": [
+      "reculer()",
+      "avancer()",
+      "tourner_droite()",
+      "s_arreter()"
+    ],
+    "feedbackOk": "Le capteur declenche une reaction qui protege le robot du choc.",
+    "feedbackKo": "Si quelque chose te bloque le passage, tu y rentres dedans ou tu t'eloignes ?"
+  },
+  {
+    "title": "Manche 3 : Bouton CENTRAL",
+    "description": "Le bouton CENTRAL sert a arreter le programme proprement.",
+    "codeLines": [
+      {
+        "parts": [
+          {
+            "type": "comment",
+            "value": "# Bouton CENTRAL = arret"
+          }
+        ]
+      },
+      {
+        "parts": [
+          {
+            "type": "kw",
+            "value": "si"
+          },
+          {
+            "type": "text",
+            "value": " "
+          },
+          {
+            "type": "var",
+            "value": "bouton_central"
+          },
+          {
+            "type": "text",
+            "value": " "
+          },
+          {
+            "type": "kw",
+            "value": "alors"
+          },
+          {
+            "type": "text",
+            "value": " :"
+          }
+        ]
+      },
+      {
+        "parts": [
+          {
+            "type": "text",
+            "value": "  "
+          },
+          {
+            "type": "slot",
+            "id": "slot1"
+          }
+        ]
+      }
+    ],
+    "slots": [
+      {
+        "id": "slot1",
+        "correct": "s_arreter()"
+      }
+    ],
+    "tokens": [
+      "s_arreter()",
+      "avancer()",
+      "reculer()",
+      "tourner_droite()"
+    ],
+    "feedbackOk": "Le bouton central de Thymio est l'arret d'urgence : utile pour stopper proprement.",
+    "feedbackKo": "Quelle action met fin au mouvement du robot ?"
+  }
+];
+const completionMsg = "Tu sais relier les evenements de Thymio (boutons, capteurs) a des instructions de code. Excellent !";
+const interactionCode = "mcg_codage_s1_04_thymio_to_code";
+
+let currentRound = 0;
+let filledSlots = {};
+let attempts = 0;
+
+function clearChildren(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+function init() {
+  currentRound = 0; filledSlots = {}; attempts = 0;
+  document.getElementById('completionScreen').classList.remove('show');
+  document.getElementById('mainCard').style.display = '';
+  updateProgress(); renderRound();
+}
+
+function updateProgress() {
+  const pct = (currentRound / rounds.length) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('roundBadge').textContent = 'Manche ' + Math.min(currentRound+1, rounds.length) + ' / ' + rounds.length;
+  for (let i = 0; i < rounds.length; i++) {
+    const dot = document.getElementById('dot' + i);
+    if (!dot) continue;
+    dot.className = 'step-dot';
+    if (i < currentRound) dot.classList.add('done');
+    else if (i === currentRound) dot.classList.add('active');
+  }
+}
+
+function renderRound() {
+  const r = rounds[currentRound];
+  filledSlots = {}; attempts = 0;
+  document.getElementById('roundTitle').textContent = r.title;
+  document.getElementById('roundDesc').textContent = r.description;
+
+  const area = document.getElementById('exerciseArea');
+  clearChildren(area);
+
+  if (r.mode === 'order') {
+    const cz = document.createElement('div');
+    cz.className = 'construction-zone';
+    const lbl = document.createElement('div');
+    lbl.className = 'order-label';
+    lbl.textContent = 'Glisse les lignes dans le bon ordre :';
+    cz.appendChild(lbl);
+    r.slots.forEach((s, idx) => {
+      const row = document.createElement('div');
+      row.className = 'construction-row';
+      const num = document.createElement('div');
+      num.className = 'row-num';
+      num.textContent = (idx+1) + '.';
+      row.appendChild(num);
+      row.appendChild(makeSlot(s.id, true));
+      cz.appendChild(row);
+    });
+    area.appendChild(cz);
+  } else {
+    const cb = document.createElement('div');
+    cb.className = 'code-block';
+    if (r.codeLines) {
+      r.codeLines.forEach(line => {
+        const lineDiv = document.createElement('div');
+        lineDiv.className = 'code-line';
+        line.parts.forEach(part => {
+          if (part.type === 'slot') {
+            lineDiv.appendChild(makeSlot(part.id, false));
+          } else if (part.type === 'comment') {
+            const span = document.createElement('span');
+            span.className = 'code-comment';
+            span.textContent = part.value;
+            lineDiv.appendChild(span);
+          } else {
+            const span = document.createElement('span');
+            const cls = {kw:'code-keyword', fn:'code-fn', num:'code-num', str:'code-str', op:'code-op', var:'code-var'}[part.type] || '';
+            if (cls) span.className = cls;
+            span.textContent = part.value;
+            lineDiv.appendChild(span);
+          }
+        });
+        cb.appendChild(lineDiv);
+      });
+    }
+    area.appendChild(cb);
+
+    if (r.traceTable) {
+      const tbl = document.createElement('table');
+      tbl.className = 'trace-table';
+      const thead = document.createElement('thead');
+      const trh = document.createElement('tr');
+      r.traceTable.headers.forEach(h => {
+        const th = document.createElement('th');
+        th.textContent = h;
+        trh.appendChild(th);
+      });
+      thead.appendChild(trh);
+      tbl.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      r.traceTable.rows.forEach(row => {
+        const tr = document.createElement('tr');
+        const td1 = document.createElement('td');
+        td1.textContent = row.input;
+        tr.appendChild(td1);
+        const td2 = document.createElement('td');
+        td2.appendChild(makeSlot(row.slotId, false));
+        tr.appendChild(td2);
+        tbody.appendChild(tr);
+      });
+      tbl.appendChild(tbody);
+      area.appendChild(tbl);
+    }
+  }
+
+  // Tokens
+  const ta = document.getElementById('tokensArea');
+  clearChildren(ta);
+  r.tokens.forEach((tok, i) => {
+    const div = document.createElement('div');
+    div.className = 'token' + (r.mode === 'order' ? ' token--line' : '');
+    div.textContent = tok;
+    div.draggable = true;
+    div.dataset.value = tok;
+    div.dataset.tokenIndex = i;
+    div.addEventListener('dragstart', e => onDragStart(e, tok, div));
+    div.addEventListener('dragend', onDragEnd);
+    div.addEventListener('touchstart', e => onTouchStart(e, tok, div), { passive: false });
+    div.addEventListener('touchmove',  onTouchMove,  { passive: false });
+    div.addEventListener('touchend',   onTouchEnd,   { passive: false });
+    ta.appendChild(div);
+  });
+
+  document.getElementById('feedbackBox').className = 'feedback-box';
+  document.getElementById('btnCheck').style.display = '';
+  document.getElementById('btnCheck').disabled = true;
+  document.getElementById('btnNext').classList.remove('show');
+}
+
+function makeSlot(id, isLine) {
+  const slot = document.createElement('span');
+  slot.className = 'drop-slot' + (isLine ? ' drop-slot--line' : '');
+  slot.id = id;
+  slot.dataset.slot = id;
+  slot.addEventListener('dragover', onDragOver);
+  slot.addEventListener('dragleave', onDragLeave);
+  slot.addEventListener('drop', e => onDrop(e, id));
+  slot.addEventListener('click', () => removeFromSlot(id));
+  return slot;
+}
+
+let dragToken = null, dragTokenEl = null, touchToken = null;
+function onDragStart(e, value, el) {
+  dragToken = value; dragTokenEl = el;
+  el.classList.add('dragging');
+  e.dataTransfer.setData('text/plain', value);
+  e.dataTransfer.effectAllowed = 'move';
+}
+function onDragEnd() { if (dragTokenEl) dragTokenEl.classList.remove('dragging'); dragToken = null; dragTokenEl = null; }
+function onDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('dragover'); }
+function onDragLeave(e) { e.currentTarget.classList.remove('dragover'); }
+function onDrop(e, slotId) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('dragover');
+  const value = e.dataTransfer.getData('text/plain') || dragToken;
+  if (value) fillSlot(slotId, value);
+}
+function onTouchStart(e, value, el) {
+  e.preventDefault();
+  touchToken = { value, el };
+  const t = e.touches[0];
+  const ghost = document.getElementById('dragGhost');
+  ghost.textContent = value;
+  ghost.style.display = 'block';
+  ghost.style.left = t.clientX + 'px';
+  ghost.style.top = t.clientY + 'px';
+  el.classList.add('dragging');
+}
+function onTouchMove(e) {
+  if (!touchToken) return;
+  e.preventDefault();
+  const t = e.touches[0];
+  const ghost = document.getElementById('dragGhost');
+  ghost.style.left = t.clientX + 'px';
+  ghost.style.top = t.clientY + 'px';
+  document.querySelectorAll('.drop-slot').forEach(s => s.classList.remove('dragover'));
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  if (el) {
+    const slotEl = el.closest('.drop-slot');
+    if (slotEl) slotEl.classList.add('dragover');
+  }
+}
+function onTouchEnd(e) {
+  if (!touchToken) return;
+  document.getElementById('dragGhost').style.display = 'none';
+  const t = e.changedTouches[0];
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  document.querySelectorAll('.drop-slot').forEach(s => s.classList.remove('dragover'));
+  if (el) {
+    const slot = el.closest('.drop-slot');
+    if (slot) fillSlot(slot.dataset.slot, touchToken.value);
+  }
+  touchToken.el.classList.remove('dragging');
+  touchToken = null;
+}
+function fillSlot(slotId, value) {
+  const r = rounds[currentRound];
+  if (!r.slots.find(s => s.id === slotId)) return;
+  if (filledSlots[slotId]) returnToken(filledSlots[slotId], slotId);
+  filledSlots[slotId] = value;
+  let claimed = false;
+  document.querySelectorAll('.token').forEach(t => {
+    if (!claimed && t.dataset.value === value && !t.classList.contains('used')) {
+      t.classList.add('used'); t._usedFor = slotId; claimed = true;
+    }
+  });
+  const slotEl = document.getElementById(slotId);
+  slotEl.classList.remove('correct', 'incorrect');
+  slotEl.classList.add('filled');
+  slotEl.textContent = value;
+  document.getElementById('btnCheck').disabled = !r.slots.every(s => filledSlots[s.id]);
+}
+function removeFromSlot(slotId) {
+  if (!filledSlots[slotId]) return;
+  returnToken(filledSlots[slotId], slotId);
+  delete filledSlots[slotId];
+  const slotEl = document.getElementById(slotId);
+  slotEl.className = 'drop-slot' + (rounds[currentRound].mode === 'order' ? ' drop-slot--line' : '');
+  slotEl.textContent = '';
+  document.getElementById('btnCheck').disabled = true;
+}
+function returnToken(value, forSlot) {
+  let released = false;
+  document.querySelectorAll('.token').forEach(t => {
+    if (!released && t.dataset.value === value && t._usedFor === forSlot) {
+      t.classList.remove('used'); delete t._usedFor; released = true;
+    }
+  });
+  if (!released) {
+    document.querySelectorAll('.token').forEach(t => {
+      if (!released && t.dataset.value === value && t.classList.contains('used')) {
+        t.classList.remove('used'); delete t._usedFor; released = true;
+      }
+    });
+  }
+}
+function setFeedback(kind, headline, body) {
+  const fb = document.getElementById('feedbackBox');
+  fb.className = 'feedback-box ' + kind + ' show';
+  document.getElementById('feedbackIcon').textContent = (kind === 'success') ? '✅' : '❌';
+  const ft = document.getElementById('feedbackText');
+  clearChildren(ft);
+  const strong = document.createElement('span');
+  strong.className = 'fb-strong';
+  strong.textContent = headline;
+  ft.appendChild(strong);
+  ft.appendChild(document.createTextNode(' ' + body));
+}
+function checkAnswer() {
+  attempts++;
+  const r = rounds[currentRound];
+  let allOk = true;
+  r.slots.forEach(s => {
+    const el = document.getElementById(s.id);
+    if (filledSlots[s.id] === s.correct) el.classList.add('correct');
+    else { allOk = false; el.classList.remove('correct'); el.classList.add('incorrect'); }
+  });
+  if (allOk) {
+    setFeedback('success', 'Bonne reponse !', r.feedbackOk);
+    document.getElementById('btnCheck').style.display = 'none';
+    document.getElementById('btnNext').classList.add('show');
+  } else {
+    setFeedback('error', 'Pas tout a fait...', r.feedbackKo);
+    setTimeout(() => {
+      r.slots.forEach(s => {
+        if (filledSlots[s.id] !== s.correct) {
+          returnToken(filledSlots[s.id], s.id);
+          delete filledSlots[s.id];
+          const el = document.getElementById(s.id);
+          el.className = 'drop-slot' + (rounds[currentRound].mode === 'order' ? ' drop-slot--line' : '');
+          el.textContent = '';
+        }
+      });
+      document.getElementById('btnCheck').disabled = !r.slots.every(s => filledSlots[s.id]);
+    }, 900);
+  }
+}
+function nextRound() {
+  currentRound++;
+  if (currentRound >= rounds.length) { showCompletion(); return; }
+  updateProgress(); renderRound();
+}
+function showCompletion() {
+  document.getElementById('mainCard').style.display = 'none';
+  document.getElementById('completionScreen').classList.add('show');
+  document.getElementById('completionMessage').textContent = completionMsg;
+  document.getElementById('progressBar').style.width = '100%';
+  document.getElementById('roundBadge').textContent = 'Termine !';
+  document.querySelectorAll('.step-dot').forEach(d => d.className = 'step-dot done');
+}
+function restartGame() { init(); }
+
+init();
+
+function adjustIframeHeight() {
+  const height = document.body.scrollHeight;
+  window.parent.postMessage({
+    interactionCode: interactionCode,
+    type: 'SET_INSTRUCTION_HEIGHT',
+    value: height
+  }, '*');
+}
+window.addEventListener('load', adjustIframeHeight);
+window.addEventListener('resize', adjustIframeHeight);
+setInterval(adjustIframeHeight, 1000);
+</script>
+</body>
+</html>

@@ -223,3 +223,113 @@ export function iouScore(studentSegments, targetSegments, { maskSize = 500, dila
   }
   return union === 0 ? 0 : inter / union;
 }
+
+// Renders a target shape spec into segments at maskSize coordinate space.
+export function renderTargetShape(shape, maskSize = 500) {
+  if (!shape) return [];
+  const [cx, cy] = shape.center || [maskSize / 2, maskSize / 2];
+
+  if (shape.kind === 'regularPolygon') {
+    const n = shape.sides;
+    const r = (shape.size || 100) / (2 * Math.sin(Math.PI / n));
+    // Offset by -π/2 (top) + π/n so even-sided polygons (e.g. squares) sit axis-aligned.
+    const offset = -Math.PI / 2 + Math.PI / n;
+    const segs = [];
+    for (let i = 0; i < n; i++) {
+      const a1 = (i * 2 * Math.PI) / n + offset;
+      const a2 = ((i + 1) * 2 * Math.PI) / n + offset;
+      segs.push({
+        x1: cx + r * Math.cos(a1), y1: cy + r * Math.sin(a1),
+        x2: cx + r * Math.cos(a2), y2: cy + r * Math.sin(a2)
+      });
+    }
+    return segs;
+  }
+
+  if (shape.kind === 'rosace') {
+    // Render petals as small regular polygons rotated around center
+    const segs = [];
+    const petals = shape.petals || 12;
+    const sides = shape.petalSides || 5;
+    const size = shape.petalSize || 30;
+    for (let p = 0; p < petals; p++) {
+      const startAngle = (p * 360) / petals;
+      let x = cx, y = cy;
+      let heading = startAngle;
+      for (let i = 0; i < sides; i++) {
+        const rad = (heading - 90) * Math.PI / 180;
+        const x2 = x + size * Math.cos(rad);
+        const y2 = y + size * Math.sin(rad);
+        segs.push({ x1: x, y1: y, x2, y2 });
+        x = x2; y = y2;
+        heading = (heading + 360 / sides) % 360;
+      }
+    }
+    return segs;
+  }
+
+  return [];
+}
+
+const HINTS = {
+  closed: () => "Ta forme n'est pas fermée.",
+  sideCount: (segments, opts, ctx) => {
+    const expected = (typeof opts.expected === 'number')
+      ? opts.expected
+      : opts.expectedFrom?.split('.').reduce((o, k) => o?.[k], ctx);
+    const actual = detectSides(segments);
+    return `Tu as ${actual} côtés, il en faut ${expected}.`;
+  },
+  equalSides: () => "Tes côtés ne sont pas égaux.",
+  rotationalSymmetry: () => "Vérifie l'angle entre chaque pétale.",
+  sectorCoverage: () => "Vérifie l'angle entre chaque pétale."
+};
+
+function bbox(segments) {
+  if (segments.length === 0) return { w: 0, h: 0 };
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const s of segments) {
+    minX = Math.min(minX, s.x1, s.x2);
+    maxX = Math.max(maxX, s.x1, s.x2);
+    minY = Math.min(minY, s.y1, s.y2);
+    maxY = Math.max(maxY, s.y1, s.y2);
+  }
+  return { w: maxX - minX, h: maxY - minY };
+}
+
+export function validate(studentSegments, exerciseConfig, ctx = {}) {
+  const v = exerciseConfig.validation || {};
+  if (v.mode === 'none' || !v.mode) return { pass: true, hint: null };
+
+  // Stage 1 — geometric
+  const geomChecks = v.geometric || [];
+  for (const c of geomChecks) {
+    const fn = checkers[c.check];
+    if (!fn) continue;
+    if (!fn(studentSegments, c, ctx)) {
+      const hintFn = HINTS[c.check] || (() => "Ta forme ne correspond pas tout à fait à la cible.");
+      return { pass: false, hint: hintFn(studentSegments, c, ctx) };
+    }
+  }
+
+  // Bounding-box pre-check (only if targetShape provided)
+  if (exerciseConfig.targetShape) {
+    const targetSegs = renderTargetShape(exerciseConfig.targetShape);
+    const sb = bbox(studentSegments);
+    const tb = bbox(targetSegs);
+    if (tb.w > 0 && tb.h > 0) {
+      const widthRatio = sb.w / tb.w;
+      const heightRatio = sb.h / tb.h;
+      if (widthRatio > 1.2 || heightRatio > 1.2) return { pass: false, hint: "Ta forme est trop grande." };
+      if (widthRatio < 0.8 && heightRatio < 0.8) return { pass: false, hint: "Ta forme est trop petite." };
+    }
+
+    // Stage 2 — IoU
+    const score = iouScore(studentSegments, targetSegs);
+    if (score < (v.iou ?? 0.7)) {
+      return { pass: false, hint: "Ta forme ne correspond pas tout à fait à la cible." };
+    }
+  }
+
+  return { pass: true, hint: null };
+}

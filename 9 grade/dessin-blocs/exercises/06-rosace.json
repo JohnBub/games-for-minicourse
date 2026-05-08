@@ -1,0 +1,25 @@
+{
+  "id": "06-rosace",
+  "title": "La rosace",
+  "interactionCode": "BD_6",
+  "intro_fr": "Construis une rosace : une boucle qui répète un polygone tout en tournant. Glisse les blocs pour assembler ton programme.",
+  "mode": "build",
+  "toolbox": ["forward", "turn-right", "repeat", "number"],
+  "starterProgramme": [],
+  "validation": {
+    "mode": "strict",
+    "iou": 0.75,
+    "geometric": [
+      { "check": "rotationalSymmetry", "order": 12, "angleToleranceDeg": 6 },
+      { "check": "sectorCoverage", "sectors": 12, "minCoverageRatio": 0.3 }
+    ]
+  },
+  "targetShape": {
+    "kind": "rosace",
+    "petals": 12,
+    "petalShape": "regularPolygon",
+    "petalSides": 5,
+    "petalSize": 60,
+    "center": [250, 250]
+  }
+}

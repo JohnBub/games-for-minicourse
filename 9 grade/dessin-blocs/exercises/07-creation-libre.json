@@ -1,0 +1,12 @@
+{
+  "id": "07-creation-libre",
+  "title": "Création libre",
+  "interactionCode": "BD_7",
+  "intro_fr": "À toi de créer ton dessin ! Utilise tous les blocs comme tu veux.",
+  "mode": "build",
+  "toolbox": ["forward", "back", "turn-right", "turn-left", "pen-up", "pen-down", "set-color", "repeat", "number"],
+  "starterProgramme": [],
+  "validation": { "mode": "none" },
+  "targetShape": null,
+  "savePng": true
+}

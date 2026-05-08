@@ -163,3 +163,63 @@ export function runGeometric(segments, checks, ctx = {}) {
   }
   return { pass: true };
 }
+
+function rasterizeSegments(segments, maskSize) {
+  // Pure-JS Bresenham. Returns Uint8Array of length maskSize*maskSize, 1 where stroked.
+  const mask = new Uint8Array(maskSize * maskSize);
+  for (const s of segments) {
+    let x0 = Math.round(s.x1), y0 = Math.round(s.y1);
+    const x1 = Math.round(s.x2), y1 = Math.round(s.y2);
+    const dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
+    const sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+    let err = dx - dy;
+    while (true) {
+      if (x0 >= 0 && x0 < maskSize && y0 >= 0 && y0 < maskSize) {
+        mask[y0 * maskSize + x0] = 1;
+      }
+      if (x0 === x1 && y0 === y1) break;
+      const e2 = 2 * err;
+      if (e2 > -dy) { err -= dy; x0 += sx; }
+      if (e2 <  dx) { err += dx; y0 += sy; }
+    }
+  }
+  return mask;
+}
+
+function dilateMask(mask, maskSize, px) {
+  // Square dilation by px pixels (3x3 box filter applied px times).
+  let cur = mask;
+  for (let pass = 0; pass < px; pass++) {
+    const next = new Uint8Array(maskSize * maskSize);
+    for (let y = 0; y < maskSize; y++) {
+      for (let x = 0; x < maskSize; x++) {
+        if (cur[y * maskSize + x]) {
+          for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+              const nx = x + dx, ny = y + dy;
+              if (nx >= 0 && nx < maskSize && ny >= 0 && ny < maskSize) {
+                next[ny * maskSize + nx] = 1;
+              }
+            }
+          }
+        }
+      }
+    }
+    cur = next;
+  }
+  return cur;
+}
+
+export function iouScore(studentSegments, targetSegments, { maskSize = 500, dilatePx = 4 } = {}) {
+  if (studentSegments.length === 0) return 0;
+  if (targetSegments.length === 0) return 0;
+  const sMask = dilateMask(rasterizeSegments(studentSegments, maskSize), maskSize, dilatePx);
+  const tMask = dilateMask(rasterizeSegments(targetSegments, maskSize), maskSize, dilatePx);
+  let inter = 0, union = 0;
+  for (let i = 0; i < sMask.length; i++) {
+    const s = sMask[i], t = tMask[i];
+    if (s || t) union++;
+    if (s && t) inter++;
+  }
+  return union === 0 ? 0 : inter / union;
+}

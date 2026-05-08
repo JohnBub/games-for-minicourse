@@ -121,3 +121,57 @@ describe('renderProgramme', () => {
     expect(repeatChildren.querySelector('.drop-zone')).toBeTruthy();
   });
 });
+
+import { insertBlock, removeBlock } from '../_engine/builder.js';
+
+describe('insertBlock (pure data mutation)', () => {
+  it('inserts a new block at top-level index 0 in empty programme', () => {
+    const out = insertBlock([], { insertIndex: 0 }, { id: 'b1', type: 'forward', params: { distance: 100 } });
+    expect(out).toHaveLength(1);
+    expect(out[0].id).toBe('b1');
+  });
+
+  it('inserts at the end of a non-empty programme', () => {
+    const before = [{ id: 'b1', type: 'forward', params: { distance: 1 } }];
+    const out = insertBlock(before, { insertIndex: 1 }, { id: 'b2', type: 'forward', params: { distance: 2 } });
+    expect(out.map(b => b.id)).toEqual(['b1', 'b2']);
+    expect(before).toHaveLength(1);  // input not mutated
+  });
+
+  it('inserts INTO a repeat block when parentId matches', () => {
+    const before = [{ id: 'r1', type: 'repeat', params: { times: 4 }, children: [] }];
+    const out = insertBlock(before, { insertIndex: 0, parentId: 'r1' }, { id: 'b2', type: 'forward', params: { distance: 50 } });
+    expect(out[0].children).toHaveLength(1);
+    expect(out[0].children[0].id).toBe('b2');
+  });
+
+  it('rejects an invalid block', () => {
+    expect(() => insertBlock([], { insertIndex: 0 }, { id: 'x', type: 'unknown', params: {} })).toThrow(/invalid|unknown/i);
+  });
+});
+
+describe('removeBlock', () => {
+  it('removes a top-level block by id', () => {
+    const before = [
+      { id: 'b1', type: 'forward', params: { distance: 1 } },
+      { id: 'b2', type: 'forward', params: { distance: 2 } }
+    ];
+    const out = removeBlock(before, 'b1');
+    expect(out.map(b => b.id)).toEqual(['b2']);
+  });
+
+  it('removes a nested block inside a repeat', () => {
+    const before = [{
+      id: 'r1', type: 'repeat', params: { times: 4 },
+      children: [{ id: 'c1', type: 'forward', params: { distance: 1 } }]
+    }];
+    const out = removeBlock(before, 'c1');
+    expect(out[0].children).toHaveLength(0);
+  });
+
+  it('returns the same shape if id not found', () => {
+    const before = [{ id: 'b1', type: 'forward', params: { distance: 1 } }];
+    const out = removeBlock(before, 'nope');
+    expect(out).toHaveLength(1);
+  });
+});

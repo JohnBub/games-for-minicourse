@@ -1,6 +1,12 @@
 // _engine/builder.js
 
 import { BLOCK_TYPES, isValidBlock } from './block-types.js';
+import { flatten, execute } from './interpreter.js';
+import { Turtle, paintSvg } from './renderer.js';
+import { validate, renderTargetShape } from './validator.js';
+import { observeAndReport } from './iframe-bridge.js';
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
 
 export function renderBlock(block) {
   const def = BLOCK_TYPES[block.type];
@@ -361,4 +367,195 @@ export function applyFillMode(programmeEl, editableSlots) {
       input.classList.remove('block-input--editable');
     }
   });
+}
+
+function el(tag, className, textContent) {
+  const e = document.createElement(tag);
+  if (className) e.className = className;
+  if (textContent !== undefined) e.textContent = textContent;
+  return e;
+}
+
+function renderGhost(svg, targetShape) {
+  if (!targetShape) return;
+  const g = document.createElementNS(SVG_NS, 'g');
+  g.setAttribute('class', 'ghost');
+  const segs = renderTargetShape(targetShape, 500);
+  for (const s of segs) {
+    const line = document.createElementNS(SVG_NS, 'line');
+    line.setAttribute('x1', s.x1);
+    line.setAttribute('y1', s.y1);
+    line.setAttribute('x2', s.x2);
+    line.setAttribute('y2', s.y2);
+    line.setAttribute('stroke', '#1E2A4D');
+    line.setAttribute('stroke-width', '6');
+    line.setAttribute('stroke-linecap', 'round');
+    g.appendChild(line);
+  }
+  svg.appendChild(g);
+}
+
+export function init(rootEl, config) {
+  // Reset root
+  while (rootEl.firstChild) rootEl.removeChild(rootEl.firstChild);
+  rootEl.classList.add('dessin-blocs-app');
+
+  // Header
+  const header = el('header', 'app-header');
+  header.appendChild(el('h1', null, config.title || ''));
+  rootEl.appendChild(header);
+
+  const layoutContainer = el('div', 'app-body');
+
+  // Intro
+  if (config.intro_fr) {
+    const intro = el('div', 'intro', config.intro_fr);
+    layoutContainer.appendChild(intro);
+  }
+
+  // Student inputs state
+  let studentState = {};
+  if (config.studentInputs && config.studentInputs.length > 0) {
+    for (const c of config.studentInputs) studentState[c.id] = c.default;
+    const si = renderStudentInputs(config.studentInputs, (state) => {
+      studentState = state;
+    });
+    layoutContainer.appendChild(si);
+  }
+
+  // Layout
+  const layout = el('div', 'layout');
+  layoutContainer.appendChild(layout);
+  rootEl.appendChild(layoutContainer);
+
+  // Programme state
+  let programme = JSON.parse(JSON.stringify(config.starterProgramme || []));
+  const toolboxIds = config.toolbox || [];
+
+  const tbHost = el('div', 'toolbox-host');
+  const pHost = el('div', 'programme-host');
+  const canvasPane = el('div', 'canvas-pane');
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 500 500');
+  svg.setAttribute('width', '500');
+  svg.setAttribute('height', '500');
+  canvasPane.appendChild(svg);
+
+  // Controls
+  const controls = el('div', 'controls');
+  const execBtn = el('button', 'btn btn-execute', 'Exécuter');
+  const resetBtn = el('button', 'btn btn-reset', 'Réinitialiser');
+  const abortBtn = el('button', 'btn btn-abort hidden', 'Arrêter');
+  controls.appendChild(execBtn);
+  controls.appendChild(abortBtn);
+  controls.appendChild(resetBtn);
+  canvasPane.appendChild(controls);
+
+  const feedback = el('div', 'feedback hidden');
+  canvasPane.appendChild(feedback);
+
+  layout.appendChild(tbHost);
+  layout.appendChild(pHost);
+  layout.appendChild(canvasPane);
+
+  let abortController = null;
+
+  function resolveProgramme(prog, state) {
+    function recur(list) {
+      return list.map(b => {
+        const params = { ...b.params };
+        for (const [k, v] of Object.entries(params)) {
+          if (typeof v === 'string' && v.startsWith('studentInputs.')) {
+            const key = v.split('.')[1];
+            params[k] = state[key];
+          }
+        }
+        const out = { ...b, params };
+        if (b.children) out.children = recur(b.children);
+        return out;
+      });
+    }
+    return recur(prog);
+  }
+
+  function rerender() {
+    while (tbHost.firstChild) tbHost.removeChild(tbHost.firstChild);
+    while (pHost.firstChild) pHost.removeChild(pHost.firstChild);
+    const tb = renderToolbox(toolboxIds);
+    const p = renderProgramme(programme);
+    tbHost.appendChild(tb);
+    pHost.appendChild(p);
+    if (config.mode === 'fill') {
+      applyFillMode(p, config.editableSlots || []);
+    } else if (config.mode === 'build') {
+      attachDragHandlers(p, tb, () => programme, (next) => { programme = next; rerender(); });
+    } else if (config.mode === 'step') {
+      attachStepMode(tb, async ({ type, defaultParams }) => {
+        const newId = `s${Date.now()}`;
+        programme = [...programme, { id: newId, type, params: defaultParams }];
+        await runProgramme();
+        rerender();
+      });
+    }
+  }
+
+  function showFeedback(kind, message) {
+    feedback.className = `feedback feedback--${kind}`;
+    feedback.textContent = message;
+  }
+
+  async function runProgramme() {
+    feedback.classList.add('hidden');
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    renderGhost(svg, config.targetShape);
+    const turtle = new Turtle({ width: 500, height: 500 });
+    const resolved = resolveProgramme(programme, studentState);
+    let commands;
+    try {
+      commands = flatten(resolved);
+    } catch (err) {
+      showFeedback('error', err.message);
+      return;
+    }
+    abortBtn.classList.remove('hidden');
+    execBtn.disabled = true;
+    abortController = new AbortController();
+    const studentLayer = document.createElementNS(SVG_NS, 'g');
+    studentLayer.setAttribute('class', 'student');
+    svg.appendChild(studentLayer);
+    try {
+      await execute(commands, (cmd) => {
+        turtle.run(cmd);
+        paintSvg(studentLayer, turtle.segments);
+      }, { signal: abortController.signal });
+      const result = validate(turtle.segments, config, { studentInputs: studentState });
+      if (result.pass) showFeedback('success', 'Bravo ! Tu as réussi.');
+      else showFeedback('error', result.hint);
+    } catch (err) {
+      showFeedback('error', err.message);
+    } finally {
+      abortBtn.classList.add('hidden');
+      execBtn.disabled = false;
+      abortController = null;
+    }
+  }
+
+  execBtn.addEventListener('click', () => { runProgramme(); });
+  resetBtn.addEventListener('click', () => {
+    programme = JSON.parse(JSON.stringify(config.starterProgramme || []));
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    renderGhost(svg, config.targetShape);
+    feedback.classList.add('hidden');
+    rerender();
+  });
+  abortBtn.addEventListener('click', () => { abortController?.abort(); });
+
+  // Initial render
+  rerender();
+  renderGhost(svg, config.targetShape);
+
+  // Iframe height reporting
+  if (config.interactionCode) {
+    observeAndReport(config.interactionCode, rootEl);
+  }
 }

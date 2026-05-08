@@ -21,3 +21,22 @@ export function flatten(programme, depth = 0) {
   }
   return out;
 }
+
+export const COMMANDS_PER_FRAME = 200;
+export const EXECUTION_TIMEOUT_MS = 3000;
+
+export async function execute(commands, runner, { signal } = {}) {
+  const start = Date.now();
+  for (let i = 0; i < commands.length; i += COMMANDS_PER_FRAME) {
+    if (signal?.aborted) throw new Error('Execution aborted');
+    if (Date.now() - start > EXECUTION_TIMEOUT_MS) {
+      throw new Error('Execution timeout');
+    }
+    const batch = commands.slice(i, i + COMMANDS_PER_FRAME);
+    for (const cmd of batch) {
+      if (signal?.aborted) throw new Error('Execution aborted');
+      runner(cmd);
+    }
+    await new Promise(r => typeof requestAnimationFrame !== 'undefined' ? requestAnimationFrame(r) : setTimeout(r, 0));
+  }
+}

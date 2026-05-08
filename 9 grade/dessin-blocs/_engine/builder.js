@@ -297,6 +297,53 @@ export function attachStepMode(toolboxEl, onTap) {
   });
 }
 
+export function renderStudentInputs(inputsConfig, onChange) {
+  const container = document.createElement('div');
+  container.classList.add('student-inputs');
+
+  // Track current values
+  const state = {};
+  for (const cfg of inputsConfig) {
+    state[cfg.id] = cfg.default;
+  }
+
+  for (const cfg of inputsConfig) {
+    const row = document.createElement('div');
+    row.classList.add('student-input-row');
+
+    const label = document.createElement('label');
+    label.classList.add('student-input-label');
+    label.textContent = cfg.label;
+    row.appendChild(label);
+
+    const range = document.createElement('input');
+    range.type = 'range';
+    range.classList.add('student-input-range');
+    range.dataset.inputId = cfg.id;
+    range.min = String(cfg.min);
+    range.max = String(cfg.max);
+    range.step = '1';
+    range.value = String(cfg.default);
+    row.appendChild(range);
+
+    const readout = document.createElement('span');
+    readout.classList.add('student-input-readout');
+    readout.textContent = String(cfg.default);
+    row.appendChild(readout);
+
+    range.addEventListener('input', () => {
+      const v = parseInt(range.value, 10);
+      state[cfg.id] = v;
+      readout.textContent = String(v);
+      onChange({ ...state });
+    });
+
+    container.appendChild(row);
+  }
+
+  return container;
+}
+
 export function applyFillMode(programmeEl, editableSlots) {
   const editable = new Set(editableSlots || []);
   const inputs = programmeEl.querySelectorAll('input[data-block-id][data-param]');

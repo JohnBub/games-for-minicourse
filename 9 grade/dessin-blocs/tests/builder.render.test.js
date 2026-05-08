@@ -268,3 +268,68 @@ describe('attachStepMode', () => {
     tb.remove();
   });
 });
+
+import { renderStudentInputs } from '../_engine/builder.js';
+
+describe('renderStudentInputs', () => {
+  it('renders a range slider for an integer input', () => {
+    const el = renderStudentInputs(
+      [{ id: 'n', type: 'integer', label: 'N (côtés)', min: 3, max: 8, default: 5 }],
+      () => {}
+    );
+    expect(el.classList.contains('student-inputs')).toBe(true);
+    const range = el.querySelector('input[type="range"]');
+    expect(range).toBeTruthy();
+    expect(range.min).toBe('3');
+    expect(range.max).toBe('8');
+    expect(range.value).toBe('5');
+    expect(range.dataset.inputId).toBe('n');
+  });
+
+  it('shows the label and a numeric readout', () => {
+    const el = renderStudentInputs(
+      [{ id: 'n', type: 'integer', label: 'N (côtés)', min: 3, max: 8, default: 5 }],
+      () => {}
+    );
+    expect(el.querySelector('.student-input-label').textContent).toBe('N (côtés)');
+    expect(el.querySelector('.student-input-readout').textContent).toBe('5');
+  });
+
+  it('calls onChange with object { id: value } on input', () => {
+    let received = null;
+    const el = renderStudentInputs(
+      [{ id: 'n', type: 'integer', label: 'N', min: 3, max: 8, default: 5 }],
+      (state) => { received = state; }
+    );
+    const range = el.querySelector('input[type="range"]');
+    range.value = '7';
+    range.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(received).toEqual({ n: 7 });
+  });
+
+  it('updates the readout when slider changes', () => {
+    const el = renderStudentInputs(
+      [{ id: 'n', type: 'integer', label: 'N', min: 3, max: 8, default: 5 }],
+      () => {}
+    );
+    const range = el.querySelector('input[type="range"]');
+    range.value = '6';
+    range.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(el.querySelector('.student-input-readout').textContent).toBe('6');
+  });
+
+  it('handles multiple inputs', () => {
+    let received = null;
+    const el = renderStudentInputs(
+      [
+        { id: 'n', type: 'integer', label: 'N', min: 3, max: 8, default: 5 },
+        { id: 'size', type: 'integer', label: 'Taille', min: 50, max: 200, default: 100 }
+      ],
+      (state) => { received = state; }
+    );
+    expect(el.querySelectorAll('input[type="range"]').length).toBe(2);
+    el.querySelector('input[data-input-id="size"]').value = '150';
+    el.querySelector('input[data-input-id="size"]').dispatchEvent(new Event('input', { bubbles: true }));
+    expect(received).toEqual({ n: 5, size: 150 });
+  });
+});

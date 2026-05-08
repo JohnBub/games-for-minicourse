@@ -28,3 +28,38 @@ describe('runGeometric — closed', () => {
     expect(runGeometric([], [])).toEqual({ pass: true });
   });
 });
+
+// (append to end of tests/validator.geometric.test.js)
+
+describe('runGeometric — sideCount', () => {
+  // Helper: build a regular polygon with N sides
+  const polySegments = (n, size = 100) => {
+    const segs = [];
+    let x = 0, y = 0, heading = 0;
+    const sideAngle = 360 / n;
+    for (let i = 0; i < n; i++) {
+      const rad = (heading - 90) * Math.PI / 180;
+      const x2 = x + size * Math.cos(rad);
+      const y2 = y + size * Math.sin(rad);
+      segs.push({ x1: x, y1: y, x2, y2 });
+      x = x2; y = y2;
+      heading = (heading + sideAngle) % 360;
+    }
+    return segs;
+  };
+
+  it('passes when actual side count matches expected', () => {
+    const r = runGeometric(polySegments(4), [{ check: 'sideCount', expected: 4 }]);
+    expect(r.pass).toBe(true);
+  });
+
+  it('fails when count differs', () => {
+    const r = runGeometric(polySegments(5), [{ check: 'sideCount', expected: 4 }]);
+    expect(r.pass).toBe(false);
+  });
+
+  it('uses studentInputs lookup with expectedFrom', () => {
+    const r = runGeometric(polySegments(6), [{ check: 'sideCount', expectedFrom: 'studentInputs.n' }], { studentInputs: { n: 6 } });
+    expect(r.pass).toBe(true);
+  });
+});

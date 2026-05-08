@@ -227,3 +227,44 @@ describe('applyFillMode', () => {
     expect(aInp.disabled).toBe(false);
   });
 });
+
+import { attachStepMode } from '../_engine/builder.js';
+
+describe('attachStepMode', () => {
+  it('calls onTap with type and default params when toolbox block is clicked', () => {
+    const tb = renderToolbox(['forward', 'turn-right']);
+    document.body.appendChild(tb);
+    const taps = [];
+    attachStepMode(tb, (event) => taps.push(event));
+    const fwd = tb.querySelector('.toolbox-block[data-template-type="forward"]');
+    fwd.click();
+    expect(taps.length).toBe(1);
+    expect(taps[0].type).toBe('forward');
+    expect(taps[0].defaultParams.distance).toBe(100);
+    tb.remove();
+  });
+
+  it('handles multiple taps in sequence', () => {
+    const tb = renderToolbox(['forward', 'turn-right']);
+    document.body.appendChild(tb);
+    const taps = [];
+    attachStepMode(tb, (event) => taps.push(event));
+    tb.querySelector('[data-template-type="forward"]').click();
+    tb.querySelector('[data-template-type="turn-right"]').click();
+    tb.querySelector('[data-template-type="forward"]').click();
+    expect(taps.map(t => t.type)).toEqual(['forward', 'turn-right', 'forward']);
+    tb.remove();
+  });
+
+  it('ignores clicks on non-toolbox-block elements', () => {
+    const tb = renderToolbox(['forward']);
+    const stranger = document.createElement('div');
+    tb.appendChild(stranger);
+    document.body.appendChild(tb);
+    const taps = [];
+    attachStepMode(tb, (event) => taps.push(event));
+    stranger.click();
+    expect(taps.length).toBe(0);
+    tb.remove();
+  });
+});

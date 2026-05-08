@@ -284,6 +284,19 @@ export function attachDragHandlers(programmeEl, toolboxEl, getProgramme, onChang
   });
 }
 
+export function attachStepMode(toolboxEl, onTap) {
+  toolboxEl.addEventListener('click', (e) => {
+    const item = e.target.closest('.toolbox-block');
+    if (!item || !toolboxEl.contains(item)) return;
+    const typeId = item.dataset.templateType;
+    if (!typeId || !BLOCK_TYPES[typeId]) return;
+    onTap({
+      type: typeId,
+      defaultParams: defaultParamsFor(typeId)
+    });
+  });
+}
+
 export function applyFillMode(programmeEl, editableSlots) {
   const editable = new Set(editableSlots || []);
   const inputs = programmeEl.querySelectorAll('input[data-block-id][data-param]');

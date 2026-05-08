@@ -59,3 +59,63 @@ export function renderBlock(block) {
 
   return el;
 }
+
+export function renderToolbox(blockTypeIds) {
+  const tb = document.createElement('div');
+  tb.classList.add('toolbox');
+  for (const typeId of blockTypeIds) {
+    const def = BLOCK_TYPES[typeId];
+    if (!def) throw new Error(`Unknown block type: ${typeId}`);
+    const item = document.createElement('div');
+    item.classList.add('toolbox-block');
+    item.classList.add(`block--${def.category}`);
+    item.dataset.templateType = typeId;
+    item.style.borderColor = def.color;
+    const label = document.createElement('span');
+    label.classList.add('block-label');
+    label.textContent = def.label;
+    item.appendChild(label);
+    tb.appendChild(item);
+  }
+  return tb;
+}
+
+function dropZone(insertIndex, parentId = null) {
+  const z = document.createElement('div');
+  z.classList.add('drop-zone');
+  z.dataset.insertIndex = String(insertIndex);
+  if (parentId) z.dataset.parentId = parentId;
+  return z;
+}
+
+export function renderProgramme(programme) {
+  const p = document.createElement('div');
+  p.classList.add('programme');
+
+  // Drop zone before first block
+  p.appendChild(dropZone(0));
+
+  programme.forEach((block, i) => {
+    const blockEl = renderBlock(block);
+
+    // For repeat blocks, augment .block-children with internal drop zones
+    if (BLOCK_TYPES[block.type]?.accepts_children) {
+      const slot = blockEl.querySelector('.block-children');
+      if (slot) {
+        // Clear and rebuild with drop zones interspersed
+        while (slot.firstChild) slot.removeChild(slot.firstChild);
+        const children = block.children || [];
+        slot.appendChild(dropZone(0, block.id));
+        children.forEach((child, j) => {
+          slot.appendChild(renderBlock(child));
+          slot.appendChild(dropZone(j + 1, block.id));
+        });
+      }
+    }
+
+    p.appendChild(blockEl);
+    p.appendChild(dropZone(i + 1));
+  });
+
+  return p;
+}

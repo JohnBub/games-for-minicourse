@@ -59,3 +59,65 @@ describe('renderBlock', () => {
     expect(input.type).toBe('color');
   });
 });
+
+import { renderToolbox, renderProgramme } from '../_engine/builder.js';
+
+describe('renderToolbox', () => {
+  it('renders one template block per type id', () => {
+    const tb = renderToolbox(['forward', 'turn-right', 'repeat']);
+    expect(tb.classList.contains('toolbox')).toBe(true);
+    const blocks = tb.querySelectorAll('.toolbox-block');
+    expect(blocks.length).toBe(3);
+  });
+
+  it('toolbox blocks carry data-template-type for drag handlers', () => {
+    const tb = renderToolbox(['forward']);
+    const block = tb.querySelector('.toolbox-block');
+    expect(block.dataset.templateType).toBe('forward');
+    expect(block.querySelector('.block-label').textContent).toBe('avancer');
+  });
+
+  it('throws on unknown block type id', () => {
+    expect(() => renderToolbox(['nope'])).toThrow(/Unknown/);
+  });
+
+  it('returns an empty toolbox when given empty list', () => {
+    const tb = renderToolbox([]);
+    expect(tb.classList.contains('toolbox')).toBe(true);
+    expect(tb.querySelectorAll('.toolbox-block').length).toBe(0);
+  });
+});
+
+describe('renderProgramme', () => {
+  it('wraps blocks in .programme container', () => {
+    const p = renderProgramme([
+      { id: 'b1', type: 'forward', params: { distance: 100 } }
+    ]);
+    expect(p.classList.contains('programme')).toBe(true);
+    expect(p.querySelectorAll('.block').length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('inserts drop zones BETWEEN and AROUND blocks', () => {
+    // For 2 blocks → 3 drop zones (before, between, after)
+    const p = renderProgramme([
+      { id: 'b1', type: 'forward', params: { distance: 1 } },
+      { id: 'b2', type: 'forward', params: { distance: 2 } }
+    ]);
+    const zones = p.querySelectorAll(':scope > .drop-zone');
+    expect(zones.length).toBe(3);
+  });
+
+  it('empty programme still has one drop zone for first insert', () => {
+    const p = renderProgramme([]);
+    const zones = p.querySelectorAll(':scope > .drop-zone');
+    expect(zones.length).toBe(1);
+  });
+
+  it('drop zones inside repeat children for build-mode nesting', () => {
+    const p = renderProgramme([
+      { id: 'r1', type: 'repeat', params: { times: 4 }, children: [] }
+    ]);
+    const repeatChildren = p.querySelector('.block-children');
+    expect(repeatChildren.querySelector('.drop-zone')).toBeTruthy();
+  });
+});

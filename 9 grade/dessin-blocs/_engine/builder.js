@@ -283,3 +283,22 @@ export function attachDragHandlers(programmeEl, toolboxEl, getProgramme, onChang
     document.querySelectorAll('.drop-zone--hover').forEach(z => z.classList.remove('drop-zone--hover'));
   });
 }
+
+export function applyFillMode(programmeEl, editableSlots) {
+  const editable = new Set(editableSlots || []);
+  const inputs = programmeEl.querySelectorAll('input[data-block-id][data-param]');
+  inputs.forEach(input => {
+    const slotId = `${input.dataset.blockId}.${input.dataset.param}`;
+    if (editable.has(slotId)) {
+      input.disabled = false;
+      input.readOnly = false;
+      input.classList.add('block-input--editable');
+      input.classList.remove('block-input--locked');
+    } else {
+      input.disabled = true;
+      input.readOnly = true;
+      input.classList.add('block-input--locked');
+      input.classList.remove('block-input--editable');
+    }
+  });
+}

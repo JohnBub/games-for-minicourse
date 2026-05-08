@@ -175,3 +175,55 @@ describe('removeBlock', () => {
     expect(out).toHaveLength(1);
   });
 });
+
+import { applyFillMode } from '../_engine/builder.js';
+
+describe('applyFillMode', () => {
+  function setupProgramme() {
+    const programme = [{
+      id: 'r1', type: 'repeat', params: { times: 4 },
+      children: [
+        { id: 'b2', type: 'forward', params: { distance: null } },
+        { id: 'b3', type: 'turn-right', params: { angle: null } }
+      ]
+    }];
+    return renderProgramme(programme);
+  }
+
+  it('disables inputs not in editableSlots', () => {
+    const p = setupProgramme();
+    applyFillMode(p, ['b2.distance']);  // only b2.distance editable
+    const lockedInput = p.querySelector('input[data-block-id="r1"][data-param="times"]');
+    expect(lockedInput.disabled).toBe(true);
+    expect(lockedInput.readOnly).toBe(true);
+    expect(lockedInput.classList.contains('block-input--locked')).toBe(true);
+  });
+
+  it('highlights editable inputs', () => {
+    const p = setupProgramme();
+    applyFillMode(p, ['b2.distance']);
+    const editable = p.querySelector('input[data-block-id="b2"][data-param="distance"]');
+    expect(editable.disabled).toBe(false);
+    expect(editable.readOnly).toBe(false);
+    expect(editable.classList.contains('block-input--editable')).toBe(true);
+  });
+
+  it('locks all inputs when editableSlots is empty', () => {
+    const p = setupProgramme();
+    applyFillMode(p, []);
+    const inputs = p.querySelectorAll('input[data-param]');
+    expect(inputs.length).toBeGreaterThan(0);
+    inputs.forEach(i => {
+      expect(i.disabled).toBe(true);
+    });
+  });
+
+  it('handles multiple editable slots', () => {
+    const p = setupProgramme();
+    applyFillMode(p, ['b2.distance', 'b3.angle']);
+    const dInp = p.querySelector('input[data-block-id="b2"][data-param="distance"]');
+    const aInp = p.querySelector('input[data-block-id="b3"][data-param="angle"]');
+    expect(dInp.disabled).toBe(false);
+    expect(aInp.disabled).toBe(false);
+  });
+});

@@ -36,3 +36,20 @@ export class Turtle {
     this.y = y2;
   }
 }
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+export function paintSvg(svg, segments, { strokeWidth = 3 } = {}) {
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  for (const s of segments) {
+    const line = document.createElementNS(SVG_NS, 'line');
+    line.setAttribute('x1', s.x1);
+    line.setAttribute('y1', s.y1);
+    line.setAttribute('x2', s.x2);
+    line.setAttribute('y2', s.y2);
+    line.setAttribute('stroke', s.color);
+    line.setAttribute('stroke-width', strokeWidth);
+    line.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(line);
+  }
+}

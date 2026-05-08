@@ -63,3 +63,27 @@ describe('runGeometric — sideCount', () => {
     expect(r.pass).toBe(true);
   });
 });
+
+describe('runGeometric — equalSides', () => {
+  it('passes when sides are equal within tolerance (perfect square)', () => {
+    const segs = [
+      { x1: 0, y1: 0, x2: 100, y2: 0 },
+      { x1: 100, y1: 0, x2: 100, y2: 100 },
+      { x1: 100, y1: 100, x2: 0, y2: 100 },
+      { x1: 0, y1: 100, x2: 0, y2: 0 }
+    ];
+    const r = runGeometric(segs, [{ check: 'equalSides', maxVarianceRatio: 0.15 }]);
+    expect(r.pass).toBe(true);
+  });
+
+  it('fails when sides differ beyond ratio (rectangle 100x50)', () => {
+    const segs = [
+      { x1: 0, y1: 0, x2: 100, y2: 0 },
+      { x1: 100, y1: 0, x2: 100, y2: 50 },
+      { x1: 100, y1: 50, x2: 0, y2: 50 },
+      { x1: 0, y1: 50, x2: 0, y2: 0 }
+    ];
+    const r = runGeometric(segs, [{ check: 'equalSides', maxVarianceRatio: 0.15 }]);
+    expect(r.pass).toBe(false);
+  });
+});

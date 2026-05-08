@@ -39,7 +39,32 @@ const checkers = {
   sideCount(segments, opts, ctx) {
     const expected = resolveExpected(opts, ctx);
     return detectSides(segments) === expected;
-  }
+  },
+  equalSides(segments, opts) {
+    if (segments.length === 0) return false;
+    // Compute per-side total length using the same grouping rule as detectSides.
+    const sides = [];
+    let acc = 0;
+    let prev = { dx: segments[0].x2 - segments[0].x1, dy: segments[0].y2 - segments[0].y1 };
+    let prevLen = Math.hypot(prev.dx, prev.dy);
+    acc = prevLen;
+    for (let i = 1; i < segments.length; i++) {
+      const cur = { dx: segments[i].x2 - segments[i].x1, dy: segments[i].y2 - segments[i].y1 };
+      const curLen = Math.hypot(cur.dx, cur.dy);
+      if (angleBetween(prev, cur) > SIDE_ANGLE_TOLERANCE_DEG) {
+        sides.push(acc);
+        acc = curLen;
+      } else {
+        acc += curLen;
+      }
+      prev = cur;
+    }
+    sides.push(acc);
+    if (sides.length === 0) return false;
+    const mean = sides.reduce((a, b) => a + b, 0) / sides.length;
+    const maxDev = Math.max(...sides.map(s => Math.abs(s - mean) / mean));
+    return maxDev <= (opts.maxVarianceRatio ?? 0.15);
+  },
 };
 
 export function runGeometric(segments, checks, ctx = {}) {

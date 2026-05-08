@@ -87,3 +87,68 @@ describe('runGeometric — equalSides', () => {
     expect(r.pass).toBe(false);
   });
 });
+
+describe('runGeometric — rotationalSymmetry', () => {
+  // Build a 12-petal rosace by repeating a small pentagon shifted by 30° rotations
+  const rosaceSegments = (petals = 12, petalSides = 5, petalSize = 30) => {
+    const segs = [];
+    const cx = 250, cy = 250;
+    for (let p = 0; p < petals; p++) {
+      const startAngle = p * (360 / petals);
+      let x = cx, y = cy;
+      let heading = startAngle;
+      for (let i = 0; i < petalSides; i++) {
+        const rad = (heading - 90) * Math.PI / 180;
+        const x2 = x + petalSize * Math.cos(rad);
+        const y2 = y + petalSize * Math.sin(rad);
+        segs.push({ x1: x, y1: y, x2, y2 });
+        x = x2; y = y2;
+        heading = (heading + 360 / petalSides) % 360;
+      }
+    }
+    return segs;
+  };
+
+  it('passes for a 12-petal rosace at order=12', () => {
+    const r = runGeometric(rosaceSegments(12), [{ check: 'rotationalSymmetry', order: 12, angleToleranceDeg: 5 }]);
+    expect(r.pass).toBe(true);
+  });
+
+  it('fails for a single pentagon at order=12', () => {
+    const oneShape = rosaceSegments(1, 5, 100);
+    const r = runGeometric(oneShape, [{ check: 'rotationalSymmetry', order: 12, angleToleranceDeg: 5 }]);
+    expect(r.pass).toBe(false);
+  });
+});
+
+describe('runGeometric — sectorCoverage', () => {
+  const rosaceSegments = (petals = 12) => {
+    const segs = [];
+    const cx = 250, cy = 250;
+    for (let p = 0; p < petals; p++) {
+      const startAngle = p * (360 / petals);
+      let x = cx, y = cy;
+      let heading = startAngle;
+      for (let i = 0; i < 5; i++) {
+        const rad = (heading - 90) * Math.PI / 180;
+        const x2 = x + 30 * Math.cos(rad);
+        const y2 = y + 30 * Math.sin(rad);
+        segs.push({ x1: x, y1: y, x2, y2 });
+        x = x2; y = y2;
+        heading = (heading + 72) % 360;
+      }
+    }
+    return segs;
+  };
+
+  it('passes when 12 sectors all have coverage', () => {
+    const r = runGeometric(rosaceSegments(12), [{ check: 'sectorCoverage', sectors: 12, minCoverageRatio: 0.3 }]);
+    expect(r.pass).toBe(true);
+  });
+
+  it('fails when only one sector has coverage (single shape)', () => {
+    const oneShape = rosaceSegments(1);  // only at start angle 0
+    const r = runGeometric(oneShape, [{ check: 'sectorCoverage', sectors: 12, minCoverageRatio: 0.3 }]);
+    expect(r.pass).toBe(false);
+  });
+});

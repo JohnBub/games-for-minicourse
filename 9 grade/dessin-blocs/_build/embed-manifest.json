@@ -1,0 +1,51 @@
+[
+  {
+    "id": "BD_1",
+    "title": "Découvrir la tortue",
+    "iframeUrl": "https://johnbub.github.io/games-for-minicourse/9%20grade/dessin-blocs/01-decouvrir-tortue.html",
+    "interactionCode": "BD_1",
+    "iframeHtml": "<iframe src=\"https://johnbub.github.io/games-for-minicourse/9%20grade/dessin-blocs/01-decouvrir-tortue.html\" width=\"100%\" frameborder=\"0\" scrolling=\"no\" style=\"border:0;display:block;width:100%;\" allow=\"fullscreen\"></iframe>"
+  },
+  {
+    "id": "BD_2",
+    "title": "Le carré",
+    "iframeUrl": "https://johnbub.github.io/games-for-minicourse/9%20grade/dessin-blocs/02-carre.html",
+    "interactionCode": "BD_2",
+    "iframeHtml": "<iframe src=\"https://johnbub.github.io/games-for-minicourse/9%20grade/dessin-blocs/02-carre.html\" width=\"100%\" frameborder=\"0\" scrolling=\"no\" style=\"border:0;display:block;width:100%;\" allow=\"fullscreen\"></iframe>"
+  },
+  {
+    "id": "BD_3",
+    "title": "Le rectangle",
+    "iframeUrl": "https://johnbub.github.io/games-for-minicourse/9%20grade/dessin-blocs/03-rectangle.html",
+    "interactionCode": "BD_3",
+    "iframeHtml": "<iframe src=\"https://johnbub.github.io/games-for-minicourse/9%20grade/dessin-blocs/03-rectangle.html\" width=\"100%\" frameborder=\"0\" scrolling=\"no\" style=\"border:0;display:block;width:100%;\" allow=\"fullscreen\"></iframe>"
+  },
+  {
+    "id": "BD_4",
+    "title": "Le triangle équilatéral",
+    "iframeUrl": "https://johnbub.github.io/games-for-minicourse/9%20grade/dessin-blocs/04-triangle.html",
+    "interactionCode": "BD_4",
+    "iframeHtml": "<iframe src=\"https://johnbub.github.io/games-for-minicourse/9%20grade/dessin-blocs/04-triangle.html\" width=\"100%\" frameborder=\"0\" scrolling=\"no\" style=\"border:0;display:block;width:100%;\" allow=\"fullscreen\"></iframe>"
+  },
+  {
+    "id": "BD_5",
+    "title": "Polygones réguliers",
+    "iframeUrl": "https://johnbub.github.io/games-for-minicourse/9%20grade/dessin-blocs/05-polygones-reguliers.html",
+    "interactionCode": "BD_5",
+    "iframeHtml": "<iframe src=\"https://johnbub.github.io/games-for-minicourse/9%20grade/dessin-blocs/05-polygones-reguliers.html\" width=\"100%\" frameborder=\"0\" scrolling=\"no\" style=\"border:0;display:block;width:100%;\" allow=\"fullscreen\"></iframe>"
+  },
+  {
+    "id": "BD_6",
+    "title": "La rosace",
+    "iframeUrl": "https://johnbub.github.io/games-for-minicourse/9%20grade/dessin-blocs/06-rosace.html",
+    "interactionCode": "BD_6",
+    "iframeHtml": "<iframe src=\"https://johnbub.github.io/games-for-minicourse/9%20grade/dessin-blocs/06-rosace.html\" width=\"100%\" frameborder=\"0\" scrolling=\"no\" style=\"border:0;display:block;width:100%;\" allow=\"fullscreen\"></iframe>"
+  },
+  {
+    "id": "BD_7",
+    "title": "Création libre",
+    "iframeUrl": "https://johnbub.github.io/games-for-minicourse/9%20grade/dessin-blocs/07-creation-libre.html",
+    "interactionCode": "BD_7",
+    "iframeHtml": "<iframe src=\"https://johnbub.github.io/games-for-minicourse/9%20grade/dessin-blocs/07-creation-libre.html\" width=\"100%\" frameborder=\"0\" scrolling=\"no\" style=\"border:0;display:block;width:100%;\" allow=\"fullscreen\"></iframe>"
+  }
+]

@@ -57,8 +57,8 @@ export function paintSvg(svg, segments, { strokeWidth = 3 } = {}) {
 // Animation speed defaults. Tune these to taste — they're the only
 // numbers a teacher would ever change. The auto speedMultiplier
 // passed by builder.js scales these up for long programmes.
-export const MOVE_PX_PER_SEC = 600;
-export const TURN_DEG_PER_SEC = 720;
+export const MOVE_PX_PER_SEC = 300;
+export const TURN_DEG_PER_SEC = 360;
 
 // Animates a single command. Updates turtle.x/y/heading gradually each
 // RAF tick; commits the resulting line segment to turtle.segments at the end.

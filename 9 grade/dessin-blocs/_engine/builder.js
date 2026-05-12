@@ -1,8 +1,8 @@
 // _engine/builder.js
 
 import { BLOCK_TYPES, isValidBlock } from './block-types.js';
-import { flatten, execute } from './interpreter.js';
-import { Turtle, paintSvg, paintTurtle } from './renderer.js';
+import { flatten } from './interpreter.js';
+import { Turtle, paintTurtle, animate } from './renderer.js';
 import { validate, renderTargetShape } from './validator.js';
 import { observeAndReport } from './iframe-bridge.js';
 
@@ -567,12 +567,17 @@ export function init(rootEl, config) {
     studentLayer.setAttribute('class', 'student');
     svg.appendChild(studentLayer);
     paintTurtle(svg, turtle);
+
+    const speedMultiplier = Math.max(1, commands.length / 15);
+
     try {
-      await execute(commands, (cmd) => {
-        turtle.run(cmd);
-        paintSvg(studentLayer, turtle.segments);
-        paintTurtle(svg, turtle);
-      }, { signal: abortController.signal });
+      for (const cmd of commands) {
+        if (abortController.signal.aborted) throw new Error('Execution aborted');
+        await animate(svg, studentLayer, turtle, cmd, {
+          signal: abortController.signal,
+          speedMultiplier
+        });
+      }
       const result = validate(turtle.segments, config, { studentInputs: studentState });
       if (result.pass) showFeedback('success', 'Bravo ! Tu as réussi.');
       else showFeedback('error', result.hint);

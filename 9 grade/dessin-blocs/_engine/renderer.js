@@ -54,6 +54,95 @@ export function paintSvg(svg, segments, { strokeWidth = 3 } = {}) {
   }
 }
 
+// Animation speed defaults. Tune these to taste — they're the only
+// numbers a teacher would ever change. The auto speedMultiplier
+// passed by builder.js scales these up for long programmes.
+export const MOVE_PX_PER_SEC = 600;
+export const TURN_DEG_PER_SEC = 720;
+
+// Animates a single command. Updates turtle.x/y/heading gradually each
+// RAF tick; commits the resulting line segment to turtle.segments at the end.
+// For non-geometric commands (pen up/down, set-color) just applies the change.
+export async function animate(svg, studentLayer, turtle, cmd, { signal, speedMultiplier = 1 } = {}) {
+  if (signal?.aborted) throw new Error('Execution aborted');
+
+  if (cmd.type === 'pen-up' || cmd.type === 'pen-down' || cmd.type === 'set-color') {
+    turtle.run(cmd);
+    paintTurtle(svg, turtle);
+    return;
+  }
+
+  if (cmd.type === 'forward' || cmd.type === 'back') {
+    const distance = cmd.params.distance * (cmd.type === 'forward' ? 1 : -1);
+    const rad = (turtle.heading - 90) * Math.PI / 180;
+    const startX = turtle.x;
+    const startY = turtle.y;
+    const endX = startX + distance * Math.cos(rad);
+    const endY = startY + distance * Math.sin(rad);
+    const totalMs = Math.abs(distance) / (MOVE_PX_PER_SEC * speedMultiplier) * 1000;
+    const penDown = turtle.penDown;
+    const color = turtle.color;
+    const priorSegments = turtle.segments;
+
+    await tween(totalMs, signal, (t) => {
+      turtle.x = startX + (endX - startX) * t;
+      turtle.y = startY + (endY - startY) * t;
+      if (penDown && studentLayer) {
+        const live = { x1: startX, y1: startY, x2: turtle.x, y2: turtle.y, color };
+        paintSvg(studentLayer, [...priorSegments, live]);
+      }
+      paintTurtle(svg, turtle);
+    });
+
+    turtle.x = endX;
+    turtle.y = endY;
+    if (penDown) {
+      turtle.segments.push({ x1: startX, y1: startY, x2: endX, y2: endY, color });
+      if (studentLayer) paintSvg(studentLayer, turtle.segments);
+    }
+    paintTurtle(svg, turtle);
+    return;
+  }
+
+  if (cmd.type === 'turn-left' || cmd.type === 'turn-right') {
+    const delta = cmd.params.angle * (cmd.type === 'turn-right' ? 1 : -1);
+    const startHeading = turtle.heading;
+    const totalMs = Math.abs(delta) / (TURN_DEG_PER_SEC * speedMultiplier) * 1000;
+
+    await tween(totalMs, signal, (t) => {
+      turtle.heading = startHeading + delta * t;
+      paintTurtle(svg, turtle);
+    });
+
+    turtle.heading = ((startHeading + delta) % 360 + 360) % 360;
+    paintTurtle(svg, turtle);
+    return;
+  }
+
+  // Unknown command: best-effort apply
+  turtle.run(cmd);
+  paintTurtle(svg, turtle);
+}
+
+function tween(totalMs, signal, onFrame) {
+  return new Promise((resolve, reject) => {
+    const dur = Math.max(totalMs, 16);
+    const startTime = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    const raf = typeof requestAnimationFrame !== 'undefined'
+      ? requestAnimationFrame
+      : (cb) => setTimeout(() => cb((typeof performance !== 'undefined' ? performance.now() : Date.now())), 16);
+
+    function frame(now) {
+      if (signal?.aborted) { reject(new Error('Execution aborted')); return; }
+      const t = Math.min(1, (now - startTime) / dur);
+      try { onFrame(t); } catch (e) { reject(e); return; }
+      if (t < 1) raf(frame);
+      else resolve();
+    }
+    raf(frame);
+  });
+}
+
 // Paints a visible turtle marker (rust-coloured triangle with shell dot)
 // at the turtle's current position, rotated to its heading.
 // 0° heading = pointing up.

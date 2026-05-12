@@ -52,3 +52,57 @@ describe('paintTurtle', () => {
     expect(svg.querySelectorAll('.turtle-marker')).toHaveLength(1);
   });
 });
+
+import { animate } from '../_engine/renderer.js';
+
+describe('animate', () => {
+  let svg, studentLayer;
+  beforeEach(() => {
+    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    studentLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    svg.appendChild(studentLayer);
+  });
+
+  it('commits the move to turtle.segments with the right endpoints', async () => {
+    const t = new Turtle({ width: 500, height: 500 });
+    // Use a tiny distance so the RAF-driven tween finishes in 1 frame
+    await animate(svg, studentLayer, t, { type: 'forward', params: { distance: 100 } }, { speedMultiplier: 10000 });
+    expect(t.segments).toHaveLength(1);
+    expect(t.segments[0].x1).toBeCloseTo(250);
+    expect(t.segments[0].y1).toBeCloseTo(250);
+    expect(t.segments[0].y2).toBeCloseTo(150); // heading 0 = up → y decreases
+    expect(t.x).toBeCloseTo(250);
+    expect(t.y).toBeCloseTo(150);
+  });
+
+  it('rotates turtle heading on turn-right', async () => {
+    const t = new Turtle({ width: 500, height: 500 });
+    await animate(svg, studentLayer, t, { type: 'turn-right', params: { angle: 90 } }, { speedMultiplier: 10000 });
+    expect(t.heading).toBe(90);
+    expect(t.segments).toHaveLength(0);
+  });
+
+  it('applies pen-up instantly with no segment', async () => {
+    const t = new Turtle({ width: 500, height: 500 });
+    await animate(svg, studentLayer, t, { type: 'pen-up', params: {} });
+    expect(t.penDown).toBe(false);
+    expect(t.segments).toHaveLength(0);
+  });
+
+  it('skips painting a segment while pen is up', async () => {
+    const t = new Turtle({ width: 500, height: 500 });
+    t.penDown = false;
+    await animate(svg, studentLayer, t, { type: 'forward', params: { distance: 50 } }, { speedMultiplier: 10000 });
+    expect(t.segments).toHaveLength(0);
+    expect(t.y).toBeCloseTo(200); // still moved
+  });
+
+  it('rejects when aborted via signal', async () => {
+    const t = new Turtle({ width: 500, height: 500 });
+    const ctrl = new AbortController();
+    ctrl.abort();
+    await expect(
+      animate(svg, studentLayer, t, { type: 'forward', params: { distance: 100 } }, { signal: ctrl.signal })
+    ).rejects.toThrow(/abort/i);
+  });
+});

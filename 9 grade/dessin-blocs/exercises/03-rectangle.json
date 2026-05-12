@@ -27,5 +27,5 @@
       { "check": "sideCount", "expected": 4 }
     ]
   },
-  "targetShape": { "kind": "regularPolygon", "sides": 4, "size": 200, "center": [250, 250] }
+  "targetShape": { "kind": "rectangle", "width": 220, "height": 140, "center": [250, 250] }
 }

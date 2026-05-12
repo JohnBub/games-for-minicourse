@@ -4,7 +4,7 @@
   "interactionCode": "BD_6",
   "intro_fr": "Construis une rosace : une boucle qui répète un polygone tout en tournant. Glisse les blocs pour assembler ton programme.",
   "mode": "build",
-  "toolbox": ["forward", "turn-right", "repeat", "number"],
+  "toolbox": ["forward", "turn-right", "repeat"],
   "starterProgramme": [],
   "validation": {
     "mode": "strict",

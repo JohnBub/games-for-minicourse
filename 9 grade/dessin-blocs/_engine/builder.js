@@ -718,7 +718,8 @@ export function init(rootEl, config) {
 
   execBtn.addEventListener('click', () => { runProgramme(); });
   resetBtn.addEventListener('click', () => {
-    programme = JSON.parse(JSON.stringify(config.starterProgramme || []));
+    abortController?.abort();
+    programme = seedDefaults(JSON.parse(JSON.stringify(config.starterProgramme || [])));
     feedback.classList.add('hidden');
     rerender();
     paintCanvas();

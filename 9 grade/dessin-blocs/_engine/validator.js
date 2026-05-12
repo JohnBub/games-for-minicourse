@@ -246,6 +246,21 @@ export function renderTargetShape(shape, maskSize = 500) {
     return segs;
   }
 
+  if (shape.kind === 'rectangle') {
+    const w = shape.width || 200;
+    const h = shape.height || 120;
+    const x1 = cx - w / 2;
+    const x2 = cx + w / 2;
+    const y1 = cy - h / 2;
+    const y2 = cy + h / 2;
+    return [
+      { x1, y1, x2, y2: y1 }, // top edge: TL → TR
+      { x1: x2, y1, x2, y2 }, // right edge: TR → BR
+      { x1: x2, y1: y2, x2: x1, y2 }, // bottom edge: BR → BL
+      { x1, y1: y2, x2: x1, y2: y1 }  // left edge: BL → TL
+    ];
+  }
+
   if (shape.kind === 'rosace') {
     // Render petals as small regular polygons rotated around center
     const segs = [];

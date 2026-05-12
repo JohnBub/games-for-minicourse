@@ -10,22 +10,22 @@ export const CATEGORY_COLORS = {
 export const BLOCK_TYPES = {
   forward: {
     category: 'mouvement', color: CATEGORY_COLORS.mouvement, label: 'avancer',
-    params: { distance: { type: 'number', required: true, default: 100 } },
+    params: { distance: { type: 'number', required: true, default: 100, min: 0, max: 500, step: 5 } },
     accepts_children: false
   },
   back: {
     category: 'mouvement', color: CATEGORY_COLORS.mouvement, label: 'reculer',
-    params: { distance: { type: 'number', required: true, default: 50 } },
+    params: { distance: { type: 'number', required: true, default: 50, min: 0, max: 500, step: 5 } },
     accepts_children: false
   },
   'turn-right': {
     category: 'mouvement', color: CATEGORY_COLORS.mouvement, label: 'tourner droite',
-    params: { angle: { type: 'number', required: true, default: 90, suffix: '°' } },
+    params: { angle: { type: 'number', required: true, default: 90, suffix: '°', min: 0, max: 360, step: 1 } },
     accepts_children: false
   },
   'turn-left': {
     category: 'mouvement', color: CATEGORY_COLORS.mouvement, label: 'tourner gauche',
-    params: { angle: { type: 'number', required: true, default: 90, suffix: '°' } },
+    params: { angle: { type: 'number', required: true, default: 90, suffix: '°', min: 0, max: 360, step: 1 } },
     accepts_children: false
   },
   'pen-up': {
@@ -45,7 +45,7 @@ export const BLOCK_TYPES = {
   },
   repeat: {
     category: 'boucles', color: CATEGORY_COLORS.boucles, label: 'répéter',
-    params: { times: { type: 'number', required: true, default: 4, suffix: 'fois' } },
+    params: { times: { type: 'number', required: true, default: 4, suffix: 'fois', min: 1, max: 100, step: 1 } },
     accepts_children: true
   },
   number: {

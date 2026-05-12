@@ -31,11 +31,23 @@ describe('flatten', () => {
   });
 
   it('throws when total commands exceed MAX_COMMANDS (5000)', () => {
+    // 100 outer × 80 inner forwards = 8000 commands, both factors below
+    // MAX_REPEAT_TIMES (1000) so the overflow tripwire still fires.
     const programme = [
-      { id: 'b1', type: 'repeat', params: { times: 6000 }, children: [
-        { id: 'b2', type: 'forward', params: { distance: 1 } }
+      { id: 'b1', type: 'repeat', params: { times: 100 }, children: [
+        { id: 'b2', type: 'repeat', params: { times: 80 }, children: [
+          { id: 'b3', type: 'forward', params: { distance: 1 } }
+        ]}
       ]}
     ];
     expect(() => flatten(programme)).toThrow(/MAX_COMMANDS/);
+  });
+
+  it('clamps an absurdly large `times` rather than wrapping at 2^31', async () => {
+    const { clampRepeatTimes, MAX_REPEAT_TIMES } = await import('../_engine/interpreter.js');
+    expect(clampRepeatTimes(5_000_000_000)).toBe(MAX_REPEAT_TIMES);
+    expect(clampRepeatTimes(-7)).toBe(0);
+    expect(clampRepeatTimes(NaN)).toBe(0);
+    expect(clampRepeatTimes('25')).toBe(25);
   });
 });

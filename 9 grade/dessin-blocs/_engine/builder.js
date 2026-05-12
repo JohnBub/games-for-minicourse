@@ -37,6 +37,9 @@ export function renderBlock(block) {
       input.type = 'color';
     } else {
       input.type = 'number';
+      if (paramSpec.min !== undefined) input.min = String(paramSpec.min);
+      if (paramSpec.max !== undefined) input.max = String(paramSpec.max);
+      if (paramSpec.step !== undefined) input.step = String(paramSpec.step);
     }
     const value = block.params?.[paramName];
     input.value = value !== undefined && value !== null ? String(value) : String(paramSpec.default ?? '');
@@ -263,8 +266,12 @@ export function seedDefaults(programme) {
 // Wires drag-from-toolbox + drop-into-programme.
 // onChange receives the new programme array after each insert.
 // Both desktop HTML5 DnD and mobile Pointer Events are handled.
-export function attachDragHandlers(programmeEl, toolboxEl, getProgramme, onChange) {
+// The optional `signal` (AbortSignal) lets callers tear down ALL listeners on
+// rerender — without it, `document.addEventListener('pointermove'/'pointerup')`
+// accumulates one new handler per rerender, slowing mobile drag noticeably.
+export function attachDragHandlers(programmeEl, toolboxEl, getProgramme, onChange, { signal } = {}) {
   if (!programmeEl || !toolboxEl) return;
+  const opts = signal ? { signal } : undefined;
 
   // ── Desktop HTML5 drag-and-drop ───────────────────────────────────────────
   toolboxEl.querySelectorAll('.toolbox-block').forEach(item => {
@@ -272,7 +279,7 @@ export function attachDragHandlers(programmeEl, toolboxEl, getProgramme, onChang
     item.addEventListener('dragstart', (e) => {
       e.dataTransfer.setData('text/x-block-type', item.dataset.templateType);
       e.dataTransfer.effectAllowed = 'copy';
-    });
+    }, opts);
   });
 
   programmeEl.addEventListener('dragover', (e) => {
@@ -282,11 +289,11 @@ export function attachDragHandlers(programmeEl, toolboxEl, getProgramme, onChang
       e.dataTransfer.dropEffect = 'copy';
       z.classList.add('drop-zone--hover');
     }
-  });
+  }, opts);
   programmeEl.addEventListener('dragleave', (e) => {
     const z = e.target.closest('.drop-zone');
     if (z) z.classList.remove('drop-zone--hover');
-  });
+  }, opts);
   programmeEl.addEventListener('drop', (e) => {
     const z = e.target.closest('.drop-zone');
     if (!z) return;
@@ -305,7 +312,7 @@ export function attachDragHandlers(programmeEl, toolboxEl, getProgramme, onChang
       parentId: z.dataset.parentId || null
     };
     onChange(insertBlock(getProgramme(), dropTarget, newBlock));
-  });
+  }, opts);
 
   // ── Mobile Pointer Events ─────────────────────────────────────────────────
   let dragGhost = null;
@@ -325,7 +332,7 @@ export function attachDragHandlers(programmeEl, toolboxEl, getProgramme, onChang
     dragGhost.style.opacity = '0.8';
     document.body.appendChild(dragGhost);
     item.setPointerCapture(e.pointerId);
-  });
+  }, opts);
 
   document.addEventListener('pointermove', (e) => {
     if (!dragGhost) return;
@@ -335,7 +342,7 @@ export function attachDragHandlers(programmeEl, toolboxEl, getProgramme, onChang
     const elBelow = document.elementFromPoint(e.clientX, e.clientY);
     const z = elBelow?.closest('.drop-zone');
     if (z) z.classList.add('drop-zone--hover');
-  });
+  }, opts);
 
   document.addEventListener('pointerup', (e) => {
     if (!dragGhost) return;
@@ -358,7 +365,7 @@ export function attachDragHandlers(programmeEl, toolboxEl, getProgramme, onChang
     dragGhost = null;
     dragTypeId = null;
     document.querySelectorAll('.drop-zone--hover').forEach(z => z.classList.remove('drop-zone--hover'));
-  });
+  }, opts);
 }
 
 export function attachStepMode(toolboxEl, onTap) {
@@ -563,6 +570,14 @@ export function init(rootEl, config) {
   layout.appendChild(canvasPane);
 
   let abortController = null;
+  // Tracks pending event listeners on `document` etc. owned by the
+  // most recent rerender. Each rerender aborts the previous signal
+  // before re-attaching, so listeners can't accumulate.
+  let rerenderAbort = null;
+  // Replaced after init() wires the iframe bridge. Calling it explicitly
+  // after content mutations covers browsers/webviews where ResizeObserver
+  // is missing or doesn't fire reliably.
+  let reportNowImpl = () => {};
 
   function resolveProgramme(prog, state) {
     function recur(list) {
@@ -583,6 +598,11 @@ export function init(rootEl, config) {
   }
 
   function rerender() {
+    // Tear down listeners from the previous render BEFORE removing the DOM,
+    // so anything that captured a closure on the old element stops firing.
+    rerenderAbort?.abort();
+    rerenderAbort = new AbortController();
+
     while (tbHost.firstChild) tbHost.removeChild(tbHost.firstChild);
     while (pHost.firstChild) pHost.removeChild(pHost.firstChild);
     const tb = renderToolbox(toolboxIds);
@@ -633,7 +653,7 @@ export function init(rootEl, config) {
         feedback.classList.add('hidden');
         rerender();
         paintCanvas();
-      });
+      }, { signal: rerenderAbort.signal });
     } else if (config.mode === 'step') {
       attachStepMode(tb, ({ type, defaultParams }) => {
         const newId = `s${Date.now()}`;
@@ -643,6 +663,8 @@ export function init(rootEl, config) {
         paintCanvas();
       });
     }
+
+    reportNowImpl();
   }
 
   function paintCanvas() {
@@ -654,6 +676,7 @@ export function init(rootEl, config) {
     const startState = computeTurtleStart(config, studentState);
     const turtle = new Turtle({ width: 500, height: 500, ...(startState || {}) });
     paintTurtle(svg, turtle);
+    reportNowImpl();
     return { studentLayer, turtle };
   }
 
@@ -670,6 +693,7 @@ export function init(rootEl, config) {
   function showFeedback(kind, message) {
     feedback.className = `feedback feedback--${kind}`;
     feedback.textContent = message;
+    reportNowImpl();
   }
 
   async function runProgramme() {
@@ -730,8 +754,13 @@ export function init(rootEl, config) {
   rerender();
   paintCanvas();
 
-  // Iframe height reporting
+  // Iframe height reporting. After init, any subsequent content change
+  // (in rerender, paintCanvas, showFeedback, runProgramme) calls
+  // `reportNow()` so older webviews lacking ResizeObserver still resize.
   if (config.interactionCode) {
-    observeAndReport(config.interactionCode, rootEl);
+    const bridge = observeAndReport(config.interactionCode, rootEl);
+    if (bridge && typeof bridge.reportNow === 'function') {
+      reportNowImpl = bridge.reportNow;
+    }
   }
 }

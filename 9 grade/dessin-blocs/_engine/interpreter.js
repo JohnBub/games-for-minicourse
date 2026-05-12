@@ -1,5 +1,15 @@
 export const MAX_COMMANDS = 5000;
 export const MAX_LOOP_DEPTH = 4;
+export const MAX_REPEAT_TIMES = 1000;
+
+// Explicit integer clamp. The previous `n | 0` coercion wrapped at 2^31
+// for huge inputs (5_000_000_000 | 0 === 705032704), and silently floored
+// negative / NaN to 0 without telling the caller.
+export function clampRepeatTimes(times) {
+  const n = Math.floor(Number(times));
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.min(MAX_REPEAT_TIMES, n));
+}
 
 export function flatten(programme, depth = 0) {
   if (depth > MAX_LOOP_DEPTH) {
@@ -8,7 +18,7 @@ export function flatten(programme, depth = 0) {
   const out = [];
   for (const block of programme) {
     if (block.type === 'repeat') {
-      const times = block.params.times | 0;
+      const times = clampRepeatTimes(block.params.times);
       for (let i = 0; i < times; i++) {
         out.push(...flatten(block.children || [], depth + 1));
         if (out.length > MAX_COMMANDS) {

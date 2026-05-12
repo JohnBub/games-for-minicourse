@@ -53,3 +53,44 @@ export function paintSvg(svg, segments, { strokeWidth = 3 } = {}) {
     svg.appendChild(line);
   }
 }
+
+// Paints a visible turtle marker (rust-coloured triangle with shell dot)
+// at the turtle's current position, rotated to its heading.
+// 0° heading = pointing up.
+export function paintTurtle(svg, turtle) {
+  const existing = svg.querySelector('.turtle-marker');
+  if (existing) existing.remove();
+
+  const g = document.createElementNS(SVG_NS, 'g');
+  g.setAttribute('class', 'turtle-marker');
+  g.setAttribute('transform', `translate(${turtle.x}, ${turtle.y}) rotate(${turtle.heading})`);
+
+  // Body (oval shell)
+  const body = document.createElementNS(SVG_NS, 'ellipse');
+  body.setAttribute('cx', '0');
+  body.setAttribute('cy', '2');
+  body.setAttribute('rx', '10');
+  body.setAttribute('ry', '12');
+  body.setAttribute('fill', '#1F4D3C');
+  body.setAttribute('stroke', '#0F2A1F');
+  body.setAttribute('stroke-width', '1.5');
+  g.appendChild(body);
+
+  // Head (small circle pointing forward = upward in local coords)
+  const head = document.createElementNS(SVG_NS, 'circle');
+  head.setAttribute('cx', '0');
+  head.setAttribute('cy', '-11');
+  head.setAttribute('r', '4');
+  head.setAttribute('fill', '#BF5A24');
+  head.setAttribute('stroke', '#0F2A1F');
+  head.setAttribute('stroke-width', '1');
+  g.appendChild(head);
+
+  // Direction indicator (tiny triangle nose)
+  const nose = document.createElementNS(SVG_NS, 'polygon');
+  nose.setAttribute('points', '0,-17 -2,-13 2,-13');
+  nose.setAttribute('fill', '#0F2A1F');
+  g.appendChild(nose);
+
+  svg.appendChild(g);
+}

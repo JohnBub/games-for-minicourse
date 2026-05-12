@@ -1,7 +1,7 @@
 // tests/renderer.paint.test.js
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach } from 'vitest';
-import { paintSvg } from '../_engine/renderer.js';
+import { paintSvg, paintTurtle, Turtle } from '../_engine/renderer.js';
 
 describe('paintSvg', () => {
   let svg;
@@ -25,5 +25,30 @@ describe('paintSvg', () => {
     svg.appendChild(stale);
     paintSvg(svg, [{ x1: 0, y1: 0, x2: 10, y2: 10, color: '#000' }]);
     expect(svg.children.length).toBe(1);
+  });
+});
+
+describe('paintTurtle', () => {
+  let svg;
+  beforeEach(() => {
+    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  });
+
+  it('appends a .turtle-marker group at the turtle position + heading', () => {
+    const t = new Turtle({ width: 500, height: 500 });
+    t.x = 100; t.y = 200; t.heading = 90;
+    paintTurtle(svg, t);
+    const g = svg.querySelector('.turtle-marker');
+    expect(g).toBeTruthy();
+    expect(g.getAttribute('transform')).toContain('translate(100, 200)');
+    expect(g.getAttribute('transform')).toContain('rotate(90)');
+  });
+
+  it('replaces the existing turtle on repaint (no duplicates)', () => {
+    const t = new Turtle({ width: 500, height: 500 });
+    paintTurtle(svg, t);
+    t.x = 300;
+    paintTurtle(svg, t);
+    expect(svg.querySelectorAll('.turtle-marker')).toHaveLength(1);
   });
 });

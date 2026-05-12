@@ -2,7 +2,7 @@
 
 import { BLOCK_TYPES, isValidBlock } from './block-types.js';
 import { flatten, execute } from './interpreter.js';
-import { Turtle, paintSvg } from './renderer.js';
+import { Turtle, paintSvg, paintTurtle } from './renderer.js';
 import { validate, renderTargetShape } from './validator.js';
 import { observeAndReport } from './iframe-bridge.js';
 
@@ -49,6 +49,14 @@ export function renderBlock(block) {
       header.appendChild(suffix);
     }
   }
+
+  const del = document.createElement('button');
+  del.type = 'button';
+  del.classList.add('block-delete');
+  del.dataset.deleteBlockId = block.id;
+  del.setAttribute('aria-label', 'Supprimer ce bloc');
+  del.textContent = '×';
+  header.appendChild(del);
 
   el.appendChild(header);
 
@@ -485,18 +493,53 @@ export function init(rootEl, config) {
     const p = renderProgramme(programme);
     tbHost.appendChild(tb);
     pHost.appendChild(p);
+
+    const deletable = config.mode === 'build' || config.mode === 'step';
+    if (deletable) {
+      p.classList.add('programme--deletable');
+      p.addEventListener('click', (e) => {
+        const btn = e.target.closest('.block-delete');
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const id = btn.dataset.deleteBlockId;
+        if (!id) return;
+        programme = removeBlock(programme, id);
+        feedback.classList.add('hidden');
+        rerender();
+        paintCanvas();
+      });
+    }
+
     if (config.mode === 'fill') {
       applyFillMode(p, config.editableSlots || []);
     } else if (config.mode === 'build') {
-      attachDragHandlers(p, tb, () => programme, (next) => { programme = next; rerender(); });
+      attachDragHandlers(p, tb, () => programme, (next) => {
+        programme = next;
+        feedback.classList.add('hidden');
+        rerender();
+        paintCanvas();
+      });
     } else if (config.mode === 'step') {
-      attachStepMode(tb, async ({ type, defaultParams }) => {
+      attachStepMode(tb, ({ type, defaultParams }) => {
         const newId = `s${Date.now()}`;
         programme = [...programme, { id: newId, type, params: defaultParams }];
-        await runProgramme();
+        feedback.classList.add('hidden');
         rerender();
+        paintCanvas();
       });
     }
+  }
+
+  function paintCanvas() {
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    renderGhost(svg, config.targetShape);
+    const studentLayer = document.createElementNS(SVG_NS, 'g');
+    studentLayer.setAttribute('class', 'student');
+    svg.appendChild(studentLayer);
+    const turtle = new Turtle({ width: 500, height: 500 });
+    paintTurtle(svg, turtle);
+    return { studentLayer, turtle };
   }
 
   function showFeedback(kind, message) {
@@ -523,10 +566,12 @@ export function init(rootEl, config) {
     const studentLayer = document.createElementNS(SVG_NS, 'g');
     studentLayer.setAttribute('class', 'student');
     svg.appendChild(studentLayer);
+    paintTurtle(svg, turtle);
     try {
       await execute(commands, (cmd) => {
         turtle.run(cmd);
         paintSvg(studentLayer, turtle.segments);
+        paintTurtle(svg, turtle);
       }, { signal: abortController.signal });
       const result = validate(turtle.segments, config, { studentInputs: studentState });
       if (result.pass) showFeedback('success', 'Bravo ! Tu as réussi.');
@@ -543,16 +588,15 @@ export function init(rootEl, config) {
   execBtn.addEventListener('click', () => { runProgramme(); });
   resetBtn.addEventListener('click', () => {
     programme = JSON.parse(JSON.stringify(config.starterProgramme || []));
-    while (svg.firstChild) svg.removeChild(svg.firstChild);
-    renderGhost(svg, config.targetShape);
     feedback.classList.add('hidden');
     rerender();
+    paintCanvas();
   });
   abortBtn.addEventListener('click', () => { abortController?.abort(); });
 
   // Initial render
   rerender();
-  renderGhost(svg, config.targetShape);
+  paintCanvas();
 
   // Iframe height reporting
   if (config.interactionCode) {

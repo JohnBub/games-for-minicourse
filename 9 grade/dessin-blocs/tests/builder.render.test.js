@@ -58,6 +58,14 @@ describe('renderBlock', () => {
     expect(input).toBeTruthy();
     expect(input.type).toBe('color');
   });
+
+  it('renders a block-delete button carrying its block id', () => {
+    const el = renderBlock({ id: 'b9', type: 'forward', params: { distance: 10 } });
+    const btn = el.querySelector('.block-delete');
+    expect(btn).toBeTruthy();
+    expect(btn.dataset.deleteBlockId).toBe('b9');
+    expect(btn.getAttribute('aria-label')).toMatch(/supprimer/i);
+  });
 });
 
 import { renderToolbox, renderProgramme } from '../_engine/builder.js';

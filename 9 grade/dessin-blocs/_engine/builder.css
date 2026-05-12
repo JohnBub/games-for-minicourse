@@ -121,6 +121,42 @@ input[type="color"].block-input { padding: 2px; width: 44px; }
   font-size: 0.9rem;
 }
 
+.block-delete {
+  display: none;
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(196, 69, 47, 0.4);
+  background: white;
+  color: var(--error);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+}
+.block-delete:hover,
+.block-delete:focus {
+  background: var(--error);
+  color: white;
+  outline: none;
+}
+.programme--deletable .block-delete {
+  display: inline-flex;
+}
+/* Hide delete on locked (fill-mode) blocks just in case mode toggles */
+.block:has(.block-input--locked) .block-delete { display: none; }
+
+.turtle-marker {
+  pointer-events: none;
+  transition: transform 0.05s linear;
+}
+
 .block-children {
   margin-left: 24px;
   padding-left: 8px;

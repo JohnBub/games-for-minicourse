@@ -90,6 +90,22 @@ h1, h2, h3 { font-family: 'Lora', Georgia, serif; }
   max-height: 600px;
   overflow-y: auto;
 }
+/* Fill mode: toolbox is shown as a non-draggable vocabulary key, dim it
+   slightly so it doesn't compete visually with the editable programme. */
+.dessin-blocs-app:has(.programme:not(.programme--deletable)) .toolbox::before {
+  content: "Blocs utilisés";
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #6E5E3D;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 4px 4px 8px;
+}
+.dessin-blocs-app:has(.programme:not(.programme--deletable)) .toolbox-block {
+  cursor: default;
+  opacity: 0.88;
+}
 
 .toolbox-block, .block {
   display: block;

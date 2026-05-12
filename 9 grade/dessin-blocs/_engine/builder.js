@@ -221,6 +221,22 @@ export function computeTurtleStart(config, studentState) {
   return { x: first.x1, y: first.y1, heading };
 }
 
+// Walks a programme tree and returns the distinct block.type values in
+// order of first appearance. Used to auto-populate the fill-mode toolbox
+// so students see what blocks exist in their pre-built programme as a
+// non-draggable reference key (the vocabulary of the exercise).
+export function collectBlockTypes(programme) {
+  const seen = [];
+  function walk(list) {
+    for (const b of list) {
+      if (!seen.includes(b.type)) seen.push(b.type);
+      if (b.children) walk(b.children);
+    }
+  }
+  walk(programme || []);
+  return seen;
+}
+
 // Recursively replace any null/undefined param with that param's default
 // from BLOCK_TYPES, so a starterProgramme with `"distance": null`
 // (the editable slot pattern) loads with a working value matching the UI.
@@ -503,16 +519,22 @@ export function init(rootEl, config) {
     layoutContainer.appendChild(si);
   }
 
-  // Layout — fill mode has no toolbox, so collapse that column.
+  // Layout. We'll add layout--no-toolbox later iff toolbox ends up empty.
   const layout = el('div', 'layout');
-  if (config.mode === 'fill') layout.classList.add('layout--no-toolbox');
   layoutContainer.appendChild(layout);
   rootEl.appendChild(layoutContainer);
 
   // Programme state. We seed any `null` params with the block-type
   // defaults so the UI input value and the underlying model agree on load.
   let programme = seedDefaults(JSON.parse(JSON.stringify(config.starterProgramme || [])));
-  const toolboxIds = config.toolbox || [];
+
+  // Toolbox vocabulary. If config doesn't specify one (typical for fill
+  // mode), auto-derive from the starterProgramme so students see the
+  // available blocks as a non-draggable reference.
+  let toolboxIds = config.toolbox && config.toolbox.length > 0
+    ? config.toolbox
+    : (config.mode === 'fill' ? collectBlockTypes(programme) : []);
+  if (toolboxIds.length === 0) layout.classList.add('layout--no-toolbox');
 
   const tbHost = el('div', 'toolbox-host');
   const pHost = el('div', 'programme-host');

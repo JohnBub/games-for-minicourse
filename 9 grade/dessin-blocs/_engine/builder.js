@@ -105,6 +105,26 @@ function dropZone(insertIndex, parentId = null) {
   return z;
 }
 
+// Renders one block plus drop zones for each of its children, recursively.
+// Used by renderProgramme so a repeat-inside-a-repeat still receives child
+// drop zones (previously only the top-level repeat did).
+function renderBlockWithDropZones(block) {
+  const blockEl = renderBlock(block);
+  if (BLOCK_TYPES[block.type]?.accepts_children) {
+    const slot = blockEl.querySelector('.block-children');
+    if (slot) {
+      while (slot.firstChild) slot.removeChild(slot.firstChild);
+      const children = block.children || [];
+      slot.appendChild(dropZone(0, block.id));
+      children.forEach((child, j) => {
+        slot.appendChild(renderBlockWithDropZones(child));
+        slot.appendChild(dropZone(j + 1, block.id));
+      });
+    }
+  }
+  return blockEl;
+}
+
 export function renderProgramme(programme) {
   const p = document.createElement('div');
   p.classList.add('programme');
@@ -113,24 +133,7 @@ export function renderProgramme(programme) {
   p.appendChild(dropZone(0));
 
   programme.forEach((block, i) => {
-    const blockEl = renderBlock(block);
-
-    // For repeat blocks, augment .block-children with internal drop zones
-    if (BLOCK_TYPES[block.type]?.accepts_children) {
-      const slot = blockEl.querySelector('.block-children');
-      if (slot) {
-        // Clear and rebuild with drop zones interspersed
-        while (slot.firstChild) slot.removeChild(slot.firstChild);
-        const children = block.children || [];
-        slot.appendChild(dropZone(0, block.id));
-        children.forEach((child, j) => {
-          slot.appendChild(renderBlock(child));
-          slot.appendChild(dropZone(j + 1, block.id));
-        });
-      }
-    }
-
-    p.appendChild(blockEl);
+    p.appendChild(renderBlockWithDropZones(block));
     p.appendChild(dropZone(i + 1));
   });
 
@@ -521,6 +524,7 @@ export function init(rootEl, config) {
     for (const c of config.studentInputs) studentState[c.id] = c.default;
     const si = renderStudentInputs(config.studentInputs, (state) => {
       studentState = state;
+      rerender();   // refresh resolved studentInputs values in the programme display
       paintCanvas(); // re-place turtle at the new shape's first vertex
     });
     layoutContainer.appendChild(si);
@@ -606,7 +610,11 @@ export function init(rootEl, config) {
     while (tbHost.firstChild) tbHost.removeChild(tbHost.firstChild);
     while (pHost.firstChild) pHost.removeChild(pHost.firstChild);
     const tb = renderToolbox(toolboxIds);
-    const p = renderProgramme(programme);
+    // Render the RESOLVED programme so any `studentInputs.*` placeholders
+    // (e.g. ex 5's `times: "studentInputs.n"`) display the current slider
+    // value instead of an empty number input. The underlying `programme`
+    // keeps the placeholder for execution.
+    const p = renderProgramme(resolveProgramme(programme, studentState));
     tbHost.appendChild(tb);
     pHost.appendChild(p);
 

@@ -197,6 +197,30 @@ function defaultParamsFor(typeId) {
   return params;
 }
 
+// Compute where the turtle should start so its first move traces the
+// FIRST edge of the target ghost shape. Without this the turtle starts
+// at canvas center and the student's correct trace ends up offset from
+// the ghost. Returns null if no target (free-creation / step modes).
+export function computeTurtleStart(config, studentState) {
+  if (config.startState) return config.startState;
+  if (!config.targetShape) return null;
+  const shape = { ...config.targetShape };
+  if (typeof shape.sidesFrom === 'string') {
+    const key = shape.sidesFrom.split('.')[1];
+    if (studentState && studentState[key] !== undefined) shape.sides = studentState[key];
+  }
+  if (!shape.sides && shape.kind === 'regularPolygon') return null;
+  const segs = renderTargetShape(shape);
+  if (!segs || segs.length === 0) return null;
+  const first = segs[0];
+  const dx = first.x2 - first.x1;
+  const dy = first.y2 - first.y1;
+  // Our convention: heading 0 = up (-Y). Math.atan2(dy, dx) gives the
+  // standard CCW angle from +X. Convert: heading = atan2 + 90°.
+  const heading = (Math.atan2(dy, dx) * 180 / Math.PI + 90 + 360) % 360;
+  return { x: first.x1, y: first.y1, heading };
+}
+
 // Recursively replace any null/undefined param with that param's default
 // from BLOCK_TYPES, so a starterProgramme with `"distance": null`
 // (the editable slot pattern) loads with a working value matching the UI.
@@ -449,8 +473,14 @@ export function init(rootEl, config) {
   while (rootEl.firstChild) rootEl.removeChild(rootEl.firstChild);
   rootEl.classList.add('dessin-blocs-app');
 
-  // Header
+  // Header with back-to-launcher link
   const header = el('header', 'app-header');
+  const back = document.createElement('a');
+  back.className = 'app-back';
+  back.href = './index-dessin.html';
+  back.textContent = '← Retour';
+  back.setAttribute('aria-label', 'Retour à la liste des exercices');
+  header.appendChild(back);
   header.appendChild(el('h1', null, config.title || ''));
   rootEl.appendChild(header);
 
@@ -468,12 +498,14 @@ export function init(rootEl, config) {
     for (const c of config.studentInputs) studentState[c.id] = c.default;
     const si = renderStudentInputs(config.studentInputs, (state) => {
       studentState = state;
+      paintCanvas(); // re-place turtle at the new shape's first vertex
     });
     layoutContainer.appendChild(si);
   }
 
-  // Layout
+  // Layout — fill mode has no toolbox, so collapse that column.
   const layout = el('div', 'layout');
+  if (config.mode === 'fill') layout.classList.add('layout--no-toolbox');
   layoutContainer.appendChild(layout);
   rootEl.appendChild(layoutContainer);
 
@@ -593,13 +625,24 @@ export function init(rootEl, config) {
 
   function paintCanvas() {
     while (svg.firstChild) svg.removeChild(svg.firstChild);
-    renderGhost(svg, config.targetShape);
+    renderGhost(svg, resolveTargetShape(config.targetShape, studentState));
     const studentLayer = document.createElementNS(SVG_NS, 'g');
     studentLayer.setAttribute('class', 'student');
     svg.appendChild(studentLayer);
-    const turtle = new Turtle({ width: 500, height: 500 });
+    const startState = computeTurtleStart(config, studentState);
+    const turtle = new Turtle({ width: 500, height: 500, ...(startState || {}) });
     paintTurtle(svg, turtle);
     return { studentLayer, turtle };
+  }
+
+  function resolveTargetShape(shape, state) {
+    if (!shape) return null;
+    const out = { ...shape };
+    if (typeof out.sidesFrom === 'string') {
+      const key = out.sidesFrom.split('.')[1];
+      if (state && state[key] !== undefined) out.sides = state[key];
+    }
+    return out;
   }
 
   function showFeedback(kind, message) {
@@ -610,8 +653,9 @@ export function init(rootEl, config) {
   async function runProgramme() {
     feedback.classList.add('hidden');
     while (svg.firstChild) svg.removeChild(svg.firstChild);
-    renderGhost(svg, config.targetShape);
-    const turtle = new Turtle({ width: 500, height: 500 });
+    renderGhost(svg, resolveTargetShape(config.targetShape, studentState));
+    const startState = computeTurtleStart(config, studentState);
+    const turtle = new Turtle({ width: 500, height: 500, ...(startState || {}) });
     const resolved = resolveProgramme(programme, studentState);
     let commands;
     try {

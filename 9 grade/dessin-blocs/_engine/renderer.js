@@ -1,12 +1,12 @@
 // _engine/renderer.js
 
 export class Turtle {
-  constructor({ width = 500, height = 500 } = {}) {
+  constructor({ width = 500, height = 500, x, y, heading } = {}) {
     this.width = width;
     this.height = height;
-    this.x = width / 2;
-    this.y = height / 2;
-    this.heading = 0;       // degrees, 0 = up
+    this.x = x !== undefined ? x : width / 2;
+    this.y = y !== undefined ? y : height / 2;
+    this.heading = heading !== undefined ? heading : 0; // degrees, 0 = up
     this.penDown = true;
     this.color = '#000';
     this.segments = [];     // {x1,y1,x2,y2,color}

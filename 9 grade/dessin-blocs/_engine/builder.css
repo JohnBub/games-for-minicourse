@@ -279,6 +279,8 @@ input[type="color"].block-input { padding: 2px; width: 44px; }
 .btn-execute:hover { filter: brightness(1.05); }
 .btn-abort { background: var(--error); color: white; }
 .btn-reset { background: #888; color: white; }
+.btn-save { background: var(--forest); color: white; }
+.btn-save:hover { filter: brightness(1.05); }
 
 .feedback {
   margin-top: 12px;

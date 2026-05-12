@@ -331,9 +331,19 @@ export function validate(studentSegments, exerciseConfig, ctx = {}) {
     }
   }
 
-  // Bounding-box pre-check (only if targetShape provided)
+  // Bounding-box pre-check (only if targetShape provided). Resolve any
+  // `sidesFrom: "studentInputs.X"` references against ctx.studentInputs
+  // so dynamic ghost shapes (ex 5) produce real target segments rather
+  // than [] (which collapsed IoU to 0 and made every solution fail).
   if (exerciseConfig.targetShape) {
-    const targetSegs = renderTargetShape(exerciseConfig.targetShape);
+    const resolvedShape = { ...exerciseConfig.targetShape };
+    if (typeof resolvedShape.sidesFrom === 'string') {
+      const k = resolvedShape.sidesFrom.split('.')[1];
+      if (ctx.studentInputs && ctx.studentInputs[k] !== undefined) {
+        resolvedShape.sides = ctx.studentInputs[k];
+      }
+    }
+    const targetSegs = renderTargetShape(resolvedShape);
     const sb = bbox(studentSegments);
     const tb = bbox(targetSegs);
     if (tb.w > 0 && tb.h > 0) {

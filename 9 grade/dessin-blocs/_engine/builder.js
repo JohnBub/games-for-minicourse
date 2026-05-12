@@ -227,6 +227,61 @@ export function computeTurtleStart(config, studentState) {
   return { x: first.x1, y: first.y1, heading };
 }
 
+// Substitutes any `studentInputs.<key>` string-valued param with the
+// current `state[<key>]` value. Lifted to module scope so integration
+// tests can run the same resolution path the engine uses.
+export function resolveProgramme(prog, state) {
+  function recur(list) {
+    return list.map(b => {
+      const params = { ...b.params };
+      for (const [k, v] of Object.entries(params)) {
+        if (typeof v === 'string' && v.startsWith('studentInputs.')) {
+          const key = v.split('.')[1];
+          params[k] = state ? state[key] : undefined;
+        }
+      }
+      const out = { ...b, params };
+      if (b.children) out.children = recur(b.children);
+      return out;
+    });
+  }
+  return recur(prog);
+}
+
+// Rasterises the live SVG canvas to a PNG download. The SVG is serialised,
+// loaded into an Image via a data: URL, drawn to a 500x500 Canvas2D with
+// an opaque paper-coloured background (so the student's lines don't sit
+// on transparent and look bad in iMessage thumbnails), then exported as
+// Blob via canvas.toBlob and downloaded through a temporary <a>.
+export function saveSvgAsPng(svgEl, filename = 'dessin.png') {
+  if (typeof XMLSerializer === 'undefined' || typeof Image === 'undefined') return;
+  const serialized = new XMLSerializer().serializeToString(svgEl);
+  const svgBlob = new Blob([serialized], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(svgBlob);
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 500;
+    canvas.height = 500;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#F5EFDE';
+    ctx.fillRect(0, 0, 500, 500);
+    ctx.drawImage(img, 0, 0, 500, 500);
+    URL.revokeObjectURL(url);
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(link.href), 100);
+    }, 'image/png');
+  };
+  img.src = url;
+}
+
 // Walks a programme tree and returns the distinct block.type values in
 // order of first appearance. Used to auto-populate the fill-mode toolbox
 // so students see what blocks exist in their pre-built programme as a
@@ -569,6 +624,14 @@ export function init(rootEl, config) {
   controls.appendChild(execBtn);
   controls.appendChild(abortBtn);
   controls.appendChild(resetBtn);
+  // Optional: Save PNG button (enabled per-exercise via config.savePng,
+  // currently only ex 7 'création libre'). Rasterises the current SVG
+  // through a Canvas2D blob and triggers a download.
+  let saveBtn = null;
+  if (config.savePng) {
+    saveBtn = el('button', 'btn btn-save', 'Sauvegarder PNG');
+    controls.appendChild(saveBtn);
+  }
   canvasPane.appendChild(controls);
 
   const feedback = el('div', 'feedback hidden');
@@ -588,23 +651,7 @@ export function init(rootEl, config) {
   // is missing or doesn't fire reliably.
   let reportNowImpl = () => {};
 
-  function resolveProgramme(prog, state) {
-    function recur(list) {
-      return list.map(b => {
-        const params = { ...b.params };
-        for (const [k, v] of Object.entries(params)) {
-          if (typeof v === 'string' && v.startsWith('studentInputs.')) {
-            const key = v.split('.')[1];
-            params[k] = state[key];
-          }
-        }
-        const out = { ...b, params };
-        if (b.children) out.children = recur(b.children);
-        return out;
-      });
-    }
-    return recur(prog);
-  }
+  // resolveProgramme is exported at module scope; used here via closure.
 
   function rerender() {
     // Tear down listeners from the previous render BEFORE removing the DOM,
@@ -762,6 +809,12 @@ export function init(rootEl, config) {
     paintCanvas();
   });
   abortBtn.addEventListener('click', () => { abortController?.abort(); });
+
+  if (saveBtn) {
+    saveBtn.addEventListener('click', () => {
+      saveSvgAsPng(svg, `${config.id || 'dessin'}.png`);
+    });
+  }
 
   // Initial render
   rerender();

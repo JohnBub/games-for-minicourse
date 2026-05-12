@@ -341,3 +341,56 @@ describe('renderStudentInputs', () => {
     expect(received).toEqual({ n: 5, size: 150 });
   });
 });
+
+import { setBlockParam, seedDefaults } from '../_engine/builder.js';
+
+describe('setBlockParam', () => {
+  it('updates a top-level block param', () => {
+    const prog = [{ id: 'b1', type: 'forward', params: { distance: null } }];
+    const next = setBlockParam(prog, 'b1', 'distance', 100);
+    expect(next[0].params.distance).toBe(100);
+    expect(prog[0].params.distance).toBe(null); // input unchanged
+  });
+
+  it('updates a deeply nested child param inside repeat', () => {
+    const prog = [{
+      id: 'b1', type: 'repeat', params: { times: 4 },
+      children: [
+        { id: 'b2', type: 'forward', params: { distance: null } },
+        { id: 'b3', type: 'turn-right', params: { angle: null } }
+      ]
+    }];
+    const next = setBlockParam(prog, 'b3', 'angle', 90);
+    expect(next[0].children[1].params.angle).toBe(90);
+    expect(next[0].children[0].params.distance).toBe(null);
+  });
+
+  it('returns the programme unchanged if no block matches', () => {
+    const prog = [{ id: 'b1', type: 'forward', params: { distance: 50 } }];
+    const next = setBlockParam(prog, 'b999', 'distance', 200);
+    expect(next[0].params.distance).toBe(50);
+  });
+});
+
+describe('seedDefaults', () => {
+  it('replaces null params with block-type defaults', () => {
+    const prog = [{ id: 'b2', type: 'forward', params: { distance: null } }];
+    const seeded = seedDefaults(prog);
+    expect(seeded[0].params.distance).toBe(100); // default per BLOCK_TYPES
+  });
+
+  it('does not overwrite an existing value', () => {
+    const prog = [{ id: 'b2', type: 'forward', params: { distance: 42 } }];
+    const seeded = seedDefaults(prog);
+    expect(seeded[0].params.distance).toBe(42);
+  });
+
+  it('walks into children', () => {
+    const prog = [{
+      id: 'b1', type: 'repeat', params: { times: 4 },
+      children: [{ id: 'b2', type: 'forward', params: { distance: null } }]
+    }];
+    const seeded = seedDefaults(prog);
+    expect(seeded[0].children[0].params.distance).toBe(100);
+  });
+});

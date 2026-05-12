@@ -197,6 +197,29 @@ function defaultParamsFor(typeId) {
   return params;
 }
 
+// Recursively replace any null/undefined param with that param's default
+// from BLOCK_TYPES, so a starterProgramme with `"distance": null`
+// (the editable slot pattern) loads with a working value matching the UI.
+export function seedDefaults(programme) {
+  function recur(list) {
+    return list.map(b => {
+      const def = BLOCK_TYPES[b.type];
+      const params = { ...(b.params || {}) };
+      if (def && def.params) {
+        for (const [name, spec] of Object.entries(def.params)) {
+          if (params[name] === null || params[name] === undefined) {
+            if (spec.default !== undefined) params[name] = spec.default;
+          }
+        }
+      }
+      const out = { ...b, params };
+      if (b.children) out.children = recur(b.children);
+      return out;
+    });
+  }
+  return recur(programme);
+}
+
 // Wires drag-from-toolbox + drop-into-programme.
 // onChange receives the new programme array after each insert.
 // Both desktop HTML5 DnD and mobile Pointer Events are handled.
@@ -358,6 +381,24 @@ export function renderStudentInputs(inputsConfig, onChange) {
   return container;
 }
 
+// Pure setter: returns a new programme tree where the block with the
+// matching id has its `params[paramName]` set to `value`. Walks children
+// recursively so nested blocks inside `repeat` are reachable.
+export function setBlockParam(programme, blockId, paramName, value) {
+  function recur(list) {
+    return list.map(b => {
+      if (b.id === blockId) {
+        return { ...b, params: { ...b.params, [paramName]: value } };
+      }
+      if (b.children) {
+        return { ...b, children: recur(b.children) };
+      }
+      return b;
+    });
+  }
+  return recur(programme);
+}
+
 export function applyFillMode(programmeEl, editableSlots) {
   const editable = new Set(editableSlots || []);
   const inputs = programmeEl.querySelectorAll('input[data-block-id][data-param]');
@@ -436,8 +477,9 @@ export function init(rootEl, config) {
   layoutContainer.appendChild(layout);
   rootEl.appendChild(layoutContainer);
 
-  // Programme state
-  let programme = JSON.parse(JSON.stringify(config.starterProgramme || []));
+  // Programme state. We seed any `null` params with the block-type
+  // defaults so the UI input value and the underlying model agree on load.
+  let programme = seedDefaults(JSON.parse(JSON.stringify(config.starterProgramme || [])));
   const toolboxIds = config.toolbox || [];
 
   const tbHost = el('div', 'toolbox-host');
@@ -493,6 +535,24 @@ export function init(rootEl, config) {
     const p = renderProgramme(programme);
     tbHost.appendChild(tb);
     pHost.appendChild(p);
+
+    // Wire input change → update programme model. Without this, edits to
+    // disabled-looking inputs are ignored and the programme keeps its
+    // starterProgramme `null` params, producing zero-length segments.
+    p.addEventListener('input', (e) => {
+      const inp = e.target;
+      if (!(inp instanceof HTMLInputElement)) return;
+      const blockId = inp.dataset.blockId;
+      const param = inp.dataset.param;
+      if (!blockId || !param) return;
+      let value;
+      if (inp.type === 'color') value = inp.value;
+      else {
+        const n = Number(inp.value);
+        value = Number.isFinite(n) ? n : null;
+      }
+      programme = setBlockParam(programme, blockId, param, value);
+    });
 
     const deletable = config.mode === 'build' || config.mode === 'step';
     if (deletable) {

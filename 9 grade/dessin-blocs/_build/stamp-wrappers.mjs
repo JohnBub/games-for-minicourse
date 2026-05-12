@@ -5,6 +5,19 @@ import { fileURLToPath } from 'url';
 const BASE_URL = 'https://johnbub.github.io/games-for-minicourse/9%20grade/dessin-blocs';
 const INTERACTION_CODE_RE = /^BD_\d+$/;
 
+// HTML attribute / text content escaper. Used everywhere we interpolate
+// user-authored config strings (titles, intros) into generated markup so
+// a stray `&`, `<`, quote, or markup-looking title can't break the wrapper
+// or inject content into the launcher.
+function escapeHtml(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export async function stampWrappers({ root } = {}) {
   root = root || join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -24,6 +37,12 @@ export async function stampWrappers({ root } = {}) {
     if (!INTERACTION_CODE_RE.test(ex.interactionCode)) {
       throw new Error(`Malformed interactionCode in ${ex.file}: ${ex.interactionCode}`);
     }
+    // Defensive: filename basename must equal config id so wrappers and
+    // manifest URLs stay in sync.
+    const expectedFile = `${ex.id}.json`;
+    if (ex.file !== expectedFile) {
+      throw new Error(`Filename/id mismatch: ${ex.file} declares id=${ex.id}, expected file ${expectedFile}`);
+    }
   }
 
   const template = readFileSync(join(root, '_engine', 'exercise-shell.html'), 'utf8');
@@ -32,8 +51,8 @@ export async function stampWrappers({ root } = {}) {
   for (const ex of exercises) {
     const wrapperName = ex.file.replace(/\.json$/, '.html');
     const html = template
-      .replaceAll('{{TITLE}}', ex.title)
-      .replaceAll('{{EXERCISE_ID}}', ex.id);
+      .replaceAll('{{TITLE}}', escapeHtml(ex.title))
+      .replaceAll('{{EXERCISE_ID}}', escapeHtml(ex.id));
     writeFileSync(join(root, wrapperName), html);
 
     const url = `${BASE_URL}/${wrapperName}`;
@@ -58,9 +77,10 @@ export async function stampWrappers({ root } = {}) {
 
 function renderIndex(exercises) {
   const items = exercises.map(ex => {
-    const wrapper = ex.file.replace(/\.json$/, '.html');
-    const intro = (ex.intro_fr || '').replace(/</g, '&lt;');
-    return `    <li><a href="./${wrapper}"><strong>${ex.title}</strong><span>${intro}</span></a></li>`;
+    const wrapper = escapeHtml(ex.file.replace(/\.json$/, '.html'));
+    const intro = escapeHtml(ex.intro_fr || '');
+    const title = escapeHtml(ex.title);
+    return `    <li><a href="./${wrapper}"><strong>${title}</strong><span>${intro}</span></a></li>`;
   }).join('\n');
 
   return `<!DOCTYPE html>

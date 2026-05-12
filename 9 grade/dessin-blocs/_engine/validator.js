@@ -314,7 +314,11 @@ function bbox(segments) {
 
 export function validate(studentSegments, exerciseConfig, ctx = {}) {
   const v = exerciseConfig.validation || {};
-  if (v.mode === 'none' || !v.mode) return { pass: true, hint: null };
+  // Only `mode: 'none'` skips validation. The previous `!v.mode` branch
+  // silently bypassed validation for any config missing the field, hiding
+  // misconfigured exercises. With the field optional now, omitting it
+  // means "run full validation"; explicit "none" means "always pass".
+  if (v.mode === 'none') return { pass: true, hint: null };
 
   // Stage 1 — geometric
   const geomChecks = v.geometric || [];

@@ -21,7 +21,11 @@ describe('exercise configs', () => {
     expect(c.title).toBeTruthy();
     expect(c.intro_fr).toBeTruthy();
     expect(c.validation).toBeTruthy();
-    expect(['none','lenient','strict']).toContain(c.validation.mode);
+    // validation.mode is optional; only 'none' has special meaning (skip).
+    // Any other value (or omitted entirely) means full validation runs.
+    if (c.validation.mode !== undefined) {
+      expect(['none']).toContain(c.validation.mode);
+    }
     expect(Array.isArray(c.toolbox)).toBe(true);
   });
 

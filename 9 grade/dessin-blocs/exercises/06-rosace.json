@@ -7,7 +7,6 @@
   "toolbox": ["forward", "turn-right", "repeat"],
   "starterProgramme": [],
   "validation": {
-    "mode": "strict",
     "iou": 0.75,
     "geometric": [
       { "check": "rotationalSymmetry", "order": 12, "angleToleranceDeg": 6 },

@@ -20,7 +20,6 @@
   ],
   "editableSlots": ["b2.distance", "b4.distance"],
   "validation": {
-    "mode": "lenient",
     "iou": 0.7,
     "geometric": [
       { "check": "closed", "maxGapPx": 12 },

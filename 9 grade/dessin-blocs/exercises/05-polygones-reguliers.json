@@ -21,7 +21,6 @@
   ],
   "editableSlots": ["b3.angle"],
   "validation": {
-    "mode": "strict",
     "iou": 0.8,
     "geometric": [
       { "check": "closed", "maxGapPx": 12 },

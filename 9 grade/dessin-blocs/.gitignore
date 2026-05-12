@@ -2,3 +2,8 @@ node_modules/
 .DS_Store
 *.log
 coverage/
+
+# Ad-hoc smoke screenshots saved by Chrome-MCP runs during manual QA.
+# Authoritative baseline lives in docs/manual-qa/baseline-YYYY-MM-DD/.
+tests/smoke-*.png
+tests/smoke-*/

@@ -91,8 +91,10 @@ h1, h2, h3 { font-family: 'Lora', Georgia, serif; }
   overflow-y: auto;
 }
 /* Fill mode: toolbox is shown as a non-draggable vocabulary key, dim it
-   slightly so it doesn't compete visually with the editable programme. */
-.dessin-blocs-app:has(.programme:not(.programme--deletable)) .toolbox::before {
+   slightly so it doesn't compete visually with the editable programme.
+   Uses an explicit class instead of :has() so Safari < 15.4 and older
+   webviews still render the affordance correctly. */
+.dessin-blocs-app--fill .toolbox::before {
   content: "Blocs utilisés";
   display: block;
   font-size: 0.75rem;
@@ -102,7 +104,7 @@ h1, h2, h3 { font-family: 'Lora', Georgia, serif; }
   letter-spacing: 0.05em;
   margin: 4px 4px 8px;
 }
-.dessin-blocs-app:has(.programme:not(.programme--deletable)) .toolbox-block {
+.dessin-blocs-app--fill .toolbox-block {
   cursor: default;
   opacity: 0.88;
 }
@@ -192,8 +194,8 @@ input[type="color"].block-input { padding: 2px; width: 44px; }
 .programme--deletable .block-delete {
   display: inline-flex;
 }
-/* Hide delete on locked (fill-mode) blocks just in case mode toggles */
-.block:has(.block-input--locked) .block-delete { display: none; }
+/* fill mode never adds programme--deletable, so .block-delete stays
+   hidden in fill via the base rule. No :has() fallback needed. */
 
 .turtle-marker {
   pointer-events: none;

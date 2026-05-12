@@ -498,6 +498,11 @@ export function init(rootEl, config) {
   // Reset root
   while (rootEl.firstChild) rootEl.removeChild(rootEl.firstChild);
   rootEl.classList.add('dessin-blocs-app');
+  // Explicit mode class. Old fill-mode CSS relied on :has(), which older
+  // iframe/webview engines don't support — without the class some users
+  // saw the toolbox without its "Blocs utilisés" label / non-draggable
+  // affordance.
+  rootEl.classList.add(`dessin-blocs-app--${config.mode || 'free'}`);
 
   // Header with back-to-launcher link
   const header = el('header', 'app-header');

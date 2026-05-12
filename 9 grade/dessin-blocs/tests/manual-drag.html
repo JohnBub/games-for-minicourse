@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual drag test</title>
+<style>
+  body { font-family: system-ui, sans-serif; padding: 20px; }
+  .layout { display: grid; grid-template-columns: 200px 1fr; gap: 20px; }
+  .toolbox, .programme { border: 1px solid #ccc; padding: 10px; min-height: 300px; }
+  .toolbox-block, .block { border: 2px solid; border-radius: 8px; padding: 8px; margin: 4px 0; cursor: grab; }
+  .block-children { margin-left: 24px; padding: 4px; border-left: 2px dashed #ccc; }
+  .drop-zone { height: 8px; margin: 2px 0; border-radius: 4px; }
+  .drop-zone--hover { background: rgba(184,137,58,0.4); height: 24px; transition: all 0.15s; }
+  pre { background: #f4f4f4; padding: 10px; }
+</style>
+</head>
+<body>
+<h1>Manual drag-and-drop smoke test</h1>
+<p>Drag a block from the toolbox into the programme. Verify desktop drag works, then test on a touchscreen.</p>
+<div class="layout">
+  <div id="toolbox-host"></div>
+  <div id="programme-host"></div>
+</div>
+<h2>Programme state</h2>
+<pre id="dump"></pre>
+<script type="module">
+import { renderToolbox, renderProgramme, attachDragHandlers } from '../_engine/builder.js';
+
+let programme = [];
+const tbHost = document.getElementById('toolbox-host');
+const pHost = document.getElementById('programme-host');
+const dump = document.getElementById('dump');
+
+function clearChildren(node) {
+  while (node.firstChild) node.removeChild(node.firstChild);
+}
+
+function rerender() {
+  clearChildren(tbHost);
+  clearChildren(pHost);
+  const tb = renderToolbox(['forward', 'turn-right', 'repeat']);
+  const p = renderProgramme(programme);
+  tbHost.appendChild(tb);
+  pHost.appendChild(p);
+  attachDragHandlers(p, tb, () => programme, (next) => { programme = next; rerender(); });
+  dump.textContent = JSON.stringify(programme, null, 2);
+}
+rerender();
+</script>
+</body>
+</html>

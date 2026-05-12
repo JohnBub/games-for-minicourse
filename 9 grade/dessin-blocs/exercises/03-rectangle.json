@@ -1,0 +1,31 @@
+{
+  "id": "03-rectangle",
+  "title": "Le rectangle",
+  "interactionCode": "BD_3",
+  "intro_fr": "Un rectangle a deux longueurs différentes. Complète les valeurs.",
+  "mode": "fill",
+  "toolbox": [],
+  "starterProgramme": [
+    {
+      "id": "b1",
+      "type": "repeat",
+      "params": { "times": 2 },
+      "children": [
+        { "id": "b2", "type": "forward", "params": { "distance": null } },
+        { "id": "b3", "type": "turn-right", "params": { "angle": 90 } },
+        { "id": "b4", "type": "forward", "params": { "distance": null } },
+        { "id": "b5", "type": "turn-right", "params": { "angle": 90 } }
+      ]
+    }
+  ],
+  "editableSlots": ["b2.distance", "b4.distance"],
+  "validation": {
+    "mode": "lenient",
+    "iou": 0.7,
+    "geometric": [
+      { "check": "closed", "maxGapPx": 12 },
+      { "check": "sideCount", "expected": 4 }
+    ]
+  },
+  "targetShape": { "kind": "regularPolygon", "sides": 4, "size": 200, "center": [250, 250] }
+}

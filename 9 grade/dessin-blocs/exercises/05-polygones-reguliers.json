@@ -1,0 +1,33 @@
+{
+  "id": "05-polygones-reguliers",
+  "title": "Polygones réguliers",
+  "interactionCode": "BD_5",
+  "intro_fr": "Choisis un nombre de côtés N. À toi de trouver le bon angle ! Indice : 360 ÷ N.",
+  "mode": "fill",
+  "studentInputs": [
+    { "id": "n", "type": "integer", "label": "N (côtés)", "min": 3, "max": 8, "default": 5 }
+  ],
+  "toolbox": [],
+  "starterProgramme": [
+    {
+      "id": "b1",
+      "type": "repeat",
+      "params": { "times": "studentInputs.n" },
+      "children": [
+        { "id": "b2", "type": "forward", "params": { "distance": 100 } },
+        { "id": "b3", "type": "turn-right", "params": { "angle": null } }
+      ]
+    }
+  ],
+  "editableSlots": ["b3.angle"],
+  "validation": {
+    "mode": "strict",
+    "iou": 0.8,
+    "geometric": [
+      { "check": "closed", "maxGapPx": 12 },
+      { "check": "sideCount", "expectedFrom": "studentInputs.n" },
+      { "check": "equalSides", "maxVarianceRatio": 0.15 }
+    ]
+  },
+  "targetShape": { "kind": "regularPolygon", "sidesFrom": "studentInputs.n", "size": 100, "center": [250, 250] }
+}

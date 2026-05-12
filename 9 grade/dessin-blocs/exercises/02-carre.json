@@ -1,0 +1,30 @@
+{
+  "id": "02-carre",
+  "title": "Le carré",
+  "interactionCode": "BD_2",
+  "intro_fr": "Complète le programme pour dessiner un carré. Trouve la bonne distance et le bon angle !",
+  "mode": "fill",
+  "toolbox": [],
+  "starterProgramme": [
+    {
+      "id": "b1",
+      "type": "repeat",
+      "params": { "times": 4 },
+      "children": [
+        { "id": "b2", "type": "forward", "params": { "distance": null } },
+        { "id": "b3", "type": "turn-right", "params": { "angle": null } }
+      ]
+    }
+  ],
+  "editableSlots": ["b2.distance", "b3.angle"],
+  "validation": {
+    "mode": "lenient",
+    "iou": 0.7,
+    "geometric": [
+      { "check": "closed", "maxGapPx": 12 },
+      { "check": "sideCount", "expected": 4 },
+      { "check": "equalSides", "maxVarianceRatio": 0.18 }
+    ]
+  },
+  "targetShape": { "kind": "regularPolygon", "sides": 4, "size": 200, "center": [250, 250] }
+}

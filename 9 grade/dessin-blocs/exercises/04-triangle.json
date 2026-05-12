@@ -1,0 +1,30 @@
+{
+  "id": "04-triangle",
+  "title": "Le triangle équilatéral",
+  "interactionCode": "BD_4",
+  "intro_fr": "Surprise ! L'angle d'un triangle équilatéral n'est pas 60°. Trouve le bon angle.",
+  "mode": "fill",
+  "toolbox": [],
+  "starterProgramme": [
+    {
+      "id": "b1",
+      "type": "repeat",
+      "params": { "times": 3 },
+      "children": [
+        { "id": "b2", "type": "forward", "params": { "distance": 150 } },
+        { "id": "b3", "type": "turn-right", "params": { "angle": null } }
+      ]
+    }
+  ],
+  "editableSlots": ["b3.angle"],
+  "validation": {
+    "mode": "strict",
+    "iou": 0.8,
+    "geometric": [
+      { "check": "closed", "maxGapPx": 10 },
+      { "check": "sideCount", "expected": 3 },
+      { "check": "equalSides", "maxVarianceRatio": 0.15 }
+    ]
+  },
+  "targetShape": { "kind": "regularPolygon", "sides": 3, "size": 150, "center": [250, 250] }
+}

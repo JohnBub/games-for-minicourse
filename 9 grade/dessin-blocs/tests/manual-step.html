@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual step-mode smoke</title>
+<style>
+  body { font-family: system-ui, sans-serif; padding: 20px; }
+  .layout { display: grid; grid-template-columns: 220px 1fr; gap: 20px; }
+  .toolbox { border: 1px solid #ccc; padding: 10px; }
+  .toolbox-block { border: 2px solid; border-radius: 8px; padding: 10px; margin: 6px 0; cursor: pointer; }
+  .canvas { border: 1px solid #333; }
+  .log { font-family: monospace; background: #f4f4f4; padding: 10px; max-height: 250px; overflow: auto; }
+</style>
+</head>
+<body>
+<h1>Step-mode smoke (Ex 1: Découvrir la tortue)</h1>
+<p>Tap a toolbox block. Each tap should append the command and the SVG turtle should move.</p>
+<div class="layout">
+  <div id="toolbox-host"></div>
+  <svg id="canvas" class="canvas" width="500" height="500" viewBox="0 0 500 500"></svg>
+</div>
+<h2>Tap log</h2>
+<div id="log" class="log"></div>
+<script type="module">
+import { renderToolbox, attachStepMode } from '../_engine/builder.js';
+import { Turtle, paintSvg } from '../_engine/renderer.js';
+
+const turtle = new Turtle({ width: 500, height: 500 });
+const tbHost = document.getElementById('toolbox-host');
+const svg = document.getElementById('canvas');
+const log = document.getElementById('log');
+
+const tb = renderToolbox(['forward', 'turn-right', 'turn-left', 'pen-up', 'pen-down']);
+tbHost.appendChild(tb);
+
+attachStepMode(tb, ({ type, defaultParams }) => {
+  turtle.run({ type, params: defaultParams });
+  paintSvg(svg, turtle.segments);
+  const line = document.createElement('div');
+  line.textContent = `${type} ${JSON.stringify(defaultParams)}`;
+  log.appendChild(line);
+  log.scrollTop = log.scrollHeight;
+});
+</script>
+</body>
+</html>

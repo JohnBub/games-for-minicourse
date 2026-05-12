@@ -1,0 +1,11 @@
+{
+  "id": "01-decouvrir-tortue",
+  "title": "Découvrir la tortue",
+  "interactionCode": "BD_1",
+  "intro_fr": "Touche les blocs pour faire bouger la tortue. Découvre comment elle avance et tourne.",
+  "mode": "step",
+  "toolbox": ["forward", "turn-right", "turn-left", "back"],
+  "starterProgramme": [],
+  "validation": { "mode": "none" },
+  "targetShape": null
+}
